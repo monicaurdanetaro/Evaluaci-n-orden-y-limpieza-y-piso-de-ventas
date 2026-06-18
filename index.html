@@ -599,18 +599,41 @@ const NOM_DATA = [
 // ═══════════════════════════════════════════════════════════════════════
 const STORES = ['WALKER','CABALLITO','SM CENTER','ALESEL','LA NOBLEZA','JUNCAL PODIUM','OLLEROS','SANFAR','DEVOTO','VILLA DEL PARQUE','COLECTORA','OLIVOS','PERDRIEL','NERES','MARK','BOTANICO','ESPER','SAN ISIDRO','GRAN FERRARI','IGLESIA','SCALABRINI','RIVADAVIA','MS PATRICIOS','LAS HERAS','KM 47.5','ALCORTA','FLOTANTES ÁREA 2','OH BUENOS AIRES','QUINTA 46','SORIA','PARQUE CHACABUCO','LUPO'];
 const API = 'https://script.google.com/macros/s/AKfycbwMoGhL_56BE90DbpGrV5qa1fZQgKgYF0TMZbORFAe40Vi3Jgh0f4bBBkHoGcUQR2_6/exec';
-const GID_RESP   = '0';
-const GID_NOMINA = '1142498963';
+const GID_RESP   = '1142498963';
+const GID_NOMINA = '1331171004';
 
 let cA=null, cS=null;
 
 const sc = s => { const m=String(s||'').match(/^(\d+)/); return m?+m[1]:null; };
 
 // Deduplica respuestas: por nombre+tienda, queda la de mayor nota (o la primera si empatan)
+function storeCol(r) {
+  // La tienda puede estar en col 15 o en la penúltima columna si hay menos cols
+  const s15 = (r[15]||'').toUpperCase().trim();
+  // Si col 15 parece una tienda válida, usarla; si no, buscar en cols finales
+  if (STORES.includes(s15)) return s15;
+  for (let i = r.length-1; i >= 10; i--) {
+    const v = (r[i]||'').toUpperCase().trim();
+    if (STORES.includes(v)) return v;
+  }
+  return s15;
+}
+
+function areaCol(r) {
+  const a16 = parseInt(r[16])||0;
+  if (a16 >= 1 && a16 <= 3) return a16;
+  // Buscar área en cols finales
+  for (let i = r.length-1; i >= 10; i--) {
+    const v = parseInt(r[i]);
+    if (v >= 1 && v <= 3) return v;
+  }
+  return 0;
+}
+
 function dedup(resp) {
   const map = new Map();
   resp.forEach(r => {
-    const store = (r[15]||'').toUpperCase().trim();
+    const store = storeCol(r);
     const nombre = (r[2]||'').trim().toUpperCase();
     const key = nombre + '||' + store;
     const score = sc(r[1]) ?? -1;
@@ -633,9 +656,9 @@ function renderAll(rawResp, nom) {
 
   const rByStore={}, sByStore={}, rByArea={1:[],2:[],3:[]};
   resp.forEach(r => {
-    const s=(r[15]||'').toUpperCase().trim();
+    const s=storeCol(r);
     if(!STORES.includes(s))return;
-    const a=+r[16]||0, score=sc(r[1]);
+    const a=areaCol(r), score=sc(r[1]);
     rByStore[s]=(rByStore[s]||0)+1;
     if(!sByStore[s])sByStore[s]=[];
     if(score!==null)sByStore[s].push(score);
@@ -725,11 +748,15 @@ function renderAll(rawResp, nom) {
   // People
   const seen=new Set(), pRows=[];
   resp.forEach(r=>{
-    const s=(r[15]||'').toUpperCase().trim();
+    const s=storeCol(r);
     if(!STORES.includes(s))return;
     const nombre=(r[2]||'').trim(), score2=sc(r[1]);
     seen.add(nombre.toUpperCase()+'||'+s);
-    pRows.push({nombre,store:s,cargo:(r[4]||'').trim(),score:score2,fecha:(r[0]||'').split(' ')[0],area:+r[16]||0,st:'r'});
+    // Fecha: tomar solo la parte de fecha (puede ser "Wed Jun 10 2026 ..." o "10/6/2026 ...")
+    const rawFecha = (r[0]||'');
+    const fechaMatch = rawFecha.match(/(\w{3} \w{3} \d{2} \d{4})|(\d{1,2}\/\d{1,2}\/\d{4})/);
+    const fecha = fechaMatch ? fechaMatch[0] : rawFecha.split(' ')[0];
+    pRows.push({nombre,store:s,cargo:(r[4]||'').trim(),score:score2,fecha,area:areaCol(r),st:'r'});
   });
   nom.forEach(r=>{
     const s=(r[1]||'').toUpperCase().trim(); if(!STORES.includes(s))return;
@@ -795,9 +822,30 @@ async function tryLive(){
     if(!r1.ok || !r2.ok) throw new Error(`HTTP ${r1.status} / ${r2.status}`);
     const txt1 = await r1.text();
     const txt2 = await r2.text();
-    const resp   = parseCSV(txt1).slice(1).filter(r=>r[0]&&r[2]);
-    const nomRaw = parseCSV(txt2).slice(2).filter(r=>r[3]||r[4]);
-    const nom    = nomRaw.map(r=>[(r[5]||((r[4]||'')+' '+(r[3]||''))).trim(),(r[12]||r[11]||'').toUpperCase().trim(),r[15]||'',parseInt(r[13]||r[11]||0)||0]);
+    const rawResp = parseCSV(txt1);
+    // Apps Script puede devolver fecha larga ("Wed Jun 10 2026...") y score como número puro ("14")
+    // Normalizamos para que el resto del código funcione igual
+    const resp = rawResp.slice(1).filter(r=>r[0]&&r[2]).map(r => {
+      const rr = [...r];
+      // Normalizar score: si es número puro sin " / 20", lo añadimos
+      if (rr[1] && /^\d+$/.test(rr[1].trim())) rr[1] = rr[1].trim() + ' / 20';
+      // Col 15 = TIENDA NOMINA, col 16 = AREA (igual que antes)
+      return rr;
+    });
+
+    const nomRaw = parseCSV(txt2);
+    // Detectar si la nómina vino vacía o con error
+    const nomData = nomRaw.filter(r => r.some(c => c && c !== '#N/A'));
+    // La nómina tiene 2 filas de encabezado; si hay muy pocas filas algo falló
+    const nomRows = nomData.length > 3 ? nomData.slice(2) : [];
+    const nom = nomRows.filter(r=>r[3]||r[4]).map(r=>[
+      (r[5]||((r[4]||'')+' '+(r[3]||''))).trim(),
+      (r[12]||r[11]||'').toUpperCase().trim(),
+      r[15]||'',
+      parseInt(r[13]||r[11]||0)||0
+    ]);
+    // Si la nómina vino vacía, usar la embebida como fallback
+    const finalNom = nom.length > 10 ? nom : NOM_DATA;
     renderAll(resp, nom);
     document.getElementById('upd').textContent='En vivo — '+new Date().toLocaleString('es-AR');
     document.getElementById('mode-badge').textContent='En vivo';
