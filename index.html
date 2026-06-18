@@ -695,12 +695,37 @@ function areaCol(r) {
   return 0;
 }
 
+function normName(n) {
+  return (n||'').trim().toUpperCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')  // quita tildes
+    .replace(/[^A-Z0-9 ]/g,'')                           // quita puntuación
+    .replace(/\s+/g,' ').trim();                         // colapsa espacios
+}
+
+// Verifica si dos nombres normalizados son "el mismo":
+// uno puede ser subconjunto del otro (ej. "MONICA NOGUERA" ⊂ "MONICA NOGUERA SALAS")
+function sameNorm(a, b) {
+  if (a === b) return true;
+  // Chequeo por palabras: todas las palabras del más corto están en el más largo
+  const wa = a.split(' '), wb = b.split(' ');
+  const [shorter, longer] = wa.length <= wb.length ? [wa, wb] : [wb, wa];
+  // Al menos 2 palabras en común (evita falsos positivos con nombres de 1 palabra)
+  const shared = shorter.filter(w => w.length > 1 && longer.includes(w));
+  return shared.length >= Math.min(2, shorter.length);
+}
+
 function dedup(resp) {
   const map = new Map();
   resp.forEach(r => {
     const store = storeCol(r);
-    const nombre = (r[2]||'').trim().toUpperCase();
-    const key = nombre + '||' + store;
+    const nombre = normName(r[2]);
+    // Check if this person (normalized) already exists under this store
+    let key = nombre + '||' + store;
+    // Check against existing keys with sameNorm
+    for (const [k] of map) {
+      const [kn, ks] = k.split('||');
+      if (ks === store && sameNorm(kn, nombre)) { key = k; break; }
+    }
     const score = sc(r[1]) ?? -1;
     if (!map.has(key) || score > (sc(map.get(key)[1]) ?? -1)) {
       map.set(key, r);
@@ -780,14 +805,22 @@ function renderAll(rawResp, nom) {
     options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:{y:{max:20,ticks:{font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
   });
 
+  // Normaliza nombres: quita acentos, espacios extra, pasa a mayúsculas
+  const normName = n => (n||'').trim().toUpperCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/\s+/g,' ');
+
   // Build people data per store for click-to-expand
-  const seen=new Set(), peopleByStore={};
+  const seen=new Set(), seenNorms={}, peopleByStore={};
   STORES.forEach(s=>{ peopleByStore[s]=[]; });
 
   resp.forEach(r=>{
     const s=storeCol(r); if(!STORES.includes(s))return;
     const nombre=(r[2]||'').trim(), score2=sc(r[1]);
-    seen.add(nombre.toUpperCase()+'||'+s);
+    const nKey = normName(nombre)+'||'+s;
+    seen.add(nKey);
+    if(!seenNorms[s]) seenNorms[s]=[];
+    seenNorms[s].push(normName(nombre));
     const rawFecha=(r[0]||'');
     const fm=rawFecha.match(/(\w{3} \w{3} \d{2} \d{4})|(\d{1,2}\/\d{1,2}\/\d{4})/);
     const fecha=fm?fm[0]:rawFecha.split(' ')[0];
@@ -795,7 +828,10 @@ function renderAll(rawResp, nom) {
   });
   nom.forEach(r=>{
     const s=(r[1]||'').toUpperCase().trim(); if(!STORES.includes(s))return;
-    const nombre=(r[0]||'').trim(); if(!nombre||seen.has(nombre.toUpperCase()+'||'+s))return;
+    const nombre=(r[0]||'').trim(); if(!nombre)return;
+    const nNorm=normName(nombre);
+    const alreadySeen=(seenNorms[s]||[]).some(rn=>sameNorm(nNorm,rn));
+    if(alreadySeen)return;
     if(!peopleByStore[s])peopleByStore[s]=[];
     peopleByStore[s].push({nombre,cargo:r[2]||'',score:null,fecha:'—',area:STORE_AREA[s]||+r[3]||0,st:'p'});
   });
