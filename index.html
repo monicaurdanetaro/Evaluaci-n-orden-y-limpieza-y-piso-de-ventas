@@ -63,6 +63,24 @@
   .gbar-search{display:flex;align-items:center;gap:8px;background:#f5f5f0;border:0.5px solid rgba(0,0,0,.12);border-radius:8px;padding:6px 12px;min-width:200px}
   .gbar-search input{border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:100%}
   .search-icon{font-size:14px;color:#aaa}
+  /* Store rows clickable */
+  #store-tb tr.store-row{cursor:pointer;transition:background .1s}
+  #store-tb tr.store-row:hover td{background:#f0f5ff}
+  #store-tb tr.store-row.expanded td{background:#e8f0fe;font-weight:500}
+  .expand-icon{font-size:11px;color:#aaa;transition:transform .2s;display:inline-block}
+  .expanded .expand-icon{transform:rotate(90deg);color:#185fa5}
+  /* People sub-table row */
+  tr.people-row{background:#f8faff}
+  tr.people-row td{padding:0}
+  .people-inner{padding:12px 16px 16px 36px}
+  .people-inner table{font-size:12px}
+  .people-inner th{font-size:10px;color:#bbb;padding:5px 8px}
+  .people-inner td{padding:6px 8px;border-bottom:0.5px solid rgba(0,0,0,.05)}
+  .people-inner tr:last-child td{border-bottom:none}
+  .people-inner .filt-inner{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+  .people-inner .filt-inner input,.people-inner .filt-inner select{font-size:12px;padding:5px 10px;border:0.5px solid rgba(0,0,0,.15);border-radius:6px;background:#fff;outline:none}
+  .people-inner .filt-inner input{flex:1;min-width:120px}
+  .store-tip{font-size:12px;color:#bbb;margin-top:10px;text-align:center}
   @media(max-width:680px){.mgrid{grid-template-columns:repeat(2,1fr)}.crow{grid-template-columns:1fr}.wrap{padding:14px}.hdr{padding:14px 16px}}
 </style>
 </head>
@@ -128,30 +146,22 @@
     </div>
     <div class="sb open" id="bd-store">
       <div style="padding-top:16px">
-        <table><thead><tr><th>Tienda</th><th>Área</th><th>Nómina</th><th>Respondieron</th><th>Participación</th><th>Nota prom.</th><th>% Aprobados</th></tr></thead>
-        <tbody id="store-tb"></tbody></table>
+        <table id="store-table-main">
+          <thead>
+            <tr>
+              <th style="width:20px"></th>
+              <th>Tienda</th><th>Área</th><th>Nómina</th><th>Respondieron</th>
+              <th>Participación</th><th>Nota prom.</th><th>% Aprobados</th>
+            </tr>
+          </thead>
+          <tbody id="store-tb"></tbody>
+        </table>
+        <div class="store-tip">↓ Hacé clic en una tienda para ver el detalle de sus colaboradores</div>
       </div>
     </div>
   </div>
 
-  <div class="sec">
-    <div class="sh" onclick="tog('people')"><h2>Detalle individual</h2><span class="chev" id="ch-people">▾</span></div>
-    <div class="sb" id="bd-people">
-      <div class="filt">
-        <input type="text" id="srch" placeholder="Buscar nombre..." oninput="filterP()">
-        <select id="fStore" onchange="filterP()"><option value="">Todas las tiendas</option></select>
-        <select id="fResult" onchange="filterP()">
-          <option value="">Todos los estados</option>
-          <option value="pass">Aprobados (≥ 14)</option>
-          <option value="fail">Desaprobados</option>
-          <option value="pending">Pendientes</option>
-        </select>
-      </div>
-      <table><thead><tr><th>Nombre</th><th>Tienda</th><th>Cargo</th><th>Área</th><th>Nota</th><th>Estado</th><th>Fecha</th></tr></thead>
-      <tbody id="people-tb"></tbody></table>
-      <div class="cnote" id="pcount"></div>
-    </div>
-  </div>
+
 </div>
 
 <script>
@@ -651,7 +661,7 @@ let cA=null, cS=null;
 let ACTIVE_AREA = 0;  // 0 = todas las áreas
 let STORE_SEARCH = ''; // texto del buscador de tienda
 // Datos globales para recalcular métricas al filtrar por área
-let G_nomByStore={}, G_rByStore={}, G_sByStore={}, G_nomByArea={}, G_rByArea={};
+let G_nomByStore={}, G_rByStore={}, G_sByStore={}, G_nomByArea={}, G_rByArea={}, G_peopleByStore={};
 
 const sc = s => { const m=String(s||'').match(/^(\d+)/); return m?+m[1]:null; };
 
@@ -770,73 +780,64 @@ function renderAll(rawResp, nom) {
     options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:{y:{max:22,ticks:{font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
   });
 
-  const stTb=$('store-tb'), fsSel=$('fStore');
-  stTb.innerHTML=''; fsSel.innerHTML='<option value="">Todas las tiendas</option>';
+  // Build people data per store for click-to-expand
+  const seen=new Set(), peopleByStore={};
+  STORES.forEach(s=>{ peopleByStore[s]=[]; });
+
+  resp.forEach(r=>{
+    const s=storeCol(r); if(!STORES.includes(s))return;
+    const nombre=(r[2]||'').trim(), score2=sc(r[1]);
+    seen.add(nombre.toUpperCase()+'||'+s);
+    const rawFecha=(r[0]||'');
+    const fm=rawFecha.match(/(\w{3} \w{3} \d{2} \d{4})|(\d{1,2}\/\d{1,2}\/\d{4})/);
+    const fecha=fm?fm[0]:rawFecha.split(' ')[0];
+    peopleByStore[s].push({nombre,cargo:(r[4]||'').trim(),score:score2,fecha,area:STORE_AREA[s]||areaCol(r),st:'r'});
+  });
+  nom.forEach(r=>{
+    const s=(r[1]||'').toUpperCase().trim(); if(!STORES.includes(s))return;
+    const nombre=(r[0]||'').trim(); if(!nombre||seen.has(nombre.toUpperCase()+'||'+s))return;
+    if(!peopleByStore[s])peopleByStore[s]=[];
+    peopleByStore[s].push({nombre,cargo:r[2]||'',score:null,fecha:'—',area:STORE_AREA[s]||+r[3]||0,st:'p'});
+  });
+  G_peopleByStore = peopleByStore;
+
+  const stTb=$('store-tb');
+  stTb.innerHTML='';
   STORES.forEach(s=>{
     const n=nomByStore[s]||0, res=rByStore[s]||0, sc2=sByStore[s]||[];
     const avg=sc2.length?(sc2.reduce((a,b)=>a+b,0)/sc2.length).toFixed(1):null;
     const pp=sc2.length?Math.round(sc2.filter(x=>x>=14).length/sc2.length*100):null;
     const pct=n>0?Math.round(res/n*100):0;
-    const area = STORE_AREA[s] || 0;
+    const area=STORE_AREA[s]||0;
     const bc=pct>=70?'bg-g':pct>=40?'bg-a':'bg-r';
     const pc=pp===null?'pgy':pp>=70?'pg':pp>=50?'pa':'pr';
-    const tr=document.createElement('tr'); tr.dataset.area=area; tr.dataset.store=s;
-    tr.innerHTML=`<td style="font-weight:500">${s}</td><td><span class="pill pb">Área ${area||'?'}</span></td><td>${n}</td><td>${res}</td><td><div style="display:flex;align-items:center;gap:8px"><div class="bar"><div class="bf ${bc}" style="width:${pct}%"></div></div><span style="font-size:12px;min-width:28px">${pct}%</span></div></td><td>${avg!==null?avg+' / 20':'—'}</td><td>${pp!==null?`<span class="pill ${pc}">${pp}%</span>`:'—'}</td>`;
-    stTb.appendChild(tr);
-    const o=document.createElement('option'); o.value=s; o.textContent=s; fsSel.appendChild(o);
-  });
-
-  // People
-  const seen=new Set(), pRows=[];
-  resp.forEach(r=>{
-    const s=storeCol(r);
-    if(!STORES.includes(s))return;
-    const nombre=(r[2]||'').trim(), score2=sc(r[1]);
-    seen.add(nombre.toUpperCase()+'||'+s);
-    // Fecha: tomar solo la parte de fecha (puede ser "Wed Jun 10 2026 ..." o "10/6/2026 ...")
-    const rawFecha = (r[0]||'');
-    const fechaMatch = rawFecha.match(/(\w{3} \w{3} \d{2} \d{4})|(\d{1,2}\/\d{1,2}\/\d{4})/);
-    const fecha = fechaMatch ? fechaMatch[0] : rawFecha.split(' ')[0];
-    pRows.push({nombre,store:s,cargo:(r[4]||'').trim(),score:score2,fecha,area:STORE_AREA[s]||areaCol(r),st:'r'});
-  });
-  nom.forEach(r=>{
-    const s=(r[1]||'').toUpperCase().trim(); if(!STORES.includes(s))return;
-    const nombre=(r[0]||'').trim(); if(!nombre||seen.has(nombre.toUpperCase()+'||'+s))return;
-    pRows.push({nombre,store:s,cargo:r[2]||'',score:null,fecha:'—',area:STORE_AREA[s]||+r[3]||0,st:'p'});
-  });
-
-  const ptb=$('people-tb'); ptb.innerHTML='';
-  pRows.forEach(({nombre,store,cargo,score:sc3,fecha,area,st})=>{
-    let pill,scStr;
-    if(st==='p'){pill='<span class="pill pa">Pendiente</span>';scStr='—';}
-    else if(sc3===null){pill='—';scStr='—';}
-    else if(sc3>=14){pill='<span class="pill pg">Aprobado</span>';scStr=sc3+' / 20';}
-    else{pill='<span class="pill pr">Desaprobado</span>';scStr=sc3+' / 20';}
+    // Main store row
     const tr=document.createElement('tr');
-    tr.dataset.store=store; tr.dataset.area=area; tr.dataset.result=st==='p'?'pending':sc3>=14?'pass':'fail'; tr.dataset.name=nombre.toLowerCase();
-    tr.innerHTML=`<td style="font-weight:500">${nombre}</td><td>${store}</td><td style="color:#aaa;font-size:12px">${cargo}</td><td><span class="pill pb">Área ${area||'?'}</span></td><td>${scStr}</td><td>${pill}</td><td style="color:#bbb;font-size:12px">${fecha}</td>`;
-    ptb.appendChild(tr);
+    tr.className='store-row'; tr.dataset.area=area; tr.dataset.store=s;
+    tr.onclick=()=>toggleStorePeople(s,tr);
+    tr.innerHTML=`
+      <td><span class="expand-icon">▶</span></td>
+      <td style="font-weight:500">${s}</td>
+      <td><span class="pill pb">Área ${area||'?'}</span></td>
+      <td>${n}</td><td>${res}</td>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <div class="bar"><div class="bf ${bc}" style="width:${pct}%"></div></div>
+        <span style="font-size:12px;min-width:28px">${pct}%</span>
+      </div></td>
+      <td>${avg!==null?avg+' / 20':'—'}</td>
+      <td>${pp!==null?`<span class="pill ${pc}">${pp}%</span>`:'—'}</td>`;
+    stTb.appendChild(tr);
+    // Hidden people row (expanded on click)
+    const pr=document.createElement('tr');
+    pr.className='people-row'; pr.id='prow-'+s.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+    pr.style.display='none';
+    pr.dataset.area=area;
+    pr.innerHTML=`<td colspan="8"><div class="people-inner" id="pinner-${s.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'')}"></div></td>`;
+    stTb.appendChild(pr);
   });
-  $('pcount').textContent=`Mostrando ${pRows.length} personas`;
 }
 
-function filterP(){
-  const srch = (document.getElementById('srch').value||'').toLowerCase();
-  const fs   = (document.getElementById('fStore').value||'').toUpperCase();
-  const fr   = document.getElementById('fResult').value||'';
-  let n = 0;
-  document.getElementById('people-tb').querySelectorAll('tr').forEach(tr => {
-    const okArea   = !ACTIVE_AREA  || tr.dataset.area  == ACTIVE_AREA;
-    const okSearch = !STORE_SEARCH || tr.dataset.store.toLowerCase().includes(STORE_SEARCH);
-    const okName   = !srch || tr.dataset.name.includes(srch) || tr.dataset.store.toLowerCase().includes(srch);
-    const okStore  = !fs   || tr.dataset.store === fs;
-    const okResult = !fr   || tr.dataset.result === fr;
-    const ok = okArea && okSearch && okName && okStore && okResult;
-    tr.style.display = ok ? '' : 'none';
-    if (ok) n++;
-  });
-  document.getElementById('pcount').textContent = `Mostrando ${n} personas`;
-}
+function filterP(){ /* no-op: people shown per store on click */ }
 
 function updateMetrics(a) {
   // Calcula y muestra métricas según el área seleccionada (0 = todas)
@@ -872,6 +873,76 @@ function updateMetrics(a) {
   set('m-pass-s', `${passed} de ${allSc.length} respondieron`);
 }
 
+function toggleStorePeople(store, storeRow) {
+  const id = store.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+  const prow  = document.getElementById('prow-'+id);
+  const inner = document.getElementById('pinner-'+id);
+  if (!prow) return;
+
+  const isOpen = prow.style.display !== 'none';
+  if (isOpen) {
+    prow.style.display = 'none';
+    storeRow.classList.remove('expanded');
+    return;
+  }
+
+  // Build people table for this store
+  const people = G_peopleByStore[store] || [];
+  const resp_count = people.filter(p=>p.st==='r').length;
+
+  let rows = people.map(p => {
+    let pill, scStr;
+    if (p.st==='p')      { pill='<span class="pill pa">Pendiente</span>'; scStr='—'; }
+    else if (p.score===null){ pill='—'; scStr='—'; }
+    else if (p.score>=14){ pill='<span class="pill pg">Aprobado</span>'; scStr=p.score+' / 20'; }
+    else                 { pill='<span class="pill pr">Desaprobado</span>'; scStr=p.score+' / 20'; }
+    return `<tr data-result="${p.st==='p'?'pending':p.score>=14?'pass':'fail'}" data-name="${p.nombre.toLowerCase()}">
+      <td style="font-weight:500">${p.nombre}</td>
+      <td style="color:#888;font-size:12px">${p.cargo}</td>
+      <td>${scStr}</td><td>${pill}</td>
+      <td style="color:#bbb;font-size:12px">${p.fecha}</td>
+    </tr>`;
+  }).join('');
+
+  inner.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <span style="font-size:12px;font-weight:500;color:#555">${store} — ${people.length} personas (${resp_count} respondieron)</span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:6px;background:#f5f5f0;border:0.5px solid rgba(0,0,0,.12);border-radius:6px;padding:4px 10px">
+          <span style="color:#bbb;font-size:13px">🔍</span>
+          <input type="text" placeholder="Buscar..." oninput="filterInner('${id}',this.value)" style="border:none;background:transparent;outline:none;font-size:12px;width:100px">
+        </div>
+        <select onchange="filterInner('${id}',null,this.value)" style="font-size:12px;padding:4px 8px;border:0.5px solid rgba(0,0,0,.15);border-radius:6px;background:#fff;outline:none">
+          <option value="">Todos</option>
+          <option value="pass">Aprobados</option>
+          <option value="fail">Desaprobados</option>
+          <option value="pending">Pendientes</option>
+        </select>
+      </div>
+    </div>
+    <table id="ptable-${id}">
+      <thead><tr><th>Nombre</th><th>Cargo</th><th>Nota</th><th>Estado</th><th>Fecha</th></tr></thead>
+      <tbody id="pbody-${id}">${rows}</tbody>
+    </table>`;
+
+  prow.style.display = '';
+  storeRow.classList.add('expanded');
+}
+
+function filterInner(id, text, result) {
+  const tbody = document.getElementById('pbody-'+id);
+  if (!tbody) return;
+  // Read current filter values
+  const wrap   = tbody.closest('.people-inner');
+  const srch   = text !== null ? text.toLowerCase() : (wrap.querySelector('input').value||'').toLowerCase();
+  const res    = result !== undefined ? result : (wrap.querySelector('select').value||'');
+  tbody.querySelectorAll('tr').forEach(tr => {
+    const okName   = !srch || tr.dataset.name.includes(srch);
+    const okResult = !res  || tr.dataset.result === res;
+    tr.style.display = (okName && okResult) ? '' : 'none';
+  });
+}
+
 function setArea(a, btn) {
   ACTIVE_AREA = a;
   // Botones de área activos
@@ -895,14 +966,25 @@ function filterByStore(val) {
 }
 
 function applyFilters() {
-  // Filtrar tabla de tiendas
+  // Filtrar filas de tiendas Y sus filas de detalle expandidas
   document.getElementById('store-tb').querySelectorAll('tr').forEach(tr => {
-    const areaOk = !ACTIVE_AREA || tr.dataset.area == ACTIVE_AREA;
-    const searchOk = !STORE_SEARCH || tr.dataset.store.toLowerCase().includes(STORE_SEARCH);
-    tr.style.display = (areaOk && searchOk) ? '' : 'none';
+    if (tr.classList.contains('store-row')) {
+      const areaOk   = !ACTIVE_AREA   || tr.dataset.area  == ACTIVE_AREA;
+      const searchOk = !STORE_SEARCH  || tr.dataset.store.toLowerCase().includes(STORE_SEARCH);
+      tr.style.display = (areaOk && searchOk) ? '' : 'none';
+    } else if (tr.classList.contains('people-row')) {
+      // Keep people-row in sync with its store-row (hide if store hidden, keep open state)
+      const areaOk   = !ACTIVE_AREA   || tr.dataset.area  == ACTIVE_AREA;
+      const storeVal = tr.previousElementSibling?.dataset?.store||'';
+      const searchOk = !STORE_SEARCH  || storeVal.toLowerCase().includes(STORE_SEARCH);
+      // Only show if store row is visible AND it was already open
+      const wasOpen  = tr.style.display !== 'none';
+      tr.style.display = (areaOk && searchOk && wasOpen) ? '' : 'none';
+      if (!(areaOk && searchOk) && tr.previousElementSibling?.classList?.contains('expanded')) {
+        tr.previousElementSibling.classList.remove('expanded');
+      }
+    }
   });
-  // Filtrar tabla de personas
-  filterP();
 }
 
 function aF(a,btn){ setArea(a,btn); }
