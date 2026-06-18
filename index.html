@@ -57,19 +57,18 @@
   <div style="display:flex;align-items:center;gap:14px">
     <div>
       <h1>Evaluación Módulo 1 - Orden y limpieza y piso de ventas</h1>
-      <div class="upd" id="upd">Datos embebidos — abrí desde archivo</div>
+      <div class="upd" id="upd">Actualizando datos...</div>
     </div>
-    <span class="badge" id="mode-badge">Offline</span>
+    <span class="badge" id="mode-badge" style="background:#faeeda;color:#854f0b">Cargando...</span>
   </div>
   <div style="display:flex;gap:8px;align-items:center">
-    <button onclick="tryLive()" id="btn-live" style="font-size:13px;padding:7px 14px;border:0.5px solid #185fa5;border-radius:8px;background:#fff;cursor:pointer;color:#185fa5">⚡ Cargar en vivo</button>
-    <button onclick="renderAll(RESP_DATA,NOM_DATA)" style="font-size:13px;padding:7px 14px;border:0.5px solid rgba(0,0,0,.2);border-radius:8px;background:#fff;cursor:pointer;color:#1a1a18">↻ Refrescar</button>
+    <button onclick="tryLive()" id="btn-live" style="font-size:13px;padding:7px 14px;border:0.5px solid rgba(0,0,0,.2);border-radius:8px;background:#fff;cursor:pointer;color:#1a1a18">↻ Refrescar</button>
   </div>
 </div>
 
 <div class="wrap">
-  <div class="info-banner" id="info-banner">
-    ℹ️ Mostrando datos embebidos al momento de generar este archivo. Para ver datos en tiempo real, hacé clic en <b>⚡ Cargar en vivo</b> (requiere conexión a internet y que la planilla esté publicada como CSV).
+  <div class="info-banner" id="info-banner" style="display:none">
+    ⚠️ No se pudieron cargar los datos en vivo. Mostrando datos embebidos. Intentá con <b>↻ Refrescar</b>.
   </div>
 
   <div class="mgrid">
@@ -786,7 +785,7 @@ function parseCSV(txt){
 
 async function tryLive(){
   const btn=document.getElementById('btn-live');
-  btn.textContent='⏳ Cargando...'; btn.disabled=true;
+  btn.textContent='⏳ Actualizando...'; btn.disabled=true;
   try {
     // Llamamos a nuestro propio Apps Script — sin CORS, sin proxies
     const [r1, r2] = await Promise.all([
@@ -806,16 +805,23 @@ async function tryLive(){
     document.getElementById('mode-badge').style.color='#185fa5';
     document.getElementById('info-banner').style.display='none';
     btn.textContent='✓ Actualizado';
-    setTimeout(()=>{btn.textContent='⚡ Cargar en vivo';btn.disabled=false;},3000);
+    setTimeout(()=>{btn.textContent='↻ Refrescar';btn.disabled=false;},2000);
   } catch(e) {
-    btn.textContent='⚡ Cargar en vivo'; btn.disabled=false;
-    alert('No se pudo cargar en vivo.\nError: '+e.message);
+    btn.textContent='↻ Refrescar'; btn.disabled=false;
+    // Fallback: show embedded data + error banner
+    renderAll(RESP_DATA, NOM_DATA);
+    document.getElementById('upd').textContent = 'Sin conexión — datos al 18/6/2026';
+    document.getElementById('mode-badge').textContent = 'Sin conexión';
+    document.getElementById('mode-badge').style.background = '#faeeda';
+    document.getElementById('mode-badge').style.color = '#854f0b';
+    document.getElementById('info-banner').style.display = 'block';
   }
 }
 
 // ── INIT ─────────────────────────────────────────────────────────────
-renderAll(RESP_DATA, NOM_DATA);
-document.getElementById('upd').textContent='Datos al '+new Date('2026-06-18').toLocaleDateString('es-AR');
+// Carga en vivo automáticamente al abrir la página
+// Si falla, cae al fallback con datos embebidos
+tryLive();
 </script>
 </body>
 </html>
