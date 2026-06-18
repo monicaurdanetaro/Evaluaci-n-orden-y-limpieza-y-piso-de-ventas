@@ -771,13 +771,13 @@ function renderAll(rawResp, nom) {
     type:'bar',
     plugins:[datalabelPlugin],
     data:{labels:aL,datasets:[{data:aPt,backgroundColor:['#b5d4f4','#378add','#0c447c'],borderRadius:5,label:'% Part.',_labelFmt:v=>v+'%'}]},
-    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:{y:{max:110,ticks:{callback:v=>v+'%',font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:{y:{max:100,ticks:{callback:v=>v+'%',font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
   });
   cS=new Chart($('cScore'),{
     type:'bar',
     plugins:[datalabelPlugin],
     data:{labels:aL,datasets:[{data:aAv,backgroundColor:aAv.map(v=>v>=14?'#97c459':v>=10?'#ef9f27':'#f09595'),borderRadius:5,label:'Nota prom.',_labelFmt:v=>v+' pts'}]},
-    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:{y:{max:22,ticks:{font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:{y:{max:20,ticks:{font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
   });
 
   // Build people data per store for click-to-expand
