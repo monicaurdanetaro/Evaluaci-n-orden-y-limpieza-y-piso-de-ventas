@@ -1114,11 +1114,18 @@ async function tryLive(){
     const rawResp = parseCSV(txt1);
     const resp = rawResp.slice(1).filter(r=>r[0]&&r[2]).map(r => {
       const rr = [...r];
+      // Normalizar score: "14" → "14 / 20"
       if (rr[1] && /^\d+$/.test(rr[1].trim())) rr[1] = rr[1].trim() + ' / 20';
-      const foundStore = storeCol(rr);
-      if (foundStore && (rr[15]||'').toUpperCase().trim() !== foundStore) {
-        rr[15] = foundStore;
-        rr[16] = String(STORE_AREA[foundStore] || '');
+      // El live CSV tiene 18 cols: [0-14]=datos, [15]=DNI, [16]=TIENDA, [17]=AREA
+      // Si solo tiene 17 cols (formato viejo sin DNI): insertar DNI vacío en [15]
+      if (rr.length === 17) {
+        rr.splice(15, 0, ''); // insert empty DNI, tienda queda en [16], area en [17]
+      }
+      // Verificar que la tienda en [16] es válida; si no, buscarla
+      const s16 = (rr[16]||'').toUpperCase().trim();
+      if (!STORES.includes(s16)) {
+        const found = storeCol(rr);
+        if (found) { rr[16] = found; rr[17] = String(STORE_AREA[found]||''); }
       }
       return rr;
     });
