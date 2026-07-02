@@ -775,6 +775,8 @@ const STORES = ['WALKER','CABALLITO','SM CENTER','ALESEL','LA NOBLEZA','JUNCAL P
 // Mapa tienda→área construido de NOM_DATA (declarado aquí, después de STORES)
 const STORE_AREA = {};
 NOM_DATA.forEach(r => { if (r[1] && r[3]) STORE_AREA[r[1].toUpperCase().trim()] = +r[3]; });
+// Overrides manuales de área por tienda
+STORE_AREA['FLOTANTES ÁREA 1'] = 1;
 // Mapa DNI → {nombre, cargo, tienda, area}
 // NOM_DATA ahora tiene: [nombre(0), tienda(1), cargo(2), area(3), dni(4)]
 const NOM_BY_DNI = {};
