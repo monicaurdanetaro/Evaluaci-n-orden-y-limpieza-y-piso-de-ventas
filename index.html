@@ -119,7 +119,7 @@
     <div class="mc"><div class="ml">Respuestas totales</div><div class="mv blue" id="m-resp">—</div><div class="ms" id="m-resp-s"></div></div>
     <div class="mc"><div class="ml">% Participación</div><div class="mv" id="m-pct">—</div><div class="ms" id="m-pct-s"></div></div>
     <div class="mc"><div class="ml">Nota promedio</div><div class="mv" id="m-avg">—</div><div class="ms">sobre 20 puntos</div></div>
-    <div class="mc"><div class="ml">% Aprobados (≥ 14)</div><div class="mv green" id="m-pass">—</div><div class="ms" id="m-pass-s"></div></div>
+    <div class="mc"><div class="ml">% Aprobados (≥ 10)</div><div class="mv green" id="m-pass">—</div><div class="ms" id="m-pass-s"></div></div>
   </div>
 
   <div class="sec">
@@ -987,7 +987,7 @@ function renderAll(rawResp, nom) {
   STORES.forEach(s=>{
     const n=nomByStore[s]||0, res=rByStore[s]||0, sc2=sByStore[s]||[];
     const avg=sc2.length?(sc2.reduce((a,b)=>a+b,0)/sc2.length).toFixed(1):null;
-    const pp=sc2.length?Math.round(sc2.filter(x=>x>=14).length/sc2.length*100):null;
+    const pp=sc2.length?Math.round(sc2.filter(x=>x>=10).length/sc2.length*100):null;
     const pct=n>0?Math.round(res/n*100):0;
     const area=STORE_AREA[s]||0;
     const bc=pct>=70?'bg-g':pct>=40?'bg-a':'bg-r';
@@ -1039,7 +1039,7 @@ function updateMetrics(a) {
   }
 
   const avgSc = allSc.length ? (allSc.reduce((x,y)=>x+y,0)/allSc.length) : null;
-  const passed = allSc.filter(s=>s>=14).length;
+  const passed = allSc.filter(s=>s>=10).length;
   const pctP   = totN>0 ? Math.round(totR/totN*100) : 0;
   const pctPas = allSc.length ? Math.round(passed/allSc.length*100) : 0;
 
@@ -1049,7 +1049,7 @@ function updateMetrics(a) {
   $('m-pct').className = 'mv '+(pctP>=70?'green':pctP>=40?'amber':'red');
   set('m-pct-s', `${totN-totR} pendientes`);
   set('m-avg', avgSc!==null ? avgSc.toFixed(1) : '—');
-  $('m-avg').className = 'mv '+(avgSc>=14?'green':'amber');
+  $('m-avg').className = 'mv '+(avgSc>=10?'green':'amber');
   set('m-pass', pctPas+'%');
   set('m-pass-s', `${passed} de ${allSc.length} respondieron`);
 }
@@ -1075,9 +1075,9 @@ function toggleStorePeople(store, storeRow) {
     let pill, scStr;
     if (p.st==='p')      { pill='<span class="pill pa">Pendiente</span>'; scStr='—'; }
     else if (p.score===null){ pill='—'; scStr='—'; }
-    else if (p.score>=14){ pill='<span class="pill pg">Aprobado</span>'; scStr=p.score+' / 20'; }
+    else if (p.score>=10){ pill='<span class="pill pg">Aprobado</span>'; scStr=p.score+' / 20'; }
     else                 { pill='<span class="pill pr">Desaprobado</span>'; scStr=p.score+' / 20'; }
-    return `<tr data-result="${p.st==='p'?'pending':p.score>=14?'pass':'fail'}" data-name="${p.nombre.toLowerCase()}">
+    return `<tr data-result="${p.st==='p'?'pending':p.score>=10?'pass':'fail'}" data-name="${p.nombre.toLowerCase()}">
       <td style="font-weight:500">${p.nombre}</td>
       <td style="color:#888;font-size:12px">${p.cargo}</td>
       <td>${scStr}</td><td>${pill}</td>
