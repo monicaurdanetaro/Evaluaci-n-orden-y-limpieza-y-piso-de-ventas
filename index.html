@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard — Evaluación Módulo 1</title>
+<title>Dashboard — Evaluaciones Farmatodo Argentina</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
@@ -39,6 +39,13 @@
   .pg{background:#eaf3de;color:#3b6d11}.pa{background:#faeeda;color:#854f0b}
   .pr{background:#fcebeb;color:#a32d2d}.pb{background:#e6f1fb;color:#185fa5}
   .pgy{background:#f1efe8;color:#5f5e5a}
+  /* Main module tabs */
+  .main-tabs{display:flex;gap:0;border-bottom:0.5px solid rgba(0,0,0,.12);background:#fff;padding:0 32px}
+  .main-tab{font-size:13px;font-weight:500;padding:14px 20px;border-bottom:2px solid transparent;cursor:pointer;color:#888;white-space:nowrap;transition:all .15s}
+  .main-tab.on{color:#185fa5;border-bottom-color:#185fa5}
+  .main-tab:hover:not(.on){color:#444;background:#fafaf8}
+  .tab-panel{display:none}.tab-panel.on{display:block}
+  /* Area filter */
   .tabs{display:flex;gap:6px;flex-wrap:wrap;padding:16px 0 4px}
   .tab{font-size:12px;padding:5px 12px;border-radius:20px;border:0.5px solid rgba(0,0,0,.15);cursor:pointer;background:#fff;color:#666}
   .tab.on{background:#185fa5;color:#fff;border-color:#185fa5}
@@ -46,15 +53,11 @@
   .filt{display:flex;gap:10px;flex-wrap:wrap;padding:16px 0 12px}
   .filt input,.filt select{font-size:13px;padding:7px 12px;border:0.5px solid rgba(0,0,0,.18);border-radius:8px;background:#fff;outline:none;color:#1a1a18}
   .filt input{flex:1;min-width:180px}
-  .cnote{font-size:12px;color:#bbb;margin-top:12px}
   .info-banner{background:#e6f1fb;color:#185fa5;border-radius:8px;padding:12px 16px;font-size:13px;margin-bottom:20px;line-height:1.6}
   .area-filter-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#fff;border:0.5px solid rgba(0,0,0,.1);border-radius:12px;padding:14px 20px;margin-bottom:14px}
-  .area-filter-label{font-size:13px;font-weight:500;color:#1a1a18;white-space:nowrap}
-  .area-filter-hint{font-size:12px;color:#bbb;margin-left:auto;white-space:nowrap}
   .afbtn{font-size:13px;padding:6px 16px;border-radius:20px;border:0.5px solid rgba(0,0,0,.15);cursor:pointer;background:#fff;color:#555;font-weight:400;transition:all .15s}
   .afbtn.on{background:#1a1a18;color:#fff;border-color:#1a1a18}
   .afbtn:hover:not(.on){background:#f0f0ee}
-  /* Barra global filtros */
   .store-search-wrap{display:flex;align-items:center;gap:6px;background:#f5f5f0;border:0.5px solid rgba(0,0,0,.12);border-radius:8px;padding:5px 10px;cursor:text}
   .store-search-wrap input::placeholder{color:#bbb}
   .gbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fff;border:0.5px solid rgba(0,0,0,.1);border-radius:12px;padding:12px 20px;margin-bottom:14px}
@@ -62,14 +65,11 @@
   .gbar-label{font-size:12px;font-weight:500;color:#888;margin-right:4px}
   .gbar-search{display:flex;align-items:center;gap:8px;background:#f5f5f0;border:0.5px solid rgba(0,0,0,.12);border-radius:8px;padding:6px 12px;min-width:200px}
   .gbar-search input{border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:100%}
-  .search-icon{font-size:14px;color:#aaa}
-  /* Store rows clickable */
-  #store-tb tr.store-row{cursor:pointer;transition:background .1s}
-  #store-tb tr.store-row:hover td{background:#f0f5ff}
-  #store-tb tr.store-row.expanded td{background:#e8f0fe;font-weight:500}
+  #store-tb tr.store-row,#store-tb2 tr.store-row{cursor:pointer;transition:background .1s}
+  #store-tb tr.store-row:hover td,#store-tb2 tr.store-row:hover td{background:#f0f5ff}
+  #store-tb tr.store-row.expanded td,#store-tb2 tr.store-row.expanded td{background:#e8f0fe;font-weight:500}
   .expand-icon{font-size:11px;color:#aaa;transition:transform .2s;display:inline-block}
   .expanded .expand-icon{transform:rotate(90deg);color:#185fa5}
-  /* People sub-table row */
   tr.people-row{background:#f8faff}
   tr.people-row td{padding:0}
   .people-inner{padding:12px 16px 16px 36px}
@@ -77,11 +77,8 @@
   .people-inner th{font-size:10px;color:#bbb;padding:5px 8px}
   .people-inner td{padding:6px 8px;border-bottom:0.5px solid rgba(0,0,0,.05)}
   .people-inner tr:last-child td{border-bottom:none}
-  .people-inner .filt-inner{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-  .people-inner .filt-inner input,.people-inner .filt-inner select{font-size:12px;padding:5px 10px;border:0.5px solid rgba(0,0,0,.15);border-radius:6px;background:#fff;outline:none}
-  .people-inner .filt-inner input{flex:1;min-width:120px}
   .store-tip{font-size:12px;color:#bbb;margin-top:10px;text-align:center}
-  @media(max-width:680px){.mgrid{grid-template-columns:repeat(2,1fr)}.crow{grid-template-columns:1fr}.wrap{padding:14px}.hdr{padding:14px 16px}}
+  @media(max-width:680px){.mgrid{grid-template-columns:repeat(2,1fr)}.crow{grid-template-columns:1fr}.wrap{padding:14px}.hdr{padding:14px 16px}.main-tabs{padding:0 16px}}
 </style>
 </head>
 <body>
@@ -89,85 +86,130 @@
 <div class="hdr">
   <div style="display:flex;align-items:center;gap:14px">
     <div>
-      <h1>Evaluación Módulo 1 - Orden y limpieza y piso de ventas</h1>
+      <h1>Evaluaciones — Farmatodo Argentina</h1>
       <div class="upd" id="upd">Actualizando datos...</div>
     </div>
     <span class="badge" id="mode-badge" style="background:#faeeda;color:#854f0b">Cargando...</span>
   </div>
-  <div style="display:flex;gap:8px;align-items:center">
-    <button onclick="tryLive()" id="btn-live" style="font-size:13px;padding:7px 14px;border:0.5px solid rgba(0,0,0,.2);border-radius:8px;background:#fff;cursor:pointer;color:#1a1a18">↻ Refrescar</button>
-  </div>
+  <button onclick="tryLive()" id="btn-live" style="font-size:13px;padding:7px 14px;border:0.5px solid rgba(0,0,0,.2);border-radius:8px;background:#fff;cursor:pointer;color:#1a1a18">↻ Refrescar</button>
+</div>
+
+<!-- MAIN MODULE TABS -->
+<div class="main-tabs">
+  <div class="main-tab on" id="mtab-1" onclick="switchModule(1)">📦 Módulo 1 — Orden y limpieza</div>
+  <div class="main-tab" id="mtab-2" onclick="switchModule(2)">🏪 Módulo 2 — Pilares de la operación</div>
 </div>
 
 <div class="wrap">
+
   <div class="info-banner" id="info-banner" style="display:none">
     ⚠️ No se pudieron cargar los datos en vivo. Mostrando datos embebidos. Intentá con <b>↻ Refrescar</b>.
   </div>
 
-  <!-- BARRA GLOBAL: filtro área -->
-  <div class="gbar">
-    <div class="gbar-left">
-      <span class="gbar-label">Filtrar por área:</span>
-      <button class="afbtn on" onclick="setArea(0,this)">Todas</button>
-      <button class="afbtn" onclick="setArea(1,this)">Área 1</button>
-      <button class="afbtn" onclick="setArea(2,this)">Área 2</button>
-      <button class="afbtn" onclick="setArea(3,this)">Área 3</button>
-    </div>
-  </div>
-
-  <div class="mgrid">
-    <div class="mc"><div class="ml">Respuestas totales</div><div class="mv blue" id="m-resp">—</div><div class="ms" id="m-resp-s"></div></div>
-    <div class="mc"><div class="ml">% Participación</div><div class="mv" id="m-pct">—</div><div class="ms" id="m-pct-s"></div></div>
-    <div class="mc"><div class="ml">Nota promedio</div><div class="mv" id="m-avg">—</div><div class="ms">sobre 20 puntos</div></div>
-    <div class="mc"><div class="ml">% Aprobados (≥ 10)</div><div class="mv green" id="m-pass">—</div><div class="ms" id="m-pass-s"></div></div>
-  </div>
-
-  <div class="sec">
-    <div class="sh" onclick="tog('area')"><h2>Participación y resultados por área</h2><span class="chev open" id="ch-area">▾</span></div>
-    <div class="sb open" id="bd-area">
-      <div id="area-tabs-inner" style="display:none"></div>
-      <div class="crow">
-        <div><div class="clbl">% Participación</div><div style="position:relative;height:200px"><canvas id="cArea" role="img" aria-label="Participación por área"></canvas></div></div>
-        <div><div class="clbl">Nota promedio</div><div style="position:relative;height:200px"><canvas id="cScore" role="img" aria-label="Nota promedio por área"></canvas></div></div>
+  <!-- ═══════════ MÓDULO 1 ═══════════ -->
+  <div class="tab-panel on" id="panel-1">
+    <div class="gbar">
+      <div class="gbar-left">
+        <span class="gbar-label">Filtrar por área:</span>
+        <button class="afbtn on" onclick="setArea1(0,this)">Todas</button>
+        <button class="afbtn" onclick="setArea1(1,this)">Área 1</button>
+        <button class="afbtn" onclick="setArea1(2,this)">Área 2</button>
+        <button class="afbtn" onclick="setArea1(3,this)">Área 3</button>
       </div>
     </div>
-  </div>
-
-  <div class="sec">
-    <div class="sh" onclick="tog('store')">
-      <h2>Detalle por tienda</h2>
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="store-search-wrap" onclick="event.stopPropagation()">
-          <span style="color:#bbb;font-size:14px">🔍</span>
-          <input type="text" id="store-search" placeholder="Buscar tienda..." oninput="filterByStore(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:140px">
+    <div class="mgrid">
+      <div class="mc"><div class="ml">Respuestas totales</div><div class="mv blue" id="m1-resp">—</div><div class="ms" id="m1-resp-s"></div></div>
+      <div class="mc"><div class="ml">% Participación</div><div class="mv" id="m1-pct">—</div><div class="ms" id="m1-pct-s"></div></div>
+      <div class="mc"><div class="ml">Nota promedio</div><div class="mv" id="m1-avg">—</div><div class="ms">sobre 20 puntos</div></div>
+      <div class="mc"><div class="ml">% Aprobados (≥ 10)</div><div class="mv green" id="m1-pass">—</div><div class="ms" id="m1-pass-s"></div></div>
+    </div>
+    <div class="sec">
+      <div class="sh" onclick="tog('area1')"><h2>Participación y resultados por área</h2><span class="chev open" id="ch-area1">▾</span></div>
+      <div class="sb open" id="bd-area1">
+        <div class="crow">
+          <div><div class="clbl">% Participación</div><div style="position:relative;height:200px"><canvas id="cArea1"></canvas></div></div>
+          <div><div class="clbl">Nota promedio</div><div style="position:relative;height:200px"><canvas id="cScore1"></canvas></div></div>
         </div>
-        <span class="chev open" id="ch-store">▾</span>
       </div>
     </div>
-    <div class="sb open" id="bd-store">
-      <div style="padding-top:16px">
-        <table id="store-table-main">
-          <thead>
-            <tr>
-              <th style="width:20px"></th>
-              <th>Tienda</th><th>Área</th><th>Nómina</th><th>Respondieron</th>
-              <th>Participación</th><th>Nota prom.</th><th>% Aprobados</th>
-            </tr>
-          </thead>
-          <tbody id="store-tb"></tbody>
-        </table>
-        <div class="store-tip">↓ Hacé clic en una tienda para ver el detalle de sus colaboradores</div>
+    <div class="sec">
+      <div class="sh" onclick="tog('store1')">
+        <h2>Detalle por tienda</h2>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="store-search-wrap" onclick="event.stopPropagation()">
+            <span style="color:#bbb;font-size:14px">🔍</span>
+            <input type="text" id="store-search1" placeholder="Buscar tienda..." oninput="filterByStore1(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:140px">
+          </div>
+          <span class="chev open" id="ch-store1">▾</span>
+        </div>
+      </div>
+      <div class="sb open" id="bd-store1">
+        <div style="padding-top:16px">
+          <table>
+            <thead><tr><th style="width:20px"></th><th>Tienda</th><th>Área</th><th>Nómina</th><th>Respondieron</th><th>Participación</th><th>Nota prom.</th><th>% Aprobados</th></tr></thead>
+            <tbody id="store-tb"></tbody>
+          </table>
+          <div class="store-tip">↓ Hacé clic en una tienda para ver el detalle de sus colaboradores</div>
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- ═══════════ MÓDULO 2 ═══════════ -->
+  <div class="tab-panel" id="panel-2">
+    <div class="gbar">
+      <div class="gbar-left">
+        <span class="gbar-label">Filtrar por área:</span>
+        <button class="afbtn on" id="a2-all" onclick="setArea2(0,this)">Todas</button>
+        <button class="afbtn" onclick="setArea2(1,this)">Área 1</button>
+        <button class="afbtn" onclick="setArea2(2,this)">Área 2</button>
+        <button class="afbtn" onclick="setArea2(3,this)">Área 3</button>
+      </div>
+    </div>
+    <div class="mgrid">
+      <div class="mc"><div class="ml">Respuestas totales</div><div class="mv blue" id="m2-resp">—</div><div class="ms" id="m2-resp-s"></div></div>
+      <div class="mc"><div class="ml">% Participación</div><div class="mv" id="m2-pct">—</div><div class="ms" id="m2-pct-s"></div></div>
+      <div class="mc"><div class="ml">Nota promedio</div><div class="mv" id="m2-avg">—</div><div class="ms">sobre 20 puntos</div></div>
+      <div class="mc"><div class="ml">% Aprobados (≥ 10)</div><div class="mv green" id="m2-pass">—</div><div class="ms" id="m2-pass-s"></div></div>
+    </div>
+    <div class="sec">
+      <div class="sh" onclick="tog('area2')"><h2>Participación y resultados por área — Supervisores</h2><span class="chev open" id="ch-area2">▾</span></div>
+      <div class="sb open" id="bd-area2">
+        <div class="crow">
+          <div><div class="clbl">% Participación</div><div style="position:relative;height:200px"><canvas id="cArea2"></canvas></div></div>
+          <div><div class="clbl">Nota promedio</div><div style="position:relative;height:200px"><canvas id="cScore2"></canvas></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sh" onclick="tog('store2')">
+        <h2>Detalle por tienda — Supervisores</h2>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="store-search-wrap" onclick="event.stopPropagation()">
+            <span style="color:#bbb;font-size:14px">🔍</span>
+            <input type="text" id="store-search2" placeholder="Buscar tienda..." oninput="filterByStore2(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:140px">
+          </div>
+          <span class="chev open" id="ch-store2">▾</span>
+        </div>
+      </div>
+      <div class="sb open" id="bd-store2">
+        <div style="padding-top:16px">
+          <table>
+            <thead><tr><th style="width:20px"></th><th>Tienda</th><th>Área</th><th>Supervisores</th><th>Respondieron</th><th>Participación</th><th>Nota prom.</th><th>% Aprobados</th></tr></thead>
+            <tbody id="store-tb2"></tbody>
+          </table>
+          <div class="store-tip">↓ Hacé clic en una tienda para ver el detalle de sus supervisores</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-</div>
+</div><!-- end wrap -->
 
 <script>
-// ═══════════════════════════════════════════════════════════════════════
-// DATOS EMBEBIDOS — se actualizan automáticamente al usar "Cargar en vivo"
-// ═══════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
+// DATOS EMBEBIDOS
+// ═══════════════════════════════════════════════════════════════════
 const RESP_DATA = [
 ["Wed Jun 10 2026 13:17:32 GMT-0400 (hora de Venezuela)", "14", "Lorena Arrieta", "25 de Mayo", "Apv senior", "c) Primero que Está en el Frente, Primero que Sale", "b) Ponés lo nuevo adelante porque está más fresco", "b) Inmediatamente después de finalizar la recepción de la mercadería", "c) Las cestas de RX y luego Misceláneos", "c) 6 meses antes", "b) Lo devolvés a la Droguería usando el formato manual", "b) Registrarlos en el formato de control", "b) Limpio, ordenado, identificado por categorías, con extintores despejados", "d) Cero cubetas llenas — todos los productos deben estar exhibidos", "a) Realizás ajuste por vencidos en SIM y solicitás autorización del Gerente de Área para el desecho", "27187164", "LA NOBLEZA", "3"],
 ["Fri Jun 12 2026 15:45:15 GMT-0400 (hora de Venezuela)", "20", "Rocio Carrizo", "25 de mayo", "Apv senior", "a) Primero que Entra, Primero que Sale", "c) Ponés lo nuevo atrás y dejás lo que ya estaba adelante", "b) Inmediatamente después de finalizar la recepción de la mercadería", "c) Las cestas de RX y luego Misceláneos", "c) 6 meses antes", "b) Lo devolvés a la Droguería usando el formato manual", "a) Rayar el empaque secundario", "b) Limpio, ordenado, identificado por categorías, con extintores despejados", "d) Cero cubetas llenas — todos los productos deben estar exhibidos", "a) Realizás ajuste por vencidos en SIM y solicitás autorización del Gerente de Área para el desecho", "36826848", "LA NOBLEZA", "3"],
@@ -403,7 +445,9 @@ const RESP_DATA = [
 ["Tue Jun 30 2026 13:50:46 GMT-0400 (hora de Venezuela)", "18", "Elias Rojas", "SAN ISIDRO", "APV", "b) Primero que Expira, Primero que Se vende", "c) Ponés lo nuevo atrás y dejás lo que ya estaba adelante", "b) Inmediatamente después de finalizar la recepción de la mercadería", "c) Las cestas de RX y luego Misceláneos", "c) 6 meses antes", "b) Lo devolvés a la Droguería usando el formato manual", "a) Rayar el empaque secundario", "b) Limpio, ordenado, identificado por categorías, con extintores despejados", "d) Cero cubetas llenas — todos los productos deben estar exhibidos", "a) Realizás ajuste por vencidos en SIM y solicitás autorización del Gerente de Área para el desecho", "31508899", "SAN ISIDRO", "1"]
 ];
 
-// Nómina simplificada: [nombre, tienda, cargo, area]
+// RESP_DATA2 embebido vacío (se carga en vivo desde el Sheet)
+const RESP_DATA2 = [];
+
 const NOM_DATA = [
 ["GUSTAVO AGUIRRE", "WALKER", "ASISTENTE DE PISO DE VENTAS", 1, "24055909"],
 ["SILVIA ROXANA CHAVEZ", "CABALLITO", "ASESORA DERMO", 2, "23474441"],
@@ -776,333 +820,385 @@ const NOM_DATA = [
 ["JOAQUIN EZEQUIEL GONZALEZ", "SM CENTER", "ASISTENTE DE PISO DE VENTAS", 3, "40910994"]
 ];
 
-// ═══════════════════════════════════════════════════════════════════════
-// LÓGICA
-// ═══════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
+// CONFIGURACIÓN
+// ═══════════════════════════════════════════════════════════════════
+const API       = 'https://script.google.com/macros/s/AKfycbwMoGhL_56BE90DbpGrV5qa1fZQgKgYF0TMZbORFAe40Vi3Jgh0f4bBBkHoGcUQR2_6/exec';
+const GID_RESP1 = '1142498963';
+const GID_RESP2 = '1095051768';
+const GID_NOM   = '1331171004';
+
 const STORES = ['WALKER','CABALLITO','SM CENTER','ALESEL','LA NOBLEZA','JUNCAL PODIUM','OLLEROS','SANFAR','DEVOTO','VILLA DEL PARQUE','COLECTORA','OLIVOS','PERDRIEL','CALLAO','MARK','BOTANICO','ESPER','SAN ISIDRO','GRAN FERRARI','IGLESIA','SCALABRINI','RIVADAVIA','MS PATRICIOS','LAS HERAS','KM 47.5','ALCORTA','FLOTANTES ÁREA 1','FLOTANTES ÁREA 2','QUINTA 46','SORIA','PARQUE CHACABUCO','LUPO'];
-// Mapa tienda→área construido de NOM_DATA (declarado aquí, después de STORES)
+
 const STORE_AREA = {};
-NOM_DATA.forEach(r => { if (r[1] && r[3]) STORE_AREA[r[1].toUpperCase().trim()] = +r[3]; });
-// Overrides manuales de área por tienda
+NOM_DATA.forEach(r => { if(r[1]&&r[3]) STORE_AREA[r[1].toUpperCase().trim()]=+r[3]; });
 STORE_AREA['FLOTANTES ÁREA 1'] = 1;
-// Mapa DNI → {nombre, cargo, tienda, area}
-// NOM_DATA ahora tiene: [nombre(0), tienda(1), cargo(2), area(3), dni(4)]
+
 const NOM_BY_DNI = {};
 NOM_DATA.forEach(r => {
-  const dni = (r[4]||'').toString().trim();
-  if (dni) NOM_BY_DNI[dni] = { nombre: r[0], cargo: r[2], tienda: r[1], area: +r[3] };
+  const dni=(r[4]||'').toString().trim();
+  if(dni) NOM_BY_DNI[dni]={nombre:r[0],cargo:r[2],tienda:r[1],area:+r[3]};
 });
-const API = 'https://script.google.com/macros/s/AKfycbwMoGhL_56BE90DbpGrV5qa1fZQgKgYF0TMZbORFAe40Vi3Jgh0f4bBBkHoGcUQR2_6/exec';
-const GID_RESP   = '1142498963';
-const GID_NOMINA = '1331171004';
 
-let cA=null, cS=null;
-let ACTIVE_AREA = 0;  // 0 = todas las áreas
-let STORE_SEARCH = ''; // texto del buscador de tienda
-// Datos globales para recalcular métricas al filtrar por área
-let G_nomByStore={}, G_rByStore={}, G_sByStore={}, G_nomByArea={}, G_rByArea={}, G_peopleByStore={};
+// ── Estado global ──
+let ACTIVE_AREA1=0, ACTIVE_AREA2=0;
+let STORE_SEARCH1='', STORE_SEARCH2='';
+let cA1=null,cS1=null,cA2=null,cS2=null;
+let G1={nomByStore:{},rByStore:{},sByStore:{},nomByArea:{},rByArea:{},peopleByStore:{}};
+let G2={nomByStore:{},rByStore:{},sByStore:{},nomByArea:{},rByArea:{},peopleByStore:{}};
 
+// NOM vivo (se actualiza en tryLive)
+let NOM_LIVE = null; // null = usar NOM_DATA embebida
+
+function getNom() { return NOM_LIVE || NOM_DATA; }
+
+// ═══════════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════════
 const sc = s => { const m=String(s||'').match(/^(\d+)/); return m?+m[1]:null; };
-
-// Deduplica respuestas: por nombre+tienda, queda la de mayor nota (o la primera si empatan)
-// Columnas del CSV de respuestas (con nueva col DNI):
-// [0]=fecha [1]=score [2]=nombre [3]=farmacia [4]=cargo
-// [5-14]=Q1-Q10 [15]=DNI [16]=TIENDA NOMINA [17]=AREA
-function dniCol(r)   { return (r[15]||'').toString().trim(); }
-function storeCol(r) {
-  const s = (r[16]||'').toUpperCase().trim();
-  if (STORES.includes(s)) return s;
-  // fallback: buscar en cols finales
-  for (let i = r.length-1; i >= 10; i--) {
-    const v = (r[i]||'').toUpperCase().trim();
-    if (STORES.includes(v)) return v;
-  }
-  return '';
-}
-function areaCol(r) {
-  const a = parseInt(r[17])||0;
-  if (a >= 1 && a <= 3) return a;
-  for (let i = r.length-1; i >= 10; i--) {
-    const v = parseInt(r[i]);
-    if (v >= 1 && v <= 3) return v;
-  }
-  return 0;
-}
 
 function normName(n) {
   return (n||'').trim().toUpperCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')  // quita tildes
-    .replace(/[^A-Z0-9 ]/g,'')                           // quita puntuación
-    .replace(/\s+/g,' ').trim();                         // colapsa espacios
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^A-Z0-9 ]/g,'').replace(/\s+/g,' ').trim();
 }
-
-// Compara dos strings: true si difieren en ≤1 carácter (typo-tolerante)
-function similar(a, b) {
-  if (a === b) return true;
-  if (Math.abs(a.length - b.length) > 2) return false;
-  if (a.length === b.length) {
-    let diffs = 0;
-    for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) diffs++;
-    return diffs <= 1;
-  }
-  const [sh, lo] = a.length < b.length ? [a, b] : [b, a];
-  for (let i = 0; i < lo.length; i++) {
-    if (lo.slice(0,i) + lo.slice(i+1) === sh) return true;
-  }
+function similar(a,b){
+  if(a===b)return true;
+  if(Math.abs(a.length-b.length)>2)return false;
+  if(a.length===b.length){let d=0;for(let i=0;i<a.length;i++)if(a[i]!==b[i])d++;return d<=1;}
+  const[sh,lo]=a.length<b.length?[a,b]:[b,a];
+  for(let i=0;i<lo.length;i++)if(lo.slice(0,i)+lo.slice(i+1)===sh)return true;
   return false;
 }
-
-// Verifica si dos nombres normalizados son "el mismo":
-// tolera orden distinto, nombres compuestos, apellidos con typos
-function sameNorm(a, b) {
-  if (a === b) return true;
-  const wa = a.split(' '), wb = b.split(' ');
-  const [shorter, longer] = wa.length <= wb.length ? [wa, wb] : [wb, wa];
-  // Palabras en común con tolerancia a typos de 1 carácter
-  const shared = shorter.filter(w => w.length > 1 && longer.some(lw => similar(w, lw)));
-  return shared.length >= Math.min(2, shorter.length);
+function sameNorm(a,b){
+  if(a===b)return true;
+  const wa=a.split(' '),wb=b.split(' ');
+  const[shorter,longer]=wa.length<=wb.length?[wa,wb]:[wb,wa];
+  const shared=shorter.filter(w=>w.length>1&&longer.some(lw=>similar(w,lw)));
+  return shared.length>=Math.min(2,shorter.length);
 }
 
-function dedup(resp) {
-  const map = new Map();
-  resp.forEach(r => {
-    const store = storeCol(r);
-    const dni = dniCol(r);
-    // Usar DNI como clave principal; si no hay DNI, caer a nombre normalizado
-    let key = (dni && dni !== '—' && dni.length > 4)
-      ? dni + '||' + store
-      : normName(r[2]) + '||' + store;
-    const score = sc(r[1]) ?? -1;
-    if (!map.has(key) || score > (sc(map.get(key)[1]) ?? -1)) {
-      map.set(key, r);
-    }
+// ── Columnas Formulario 1: [0]fecha [1]score [2]nombre [3]farmacia [4]cargo [5-14]Q1-10 [15]DNI [16]TIENDA [17]AREA ──
+function dniCol1(r)   { return (r[15]||'').toString().trim(); }
+function storeCol1(r) {
+  const s=(r[16]||'').toUpperCase().trim();
+  if(STORES.includes(s))return s;
+  for(let i=r.length-1;i>=10;i--){const v=(r[i]||'').toUpperCase().trim();if(STORES.includes(v))return v;}
+  return '';
+}
+function areaCol1(r)  { const a=parseInt(r[17])||0; return(a>=1&&a<=3)?a:0; }
+
+// ── Columnas Formulario 2: [0]fecha [1]score [2]nombre [3]DNI [4]tienda [5]cargo [6-15]Q1-10 [16]AREA ──
+function dniCol2(r)   { return (r[3]||'').toString().trim(); }
+function storeCol2(r) {
+  const s=(r[4]||'').toUpperCase().trim();
+  if(STORES.includes(s))return s;
+  // normalizar NERES→CALLAO
+  if(s==='NERES')return 'CALLAO';
+  // fallback: buscar por nombre en NOM_BY_DNI
+  const dni=dniCol2(r);
+  if(dni&&NOM_BY_DNI[dni])return NOM_BY_DNI[dni].tienda.toUpperCase().trim();
+  return s;
+}
+function areaCol2(r)  { const a=parseInt(r[16])||0; return(a>=1&&a<=3)?a:0; }
+
+function dedup(resp, dniColFn, storeColFn) {
+  const map=new Map();
+  resp.forEach(r=>{
+    const store=storeColFn(r), dni=dniColFn(r);
+    const key=(dni&&dni!=='—'&&dni.length>4)?dni+'||'+store:normName(r[2])+'||'+store;
+    const score=sc(r[1])??-1;
+    if(!map.has(key)||score>(sc(map.get(key)[1])??-1))map.set(key,r);
   });
   return Array.from(map.values());
 }
 
-function renderAll(rawResp, nom) {
-  const resp = dedup(rawResp);
-  const nomByStore={}, nomByArea={1:0,2:0,3:0};
-  nom.forEach(r => {
+// ── Chart plugin ──
+const datalabelPlugin={
+  id:'topLabel',
+  afterDatasetsDraw(chart){
+    const{ctx}=chart;
+    chart.data.datasets.forEach((ds,di)=>{
+      chart.getDatasetMeta(di).data.forEach((bar,i)=>{
+        const val=ds.data[i];
+        if(val===null||val===undefined)return;
+        const label=ds._labelFmt?ds._labelFmt(val):String(val);
+        ctx.save();ctx.font='bold 12px -apple-system,sans-serif';
+        ctx.fillStyle='#444';ctx.textAlign='center';ctx.textBaseline='bottom';
+        ctx.fillText(label,bar.x,bar.y-3);ctx.restore();
+      });
+    });
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// MÓDULO 1 — renderAll1
+// ═══════════════════════════════════════════════════════════════════
+function renderAll1(rawResp, nom) {
+  const resp = dedup(rawResp, dniCol1, storeCol1);
+  const nomByStore={},nomByArea={1:0,2:0,3:0};
+  nom.forEach(r=>{
     const s=(r[1]||'').toUpperCase().trim();
     if(!STORES.includes(s))return;
     nomByStore[s]=(nomByStore[s]||0)+1;
-    const a=+r[3]||0; if(a>=1&&a<=3)nomByArea[a]++;
+    const a=+r[3]||0;if(a>=1&&a<=3)nomByArea[a]++;
   });
 
-  const rByStore={}, sByStore={}, rByArea={1:[],2:[],3:[]};
-  resp.forEach(r => {
-    const s=storeCol(r);
-    if(!STORES.includes(s))return;
-    const a=areaCol(r), score=sc(r[1]);
+  const rByStore={},sByStore={},rByArea={1:[],2:[],3:[]};
+  resp.forEach(r=>{
+    const s=storeCol1(r);if(!STORES.includes(s))return;
+    const a=areaCol1(r),score=sc(r[1]);
     rByStore[s]=(rByStore[s]||0)+1;
     if(!sByStore[s])sByStore[s]=[];
     if(score!==null)sByStore[s].push(score);
     if(a>=1&&a<=3)rByArea[a].push(score);
   });
 
-  // Guardar en globals para que setArea pueda recalcular métricas
-  G_nomByStore=nomByStore; G_rByStore=rByStore; G_sByStore=sByStore;
-  G_nomByArea=nomByArea; G_rByArea=rByArea;
-
-  const $=id=>document.getElementById(id);
-  const set=(id,v)=>{$(id).textContent=v};
-  updateMetrics(0); // mostrar totales globales al inicio
+  G1={nomByStore,rByStore,sByStore,nomByArea,rByArea,peopleByStore:{}};
+  updateMetrics1(0);
 
   const aL=['Área 1','Área 2','Área 3'];
   const aPt=[1,2,3].map(a=>nomByArea[a]>0?Math.round(rByArea[a].length/nomByArea[a]*100):0);
   const aAv=[1,2,3].map(a=>{const s=rByArea[a].filter(x=>x!==null);return s.length?parseFloat((s.reduce((x,y)=>x+y,0)/s.length).toFixed(1)):0;});
 
-  if(cA)cA.destroy(); if(cS)cS.destroy();
-
-  // Plugin inline para etiquetas sobre las barras (sin CDN extra)
-  const datalabelPlugin = {
-    id:'topLabel',
-    afterDatasetsDraw(chart) {
-      const {ctx, data} = chart;
-      chart.data.datasets.forEach((ds, di) => {
-        const meta = chart.getDatasetMeta(di);
-        meta.data.forEach((bar, i) => {
-          const val = ds.data[i];
-          if(val===null||val===undefined) return;
-          const label = ds._labelFmt ? ds._labelFmt(val) : String(val);
-          ctx.save();
-          ctx.font = 'bold 12px -apple-system,sans-serif';
-          ctx.fillStyle = '#444';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'bottom';
-          ctx.fillText(label, bar.x, bar.y - 3);
-          ctx.restore();
-        });
-      });
-    }
-  };
-
-  cA=new Chart($('cArea'),{
-    type:'bar',
-    plugins:[datalabelPlugin],
+  if(cA1)cA1.destroy();if(cS1)cS1.destroy();
+  cA1=new Chart(document.getElementById('cArea1'),{type:'bar',plugins:[datalabelPlugin],
     data:{labels:aL,datasets:[{data:aPt,backgroundColor:['#b5d4f4','#378add','#0c447c'],borderRadius:5,label:'% Part.',_labelFmt:v=>v+'%'}]},
     options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:{y:{max:100,ticks:{callback:v=>v+'%',font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
   });
-  cS=new Chart($('cScore'),{
-    type:'bar',
-    plugins:[datalabelPlugin],
+  cS1=new Chart(document.getElementById('cScore1'),{type:'bar',plugins:[datalabelPlugin],
     data:{labels:aL,datasets:[{data:aAv,backgroundColor:aAv.map(v=>v>=14?'#97c459':v>=10?'#ef9f27':'#f09595'),borderRadius:5,label:'Nota prom.',_labelFmt:v=>v+' pts'}]},
     options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:{y:{max:20,ticks:{font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
   });
 
-  // Normaliza nombres: quita acentos, espacios extra, pasa a mayúsculas
-  const normName = n => (n||'').trim().toUpperCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .replace(/\s+/g,' ');
-
-  // Build people data per store for click-to-expand
-  const seen=new Set(), seenNorms={}, seenDNIs=new Set(), peopleByStore={};
-  STORES.forEach(s=>{ peopleByStore[s]=[]; });
-
+  // Build people
+  const seen=new Set(),seenNorms={},seenDNIs=new Set(),peopleByStore={};
+  STORES.forEach(s=>{peopleByStore[s]=[];});
   resp.forEach(r=>{
-    const s=storeCol(r); if(!STORES.includes(s))return;
-    const nombre=(r[2]||'').trim(), score2=sc(r[1]);
-    const nKey = normName(nombre)+'||'+s;
-    seen.add(nKey);
-    if(!seenNorms[s]) seenNorms[s]=[];
+    const s=storeCol1(r);if(!STORES.includes(s))return;
+    const nombre=(r[2]||'').trim(),score2=sc(r[1]);
+    seen.add(normName(nombre)+'||'+s);
+    if(!seenNorms[s])seenNorms[s]=[];
     seenNorms[s].push(normName(nombre));
-    const rDni = dniCol(r);
-    if (rDni && rDni !== '—' && rDni.length > 4) seenDNIs.add(rDni);
+    const rDni=dniCol1(r);
+    if(rDni&&rDni!=='—'&&rDni.length>4)seenDNIs.add(rDni);
     const rawFecha=(r[0]||'');
     const fm=rawFecha.match(/(\w{3} \w{3} \d{2} \d{4})|(\d{1,2}\/\d{1,2}\/\d{4})/);
     const fecha=fm?fm[0]:rawFecha.split(' ')[0];
-    const nomInfo = NOM_BY_DNI[rDni];
-    const nombreFinal = nomInfo ? nomInfo.nombre : nombre;
-    const cargoFinal  = nomInfo ? nomInfo.cargo  : (r[4]||'').trim();
-    peopleByStore[s].push({nombre:nombreFinal,cargo:cargoFinal,score:score2,fecha,area:STORE_AREA[s]||areaCol(r),st:'r'});
+    const nomInfo=NOM_BY_DNI[rDni];
+    peopleByStore[s].push({nombre:nomInfo?nomInfo.nombre:nombre,cargo:nomInfo?nomInfo.cargo:(r[4]||'').trim(),score:score2,fecha,st:'r'});
   });
   nom.forEach(r=>{
-    const s=(r[1]||'').toUpperCase().trim(); if(!STORES.includes(s))return;
-    const nombre=(r[0]||'').trim(); if(!nombre)return;
+    const s=(r[1]||'').toUpperCase().trim();if(!STORES.includes(s))return;
+    const nombre=(r[0]||'').trim();if(!nombre)return;
     const dniNom=(r[4]||'').toString().trim();
-    // Chequeo por DNI primero (más confiable), luego por nombre normalizado
-    const seenByDni  = dniNom && seenDNIs.has(dniNom);
-    const nNorm      = normName(nombre);
-    const seenByName = (seenNorms[s]||[]).some(rn=>sameNorm(nNorm,rn));
-    if(seenByDni || seenByName)return;
-    if(!peopleByStore[s])peopleByStore[s]=[];
-    peopleByStore[s].push({nombre,cargo:r[2]||'',score:null,fecha:'—',area:STORE_AREA[s]||+r[3]||0,st:'p'});
+    if(dniNom&&seenDNIs.has(dniNom))return;
+    if((seenNorms[s]||[]).some(rn=>sameNorm(normName(nombre),rn)))return;
+    peopleByStore[s].push({nombre,cargo:r[2]||'',score:null,fecha:'—',st:'p'});
   });
-  G_peopleByStore = peopleByStore;
+  G1.peopleByStore=peopleByStore;
 
-  const stTb=$('store-tb');
+  buildStoreTable('store-tb', STORES, G1, 'store1', storeToggle1);
+}
+
+function updateMetrics1(a) {
+  const $=id=>document.getElementById(id);
+  let totN,totR,allSc;
+  if(!a){
+    totN=Object.values(G1.nomByStore).reduce((x,y)=>x+y,0);
+    totR=Object.values(G1.rByStore).reduce((x,y)=>x+y,0);
+    allSc=STORES.flatMap(s=>G1.sByStore[s]||[]);
+  } else {
+    totN=G1.nomByArea[a]||0;
+    totR=(G1.rByArea[a]||[]).length;
+    allSc=(G1.rByArea[a]||[]).filter(x=>x!==null);
+  }
+  const avgSc=allSc.length?(allSc.reduce((x,y)=>x+y,0)/allSc.length):null;
+  const passed=allSc.filter(s=>s>=10).length;
+  const pctP=totN>0?Math.round(totR/totN*100):0;
+  const pctPas=allSc.length?Math.round(passed/allSc.length*100):0;
+  $('m1-resp').textContent=totR;
+  $('m1-resp-s').textContent=`de ${totN} en nómina`;
+  $('m1-pct').textContent=pctP+'%';
+  $('m1-pct').className='mv '+(pctP>=70?'green':pctP>=40?'amber':'red');
+  $('m1-pct-s').textContent=`${totN-totR} pendientes`;
+  $('m1-avg').textContent=avgSc!==null?avgSc.toFixed(1):'—';
+  $('m1-avg').className='mv '+(avgSc!==null&&avgSc>=10?'green':'amber');
+  $('m1-pass').textContent=pctPas+'%';
+  $('m1-pass-s').textContent=`${passed} de ${allSc.length} respondieron`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MÓDULO 2 — renderAll2
+// ═══════════════════════════════════════════════════════════════════
+function renderAll2(rawResp, nom) {
+  // Solo supervisores en la nómina (Unidad de Negocio = SUPERVISOR)
+  const supNom = nom.filter(r => (r[5]||'').toUpperCase().includes('SUPERVISOR'));
+  // Si NOM_LIVE tiene columna [5] con UN; si es NOM_DATA embebida (solo 5 cols) no hay UN → usar todos
+  const nomToUse = supNom.length > 0 ? supNom : nom;
+
+  const resp = dedup(rawResp, dniCol2, storeCol2);
+
+  const nomByStore={},nomByArea={1:0,2:0,3:0};
+  const storesWithSup=new Set();
+  nomToUse.forEach(r=>{
+    const s=(r[1]||'').toUpperCase().trim();
+    if(!STORES.includes(s))return;
+    storesWithSup.add(s);
+    nomByStore[s]=(nomByStore[s]||0)+1;
+    const a=+r[3]||0;if(a>=1&&a<=3)nomByArea[a]++;
+  });
+
+  const rByStore={},sByStore={},rByArea={1:[],2:[],3:[]};
+  resp.forEach(r=>{
+    const s=storeCol2(r);if(!STORES.includes(s))return;
+    const a=areaCol2(r)||STORE_AREA[s]||0,score=sc(r[1]);
+    rByStore[s]=(rByStore[s]||0)+1;
+    if(!sByStore[s])sByStore[s]=[];
+    if(score!==null)sByStore[s].push(score);
+    if(a>=1&&a<=3)rByArea[a].push(score);
+  });
+
+  G2={nomByStore,rByStore,sByStore,nomByArea,rByArea,peopleByStore:{}};
+  updateMetrics2(0);
+
+  const aL=['Área 1','Área 2','Área 3'];
+  const aPt=[1,2,3].map(a=>nomByArea[a]>0?Math.round(rByArea[a].length/nomByArea[a]*100):0);
+  const aAv=[1,2,3].map(a=>{const s=rByArea[a].filter(x=>x!==null);return s.length?parseFloat((s.reduce((x,y)=>x+y,0)/s.length).toFixed(1)):0;});
+
+  if(cA2)cA2.destroy();if(cS2)cS2.destroy();
+  cA2=new Chart(document.getElementById('cArea2'),{type:'bar',plugins:[datalabelPlugin],
+    data:{labels:aL,datasets:[{data:aPt,backgroundColor:['#f4c4b5','#dd6537','#7c2c0c'],borderRadius:5,label:'% Part.',_labelFmt:v=>v+'%'}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:{y:{max:100,ticks:{callback:v=>v+'%',font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
+  });
+  cS2=new Chart(document.getElementById('cScore2'),{type:'bar',plugins:[datalabelPlugin],
+    data:{labels:aL,datasets:[{data:aAv,backgroundColor:aAv.map(v=>v>=14?'#97c459':v>=10?'#ef9f27':'#f09595'),borderRadius:5,label:'Nota prom.',_labelFmt:v=>v+' pts'}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:{y:{max:20,ticks:{font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
+  });
+
+  // Build people for module 2
+  const seenDNIs2=new Set(),seenNorms2={},peopleByStore2={};
+  STORES.forEach(s=>{peopleByStore2[s]=[];});
+  resp.forEach(r=>{
+    const s=storeCol2(r);if(!STORES.includes(s))return;
+    const nombre=(r[2]||'').trim(),score2=sc(r[1]);
+    if(!seenNorms2[s])seenNorms2[s]=[];
+    seenNorms2[s].push(normName(nombre));
+    const rDni=dniCol2(r);
+    if(rDni&&rDni!=='—'&&rDni.length>4)seenDNIs2.add(rDni);
+    const rawFecha=(r[0]||'');
+    const fm=rawFecha.match(/(\w{3} \w{3} \d{2} \d{4})|(\d{1,2}\/\d{1,2}\/\d{4})/);
+    const fecha=fm?fm[0]:rawFecha.split(' ')[0];
+    const nomInfo=NOM_BY_DNI[rDni];
+    peopleByStore2[s].push({nombre:nomInfo?nomInfo.nombre:nombre,cargo:nomInfo?nomInfo.cargo:(r[5]||'').trim(),score:score2,fecha,st:'r'});
+  });
+  nomToUse.forEach(r=>{
+    const s=(r[1]||'').toUpperCase().trim();if(!STORES.includes(s))return;
+    const nombre=(r[0]||'').trim();if(!nombre)return;
+    const dniNom=(r[4]||'').toString().trim();
+    if(dniNom&&seenDNIs2.has(dniNom))return;
+    if((seenNorms2[s]||[]).some(rn=>sameNorm(normName(nombre),rn)))return;
+    if(!peopleByStore2[s])peopleByStore2[s]=[];
+    peopleByStore2[s].push({nombre,cargo:r[2]||'',score:null,fecha:'—',st:'p'});
+  });
+  G2.peopleByStore=peopleByStore2;
+
+  // Only show stores that have supervisors
+  const storeList2=[...storesWithSup].sort((a,b)=>a.localeCompare(b));
+  buildStoreTable('store-tb2', storeList2, G2, 'store2', storeToggle2);
+}
+
+function updateMetrics2(a) {
+  const $=id=>document.getElementById(id);
+  let totN,totR,allSc;
+  if(!a){
+    totN=Object.values(G2.nomByStore).reduce((x,y)=>x+y,0);
+    totR=Object.values(G2.rByStore).reduce((x,y)=>x+y,0);
+    allSc=Object.values(G2.sByStore).flat();
+  } else {
+    totN=G2.nomByArea[a]||0;
+    totR=(G2.rByArea[a]||[]).length;
+    allSc=(G2.rByArea[a]||[]).filter(x=>x!==null);
+  }
+  const avgSc=allSc.length?(allSc.reduce((x,y)=>x+y,0)/allSc.length):null;
+  const passed=allSc.filter(s=>s>=10).length;
+  const pctP=totN>0?Math.round(totR/totN*100):0;
+  const pctPas=allSc.length?Math.round(passed/allSc.length*100):0;
+  $('m2-resp').textContent=totR;
+  $('m2-resp-s').textContent=`de ${totN} supervisores`;
+  $('m2-pct').textContent=pctP+'%';
+  $('m2-pct').className='mv '+(pctP>=70?'green':pctP>=40?'amber':'red');
+  $('m2-pct-s').textContent=`${totN-totR} pendientes`;
+  $('m2-avg').textContent=avgSc!==null?avgSc.toFixed(1):'—';
+  $('m2-avg').className='mv '+(avgSc!==null&&avgSc>=10?'green':'amber');
+  $('m2-pass').textContent=pctPas+'%';
+  $('m2-pass-s').textContent=`${passed} de ${allSc.length} respondieron`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TABLA DE TIENDAS (genérica)
+// ═══════════════════════════════════════════════════════════════════
+function buildStoreTable(tbodyId, storeList, G, prefix, toggleFn) {
+  const stTb=document.getElementById(tbodyId);
   stTb.innerHTML='';
-  STORES.forEach(s=>{
-    const n=nomByStore[s]||0, res=rByStore[s]||0, sc2=sByStore[s]||[];
+  storeList.forEach(s=>{
+    const n=G.nomByStore[s]||0,res=G.rByStore[s]||0,sc2=G.sByStore[s]||[];
+    if(n===0&&res===0)return;
     const avg=sc2.length?(sc2.reduce((a,b)=>a+b,0)/sc2.length).toFixed(1):null;
     const pp=sc2.length?Math.round(sc2.filter(x=>x>=10).length/sc2.length*100):null;
     const pct=n>0?Math.round(res/n*100):0;
     const area=STORE_AREA[s]||0;
     const bc=pct>=70?'bg-g':pct>=40?'bg-a':'bg-r';
     const pc=pp===null?'pgy':pp>=70?'pg':pp>=50?'pa':'pr';
-    // Main store row
     const tr=document.createElement('tr');
-    tr.className='store-row'; tr.dataset.area=area; tr.dataset.store=s;
-    tr.onclick=()=>toggleStorePeople(s,tr);
+    tr.className='store-row';tr.dataset.area=area;tr.dataset.store=s;
+    tr.onclick=()=>toggleFn(s,tr,G,prefix);
     tr.innerHTML=`
       <td><span class="expand-icon">▶</span></td>
       <td style="font-weight:500">${s}</td>
       <td><span class="pill pb">Área ${area||'?'}</span></td>
       <td>${n}</td><td>${res}</td>
       <td><div style="display:flex;align-items:center;gap:8px">
-        <div class="bar"><div class="bf ${bc}" style="width:${pct}%"></div></div>
+        <div class="bar"><div class="bf ${bc}" style="width:${Math.min(pct,100)}%"></div></div>
         <span style="font-size:12px;min-width:28px">${pct}%</span>
       </div></td>
       <td>${avg!==null?avg+' / 20':'—'}</td>
       <td>${pp!==null?`<span class="pill ${pc}">${pp}%</span>`:'—'}</td>`;
     stTb.appendChild(tr);
-    // Hidden people row (expanded on click)
     const pr=document.createElement('tr');
-    pr.className='people-row'; pr.id='prow-'+s.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
-    pr.style.display='none';
-    pr.dataset.area=area;
-    pr.innerHTML=`<td colspan="8"><div class="people-inner" id="pinner-${s.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'')}"></div></td>`;
+    const safeId=s.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'')+'_'+prefix;
+    pr.className='people-row';pr.id='prow-'+safeId;pr.style.display='none';pr.dataset.area=area;
+    pr.innerHTML=`<td colspan="8"><div class="people-inner" id="pinner-${safeId}"></div></td>`;
     stTb.appendChild(pr);
   });
 }
 
-function filterP(){ /* no-op: people shown per store on click */ }
-
-function updateMetrics(a) {
-  // Calcula y muestra métricas según el área seleccionada (0 = todas)
-  const $=id=>document.getElementById(id);
-  const set=(id,v)=>{$(id).textContent=v};
-
-  let totN, totR, allSc;
-  if (!a) {
-    // Todas las áreas
-    totN = Object.values(G_nomByStore).reduce((x,y)=>x+y,0);
-    totR = Object.values(G_rByStore).reduce((x,y)=>x+y,0);
-    allSc = STORES.flatMap(s => G_sByStore[s]||[]);
-  } else {
-    // Solo el área seleccionada
-    totN = G_nomByArea[a] || 0;
-    totR = (G_rByArea[a]||[]).length;
-    allSc = (G_rByArea[a]||[]).filter(x=>x!==null);
-  }
-
-  const avgSc = allSc.length ? (allSc.reduce((x,y)=>x+y,0)/allSc.length) : null;
-  const passed = allSc.filter(s=>s>=10).length;
-  const pctP   = totN>0 ? Math.round(totR/totN*100) : 0;
-  const pctPas = allSc.length ? Math.round(passed/allSc.length*100) : 0;
-
-  set('m-resp', totR);
-  set('m-resp-s', `de ${totN} en nómina`);
-  set('m-pct', pctP+'%');
-  $('m-pct').className = 'mv '+(pctP>=70?'green':pctP>=40?'amber':'red');
-  set('m-pct-s', `${totN-totR} pendientes`);
-  set('m-avg', avgSc!==null ? avgSc.toFixed(1) : '—');
-  $('m-avg').className = 'mv '+(avgSc>=10?'green':'amber');
-  set('m-pass', pctPas+'%');
-  set('m-pass-s', `${passed} de ${allSc.length} respondieron`);
-}
-
-function toggleStorePeople(store, storeRow) {
-  const id = store.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
-  const prow  = document.getElementById('prow-'+id);
-  const inner = document.getElementById('pinner-'+id);
-  if (!prow) return;
-
-  const isOpen = prow.style.display !== 'none';
-  if (isOpen) {
-    prow.style.display = 'none';
-    storeRow.classList.remove('expanded');
-    return;
-  }
-
-  // Build people table for this store
-  const people = G_peopleByStore[store] || [];
-  const resp_count = people.filter(p=>p.st==='r').length;
-
-  let rows = people.map(p => {
-    let pill, scStr;
-    if (p.st==='p')      { pill='<span class="pill pa">Pendiente</span>'; scStr='—'; }
-    else if (p.score===null){ pill='—'; scStr='—'; }
-    else if (p.score>=10){ pill='<span class="pill pg">Aprobado</span>'; scStr=p.score+' / 20'; }
-    else                 { pill='<span class="pill pr">Desaprobado</span>'; scStr=p.score+' / 20'; }
-    return `<tr data-result="${p.st==='p'?'pending':p.score>=10?'pass':'fail'}" data-name="${p.nombre.toLowerCase()}">
+function buildPeopleInner(store, G, safeId) {
+  const people=G.peopleByStore[store]||[];
+  const resp_count=people.filter(p=>p.st==='r').length;
+  const rows=people.map(p=>{
+    let pill,scStr;
+    if(p.st==='p'){pill='<span class="pill pa">Pendiente</span>';scStr='—';}
+    else if(p.score===null){pill='—';scStr='—';}
+    else if(p.score>=10){pill='<span class="pill pg">Aprobado</span>';scStr=p.score+' / 20';}
+    else{pill='<span class="pill pr">Desaprobado</span>';scStr=p.score+' / 20';}
+    const res=p.st==='p'?'pending':p.score>=10?'pass':'fail';
+    return `<tr data-result="${res}" data-name="${(p.nombre||'').toLowerCase()}">
       <td style="font-weight:500">${p.nombre}</td>
       <td style="color:#888;font-size:12px">${p.cargo}</td>
       <td>${scStr}</td><td>${pill}</td>
       <td style="color:#bbb;font-size:12px">${p.fecha}</td>
     </tr>`;
   }).join('');
-
-  inner.innerHTML = `
+  return `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
       <span style="font-size:12px;font-weight:500;color:#555">${store} — ${people.length} personas (${resp_count} respondieron)</span>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:6px;background:#f5f5f0;border:0.5px solid rgba(0,0,0,.12);border-radius:6px;padding:4px 10px">
           <span style="color:#bbb;font-size:13px">🔍</span>
-          <input type="text" placeholder="Buscar..." oninput="filterInner('${id}',this.value)" style="border:none;background:transparent;outline:none;font-size:12px;width:100px">
+          <input type="text" placeholder="Buscar..." oninput="filterInner('${safeId}',this.value)" style="border:none;background:transparent;outline:none;font-size:12px;width:100px">
         </div>
-        <select onchange="filterInner('${id}',null,this.value)" style="font-size:12px;padding:4px 8px;border:0.5px solid rgba(0,0,0,.15);border-radius:6px;background:#fff;outline:none">
+        <select onchange="filterInner('${safeId}',null,this.value)" style="font-size:12px;padding:4px 8px;border:0.5px solid rgba(0,0,0,.15);border-radius:6px;background:#fff;outline:none">
           <option value="">Todos</option>
           <option value="pass">Aprobados</option>
           <option value="fail">Desaprobados</option>
@@ -1110,185 +1206,227 @@ function toggleStorePeople(store, storeRow) {
         </select>
       </div>
     </div>
-    <table id="ptable-${id}">
+    <table id="ptable-${safeId}">
       <thead><tr><th>Nombre</th><th>Cargo</th><th>Nota</th><th>Estado</th><th>Fecha</th></tr></thead>
-      <tbody id="pbody-${id}">${rows}</tbody>
+      <tbody id="pbody-${safeId}">${rows}</tbody>
     </table>`;
-
-  prow.style.display = '';
-  storeRow.classList.add('expanded');
 }
 
-function filterInner(id, text, result) {
-  const tbody = document.getElementById('pbody-'+id);
-  if (!tbody) return;
-  // Read current filter values
-  const wrap   = tbody.closest('.people-inner');
-  const srch   = text !== null ? text.toLowerCase() : (wrap.querySelector('input').value||'').toLowerCase();
-  const res    = result !== undefined ? result : (wrap.querySelector('select').value||'');
-  tbody.querySelectorAll('tr').forEach(tr => {
-    const okName   = !srch || tr.dataset.name.includes(srch);
-    const okResult = !res  || tr.dataset.result === res;
-    tr.style.display = (okName && okResult) ? '' : 'none';
+function storeToggle1(store, storeRow, G, prefix) {
+  const safeId=store.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'')+'_'+prefix;
+  const prow=document.getElementById('prow-'+safeId);
+  const inner=document.getElementById('pinner-'+safeId);
+  if(!prow)return;
+  if(prow.style.display!=='none'){prow.style.display='none';storeRow.classList.remove('expanded');return;}
+  inner.innerHTML=buildPeopleInner(store,G,safeId);
+  prow.style.display='';storeRow.classList.add('expanded');
+}
+function storeToggle2(store,storeRow,G,prefix){storeToggle1(store,storeRow,G,prefix);}
+
+function filterInner(id,text,result){
+  const tbody=document.getElementById('pbody-'+id);if(!tbody)return;
+  const wrap=tbody.closest('.people-inner');
+  const srch=text!==null?text.toLowerCase():(wrap.querySelector('input').value||'').toLowerCase();
+  const res=result!==undefined?result:(wrap.querySelector('select').value||'');
+  tbody.querySelectorAll('tr').forEach(tr=>{
+    const okName=!srch||tr.dataset.name.includes(srch);
+    const okResult=!res||tr.dataset.result===res;
+    tr.style.display=(okName&&okResult)?'':'none';
   });
 }
 
-function setArea(a, btn) {
-  ACTIVE_AREA = a;
-  // Botones de área activos
-  document.querySelectorAll('.afbtn').forEach(b => b.classList.remove('on'));
+// ═══════════════════════════════════════════════════════════════════
+// FILTROS DE ÁREA
+// ═══════════════════════════════════════════════════════════════════
+function setArea1(a,btn){
+  ACTIVE_AREA1=a;
+  document.querySelectorAll('#panel-1 .afbtn').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
-  // Limpiar buscador de tienda al cambiar área
-  const storeSearchEl = document.getElementById('store-search');
-  if (storeSearchEl) storeSearchEl.value = '';
-  STORE_SEARCH = '';
-  // Actualizar métricas del header
-  updateMetrics(a);
-  // Aplicar filtros a tablas
-  applyFilters();
-  // Actualizar colores de gráficos
-  updateCharts();
+  const el=document.getElementById('store-search1');if(el)el.value='';STORE_SEARCH1='';
+  updateMetrics1(a);applyFilters1();
+  if(cA1&&cS1)updateCharts1();
 }
-
-function filterByStore(val) {
-  STORE_SEARCH = val.trim().toLowerCase();
-  applyFilters();
+function setArea2(a,btn){
+  ACTIVE_AREA2=a;
+  document.querySelectorAll('#panel-2 .afbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const el=document.getElementById('store-search2');if(el)el.value='';STORE_SEARCH2='';
+  updateMetrics2(a);applyFilters2();
+  if(cA2&&cS2)updateCharts2();
 }
+function filterByStore1(val){STORE_SEARCH1=val.trim().toLowerCase();applyFilters1();}
+function filterByStore2(val){STORE_SEARCH2=val.trim().toLowerCase();applyFilters2();}
 
-function applyFilters() {
-  // Filtrar filas de tiendas Y sus filas de detalle expandidas
-  document.getElementById('store-tb').querySelectorAll('tr').forEach(tr => {
-    if (tr.classList.contains('store-row')) {
-      const areaOk   = !ACTIVE_AREA   || tr.dataset.area  == ACTIVE_AREA;
-      const searchOk = !STORE_SEARCH  || tr.dataset.store.toLowerCase().includes(STORE_SEARCH);
-      tr.style.display = (areaOk && searchOk) ? '' : 'none';
-    } else if (tr.classList.contains('people-row')) {
-      // Keep people-row in sync with its store-row (hide if store hidden, keep open state)
-      const areaOk   = !ACTIVE_AREA   || tr.dataset.area  == ACTIVE_AREA;
-      const storeVal = tr.previousElementSibling?.dataset?.store||'';
-      const searchOk = !STORE_SEARCH  || storeVal.toLowerCase().includes(STORE_SEARCH);
-      // Only show if store row is visible AND it was already open
-      const wasOpen  = tr.style.display !== 'none';
-      tr.style.display = (areaOk && searchOk && wasOpen) ? '' : 'none';
-      if (!(areaOk && searchOk) && tr.previousElementSibling?.classList?.contains('expanded')) {
-        tr.previousElementSibling.classList.remove('expanded');
-      }
+function applyFilters1(){
+  document.getElementById('store-tb').querySelectorAll('tr').forEach(tr=>{
+    if(tr.classList.contains('store-row')){
+      const ok=(!ACTIVE_AREA1||tr.dataset.area==ACTIVE_AREA1)&&(!STORE_SEARCH1||tr.dataset.store.toLowerCase().includes(STORE_SEARCH1));
+      tr.style.display=ok?'':'none';
+    } else if(tr.classList.contains('people-row')){
+      const ok=(!ACTIVE_AREA1||tr.dataset.area==ACTIVE_AREA1)&&(!STORE_SEARCH1||(tr.previousElementSibling?.dataset?.store||'').toLowerCase().includes(STORE_SEARCH1));
+      if(!ok){tr.style.display='none';tr.previousElementSibling?.classList.remove('expanded');}
+    }
+  });
+}
+function applyFilters2(){
+  document.getElementById('store-tb2').querySelectorAll('tr').forEach(tr=>{
+    if(tr.classList.contains('store-row')){
+      const ok=(!ACTIVE_AREA2||tr.dataset.area==ACTIVE_AREA2)&&(!STORE_SEARCH2||tr.dataset.store.toLowerCase().includes(STORE_SEARCH2));
+      tr.style.display=ok?'':'none';
+    } else if(tr.classList.contains('people-row')){
+      const ok=(!ACTIVE_AREA2||tr.dataset.area==ACTIVE_AREA2)&&(!STORE_SEARCH2||(tr.previousElementSibling?.dataset?.store||'').toLowerCase().includes(STORE_SEARCH2));
+      if(!ok){tr.style.display='none';tr.previousElementSibling?.classList.remove('expanded');}
     }
   });
 }
 
-function aF(a,btn){ setArea(a,btn); }
+function updateCharts1(){
+  const a=ACTIVE_AREA1;
+  const base=['#b5d4f4','#378add','#0c447c'],dim=['#dde9f7','#9ec4ee','#6a93bc'];
+  cA1.data.datasets[0].backgroundColor=base.map((c,i)=>(!a||i+1===a)?c:dim[i]);cA1.update();
+  const sd=cS1.data.datasets[0].data;
+  cS1.data.datasets[0].backgroundColor=sd.map((v,i)=>{if(a&&i+1!==a)return'#d9d9d9';return v>=14?'#97c459':v>=10?'#ef9f27':'#f09595';});cS1.update();
+}
+function updateCharts2(){
+  const a=ACTIVE_AREA2;
+  const base=['#f4c4b5','#dd6537','#7c2c0c'],dim=['#f9e0d8','#eeaa8e','#c07058'];
+  cA2.data.datasets[0].backgroundColor=base.map((c,i)=>(!a||i+1===a)?c:dim[i]);cA2.update();
+  const sd=cS2.data.datasets[0].data;
+  cS2.data.datasets[0].backgroundColor=sd.map((v,i)=>{if(a&&i+1!==a)return'#d9d9d9';return v>=14?'#97c459':v>=10?'#ef9f27':'#f09595';});cS2.update();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PESTAÑAS PRINCIPALES
+// ═══════════════════════════════════════════════════════════════════
+function switchModule(n){
+  document.querySelectorAll('.main-tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('on'));
+  document.getElementById('mtab-'+n).classList.add('on');
+  document.getElementById('panel-'+n).classList.add('on');
+}
 
 function tog(id){
   document.getElementById('bd-'+id).classList.toggle('open');
   document.getElementById('ch-'+id).classList.toggle('open');
 }
 
-function updateCharts() {
-  // Redraw area charts highlighting the selected area
-  if (!cA || !cS) return;
-  const a = ACTIVE_AREA;
-  // Update bar colors to highlight selected area
-  const blueBase = ['#b5d4f4','#378add','#0c447c'];
-  const blueDim   = ['#dde9f7','#9ec4ee','#6a93bc'];
-  cA.data.datasets[0].backgroundColor = blueBase.map((c,i) => (!a || i+1===a) ? c : blueDim[i]);
-  cA.update();
-  // score chart
-  const scoreData = cS.data.datasets[0].data;
-  cS.data.datasets[0].backgroundColor = scoreData.map((v,i) => {
-    if (a && i+1 !== a) return '#d9d9d9';
-    return v>=14?'#97c459':v>=10?'#ef9f27':'#f09595';
-  });
-  cS.update();
-}
-
-// ── LIVE MODE ────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════
+// CSV PARSER
+// ═══════════════════════════════════════════════════════════════════
 function parseCSV(txt){
   return txt.split('\n').map(line=>{
-    const cols=[]; let cur='',q=false;
+    const cols=[];let cur='',q=false;
     for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){q=!q;}else if(c===','&&!q){cols.push(cur.trim());cur='';}else cur+=c;}
-    cols.push(cur.trim()); return cols;
+    cols.push(cur.trim());return cols;
   }).filter(r=>r.some(x=>x));
 }
 
-function showEmbedded(reason) {
-  renderAll(RESP_DATA, NOM_DATA);
-  const btn = document.getElementById('btn-live');
-  btn.textContent='↻ Refrescar'; btn.disabled=false;
-  document.getElementById('upd').textContent = reason;
-  document.getElementById('mode-badge').textContent = 'Datos embebidos';
-  document.getElementById('mode-badge').style.background = '#faeeda';
-  document.getElementById('mode-badge').style.color = '#854f0b';
-  document.getElementById('info-banner').style.display = 'block';
+// Parse nómina CSV (columnas del Sheet):
+// [0]CodEmp [1]CUIL [2]DNI [3]Apellido [4]Nombre [5]NombreyApellido [6]Sexo [7]ESTATUS [8]UnidadNegocio [9]VP [10]AREA [11]RazSocial [12]Tienda [13]AREA [14]Categoria [15]CARGO ...
+function parseNomCSV(rows) {
+  return rows.slice(3).filter(r=>r[5]&&r[12]).map(r=>{
+    let tienda=(r[12]||'').trim().toUpperCase();
+    if(tienda==='NERES')tienda='CALLAO';
+    const area=parseInt(r[13])||0;
+    const nombre=(r[5]||'').trim().toUpperCase();
+    const cargo=(r[15]||'').trim().toUpperCase();
+    const dni=r[2]?String(r[2]).replace(/\.0$/,'').trim():'';
+    const un=(r[8]||'').trim().toUpperCase(); // Unidad de Negocio
+    return [nombre,tienda,cargo,area,dni,un]; // 6 elementos: [0-4] como antes + [5]=UN
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// LIVE MODE
+// ═══════════════════════════════════════════════════════════════════
+function showEmbedded(reason){
+  renderAll1(RESP_DATA, NOM_DATA);
+  renderAll2(RESP_DATA2, NOM_DATA);
+  document.getElementById('btn-live').textContent='↻ Refrescar';
+  document.getElementById('btn-live').disabled=false;
+  document.getElementById('upd').textContent=reason;
+  document.getElementById('mode-badge').textContent='Datos embebidos';
+  document.getElementById('mode-badge').style.cssText='background:#faeeda;color:#854f0b';
+  document.getElementById('info-banner').style.display='block';
 }
 
 async function tryLive(){
   const btn=document.getElementById('btn-live');
-  btn.textContent='⏳ Actualizando...'; btn.disabled=true;
+  btn.textContent='⏳ Actualizando...';btn.disabled=true;
 
-  // Timeout de 12 segundos usando Promise.race (más compatible con redirects)
-  const fetchWithTimeout = (url, ms) => {
-    const fetchPromise = fetch(url);
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('timeout')), ms)
-    );
-    return Promise.race([fetchPromise, timeoutPromise]);
+  const fetchT=(url,ms)=>{
+    const fp=fetch(url);
+    const tp=new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),ms));
+    return Promise.race([fp,tp]);
   };
 
   try {
-    const r1 = await fetchWithTimeout(`${API}?gid=${GID_RESP}`, 12000);
-    if(!r1.ok) throw new Error(`HTTP ${r1.status}`);
-    const txt1 = await r1.text();
+    // Fetch nómina, resp1 y resp2 en paralelo
+    const [r1,r2,rN]=await Promise.all([
+      fetchT(`${API}?gid=${GID_RESP1}`,12000),
+      fetchT(`${API}?gid=${GID_RESP2}`,12000),
+      fetchT(`${API}?gid=${GID_NOM}`,12000)
+    ]);
 
-    // Validar que la respuesta parece un CSV real
-    if (!txt1 || txt1.trim().length < 50) throw new Error('Respuesta vacía o inválida');
+    if(!r1.ok||!r2.ok||!rN.ok) throw new Error('HTTP error');
+    const[txt1,txt2,txtN]=await Promise.all([r1.text(),r2.text(),rN.text()]);
+    if(!txt1||txt1.trim().length<50) throw new Error('Respuesta vacía');
 
-    const rawResp = parseCSV(txt1);
-    const resp = rawResp.slice(1).filter(r=>r[0]&&r[2]).map(r => {
-      const rr = [...r];
-      // Normalizar score: "14" → "14 / 20"
-      if (rr[1] && /^\d+$/.test(rr[1].trim())) rr[1] = rr[1].trim() + ' / 20';
-      // El live CSV tiene 18 cols: [0-14]=datos, [15]=DNI, [16]=TIENDA, [17]=AREA
-      // Si solo tiene 17 cols (formato viejo sin DNI): insertar DNI vacío en [15]
-      if (rr.length === 17) {
-        rr.splice(15, 0, ''); // insert empty DNI, tienda queda en [16], area en [17]
-      }
-      // Verificar que la tienda en [16] es válida; si no, buscarla
-      const s16 = (rr[16]||'').toUpperCase().trim();
-      if (!STORES.includes(s16)) {
-        const found = storeCol(rr);
-        if (found) { rr[16] = found; rr[17] = String(STORE_AREA[found]||''); }
-      }
+    // Parse nómina
+    const nomRaw=parseCSV(txtN);
+    const nomLive=parseNomCSV(nomRaw);
+    NOM_LIVE=nomLive;
+
+    // Rebuild NOM_BY_DNI con nómina en vivo
+    Object.keys(NOM_BY_DNI).forEach(k=>delete NOM_BY_DNI[k]);
+    nomLive.forEach(r=>{
+      const dni=(r[4]||'').toString().trim();
+      if(dni) NOM_BY_DNI[dni]={nombre:r[0],cargo:r[2],tienda:r[1],area:+r[3]};
+    });
+    // Rebuild STORE_AREA
+    Object.keys(STORE_AREA).forEach(k=>delete STORE_AREA[k]);
+    nomLive.forEach(r=>{if(r[1]&&r[3])STORE_AREA[r[1].toUpperCase().trim()]=+r[3];});
+    STORE_AREA['FLOTANTES ÁREA 1']=1;
+
+    // Parse resp1
+    const resp1=parseCSV(txt1).slice(1).filter(r=>r[0]&&r[2]).map(r=>{
+      const rr=[...r];
+      if(rr[1]&&/^\d+$/.test(rr[1].trim()))rr[1]=rr[1].trim()+' / 20';
+      if(rr.length===17)rr.splice(15,0,'');
+      const s16=(rr[16]||'').toUpperCase().trim();
+      if(!STORES.includes(s16)){const f=storeCol1(rr);if(f){rr[16]=f;rr[17]=String(STORE_AREA[f]||'');}}
       return rr;
     });
 
-    // Si no se parseó ninguna respuesta válida, usar embebidos
-    if (resp.length < 5) throw new Error('No se encontraron respuestas válidas en el CSV');
+    // Parse resp2 — columnas: [0]fecha [1]score [2]nombre [3]DNI [4]tienda [5]cargo [6-15]Q1-10 [16]AREA
+    const resp2=parseCSV(txt2).slice(1).filter(r=>r[0]&&r[2]).map(r=>{
+      const rr=[...r];
+      if(rr[1]&&/^\d+$/.test(rr[1].trim()))rr[1]=rr[1].trim()+' / 20';
+      return rr;
+    });
 
-    renderAll(resp, NOM_DATA);
+    renderAll1(resp1.length>=1?resp1:RESP_DATA, nomLive);
+    renderAll2(resp2, nomLive);
+
     document.getElementById('upd').textContent='En vivo — '+new Date().toLocaleString('es-AR');
     document.getElementById('mode-badge').textContent='En vivo';
-    document.getElementById('mode-badge').style.background='#e6f1fb';
-    document.getElementById('mode-badge').style.color='#185fa5';
+    document.getElementById('mode-badge').style.cssText='background:#e6f1fb;color:#185fa5';
     document.getElementById('info-banner').style.display='none';
     btn.textContent='✓ Actualizado';
     setTimeout(()=>{btn.textContent='↻ Refrescar';btn.disabled=false;},2000);
 
-  } catch(e) {
-    const reason = e.name === 'AbortError'
-      ? 'Sin respuesta del servidor — mostrando datos del 30/6/2026'
-      : 'Sin conexión — mostrando datos del 30/6/2026';
-    showEmbedded(reason);
+  } catch(e){
+    showEmbedded('Sin conexión — mostrando datos embebidos');
   }
 }
 
-// ── INIT ─────────────────────────────────────────────────────────────
-// Esperar a que el DOM esté listo antes de tocar cualquier elemento
-document.addEventListener('DOMContentLoaded', () => {
-  // Mostrar datos embebidos de inmediato
-  renderAll(RESP_DATA, NOM_DATA);
-  document.getElementById('mode-badge').textContent = 'Actualizando...';
-  // Luego intentar cargar datos en vivo por encima
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  renderAll1(RESP_DATA, NOM_DATA);
+  renderAll2(RESP_DATA2, NOM_DATA);
+  document.getElementById('mode-badge').textContent='Actualizando...';
   tryLive();
 });
 </script>
