@@ -86,7 +86,10 @@
 <div class="hdr">
   <div style="display:flex;align-items:center;gap:14px">
     <div>
-      <h1>Evaluaciones — Farmatodo Argentina</h1>
+      <div style="display:flex;align-items:center;gap:10px">
+        <h1>Estatus de participación - Capacitaciones ARG</h1>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" style="height:20px;border-radius:2px;vertical-align:middle;box-shadow:0 0 0 0.5px rgba(0,0,0,.15)"><rect width="900" height="600" fill="#74acdf"/><rect y="200" width="900" height="200" fill="#fff"/><g transform="translate(450,300)"><circle r="40" fill="#F6B40E" stroke="#843511" stroke-width="3.5"/><g fill="#843511"><path d="M0-58 L4-42 L0-46 L-4-42Z"/><path d="M0 58 L4 42 L0 46 L-4 42Z"/><path d="M-58 0 L-42-4 L-46 0 L-42 4Z"/><path d="M58 0 L42-4 L46 0 L42 4Z"/><path d="M-41-41 L-32-28 L-36-32 L-28-36Z"/><path d="M41-41 L28-36 L32-32 L36-28Z"/><path d="M-41 41 L-28 36 L-32 32 L-36 28Z"/><path d="M41 41 L36 28 L32 32 L28 36Z"/><path d="M-22-55 L-18-39 L-22-44 L-26-39Z"/><path d="M22-55 L26-39 L22-44 L18-39Z"/><path d="M-22 55 L-26 39 L-22 44 L-18 39Z"/><path d="M22 55 L18 39 L22 44 L26 39Z"/><path d="M-55-22 L-39-18 L-44-22 L-39-26Z"/><path d="M55-22 L39-26 L44-22 L39-18Z"/><path d="M-55 22 L-39 26 L-44 22 L-39 18Z"/><path d="M55 22 L39 18 L44 22 L39 26Z"/></g><circle r="28" fill="#F6B40E" stroke="#843511" stroke-width="2"/><ellipse cx="-8" cy="-6" rx="5" ry="6" fill="#843511"/><ellipse cx="8" cy="-6" rx="5" ry="6" fill="#843511"/><path d="M-12 8 Q0 16 12 8" stroke="#843511" stroke-width="2" fill="none"/></g></svg>
+      </div>
       <div class="upd" id="upd">Actualizando datos...</div>
     </div>
     <span class="badge" id="mode-badge" style="background:#faeeda;color:#854f0b">Cargando...</span>
@@ -96,8 +99,8 @@
 
 <!-- MAIN MODULE TABS -->
 <div class="main-tabs">
-  <div class="main-tab on" id="mtab-1" onclick="switchModule(1)">📦 Módulo 1 — Orden y limpieza</div>
-  <div class="main-tab" id="mtab-2" onclick="switchModule(2)">🏪 Módulo 2 — Pilares de la operación</div>
+  <div class="main-tab on" id="mtab-1" onclick="switchModule(1)">Módulo 1 — Orden y limpieza</div>
+  <div class="main-tab" id="mtab-2" onclick="switchModule(2)">Módulo 2 — Pilares de la operación</div>
 </div>
 
 <div class="wrap">
@@ -135,16 +138,22 @@
     <div class="sec">
       <div class="sh" onclick="tog('store1')">
         <h2>Detalle por tienda</h2>
-        <div style="display:flex;align-items:center;gap:10px">
-          <div class="store-search-wrap" onclick="event.stopPropagation()">
-            <span style="color:#bbb;font-size:14px">🔍</span>
-            <input type="text" id="store-search1" placeholder="Buscar tienda..." oninput="filterByStore1(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:140px">
+        <div style="display:flex;align-items:center;gap:8px" onclick="event.stopPropagation()">
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">🏪</span>
+            <input type="text" id="store-search1" placeholder="Buscar tienda..." oninput="filterByStore1(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:120px">
           </div>
-          <span class="chev open" id="ch-store1">▾</span>
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">👤</span>
+            <input type="text" id="collab-search1" placeholder="Nombre o DNI..." oninput="searchCollab1(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:130px">
+            <span id="collab-result1" style="font-size:11px;color:#bbb;white-space:nowrap;margin-left:4px"></span>
+          </div>
+          <span class="chev open" id="ch-store1" onclick="event.stopPropagation();tog('store1')">▾</span>
         </div>
       </div>
       <div class="sb open" id="bd-store1">
         <div style="padding-top:16px">
+          <div id="collab-results1" style="display:none;margin-bottom:14px"></div>
           <table>
             <thead><tr><th style="width:20px"></th><th>Tienda</th><th>Área</th><th>Nómina</th><th>Respondieron</th><th>Participación</th><th>Nota prom.</th><th>% Aprobados</th></tr></thead>
             <tbody id="store-tb"></tbody>
@@ -184,16 +193,22 @@
     <div class="sec">
       <div class="sh" onclick="tog('store2')">
         <h2>Detalle por tienda — Supervisores</h2>
-        <div style="display:flex;align-items:center;gap:10px">
-          <div class="store-search-wrap" onclick="event.stopPropagation()">
-            <span style="color:#bbb;font-size:14px">🔍</span>
-            <input type="text" id="store-search2" placeholder="Buscar tienda..." oninput="filterByStore2(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:140px">
+        <div style="display:flex;align-items:center;gap:8px" onclick="event.stopPropagation()">
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">🏪</span>
+            <input type="text" id="store-search2" placeholder="Buscar tienda..." oninput="filterByStore2(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:120px">
           </div>
-          <span class="chev open" id="ch-store2">▾</span>
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">👤</span>
+            <input type="text" id="collab-search2" placeholder="Nombre o DNI..." oninput="searchCollab2(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:130px">
+            <span id="collab-result2" style="font-size:11px;color:#bbb;white-space:nowrap;margin-left:4px"></span>
+          </div>
+          <span class="chev open" id="ch-store2" onclick="event.stopPropagation();tog('store2')">▾</span>
         </div>
       </div>
       <div class="sb open" id="bd-store2">
         <div style="padding-top:16px">
+          <div id="collab-results2" style="display:none;margin-bottom:14px"></div>
           <table>
             <thead><tr><th style="width:20px"></th><th>Tienda</th><th>Área</th><th>Supervisores</th><th>Respondieron</th><th>Participación</th><th>Nota prom.</th><th>% Aprobados</th></tr></thead>
             <tbody id="store-tb2"></tbody>
@@ -986,7 +1001,7 @@ function renderAll1(rawResp, nom) {
     const fm=rawFecha.match(/(\w{3} \w{3} \d{2} \d{4})|(\d{1,2}\/\d{1,2}\/\d{4})/);
     const fecha=fm?fm[0]:rawFecha.split(' ')[0];
     const nomInfo=NOM_BY_DNI[rDni];
-    peopleByStore[s].push({nombre:nomInfo?nomInfo.nombre:nombre,cargo:nomInfo?nomInfo.cargo:(r[4]||'').trim(),score:score2,fecha,st:'r'});
+    peopleByStore[s].push({nombre:nomInfo?nomInfo.nombre:nombre,cargo:nomInfo?nomInfo.cargo:(r[4]||'').trim(),score:score2,fecha,st:'r',dni:rDni});
   });
   nom.forEach(r=>{
     const s=(r[1]||'').toUpperCase().trim();if(!STORES.includes(s))return;
@@ -994,7 +1009,7 @@ function renderAll1(rawResp, nom) {
     const dniNom=(r[4]||'').toString().trim();
     if(dniNom&&seenDNIs.has(dniNom))return;
     if((seenNorms[s]||[]).some(rn=>sameNorm(normName(nombre),rn)))return;
-    peopleByStore[s].push({nombre,cargo:r[2]||'',score:null,fecha:'—',st:'p'});
+    peopleByStore[s].push({nombre,cargo:r[2]||'',score:null,fecha:'—',st:'p',dni:dniNom});
   });
   G1.peopleByStore=peopleByStore;
 
@@ -1090,7 +1105,7 @@ function renderAll2(rawResp, nom) {
     const fm=rawFecha.match(/(\w{3} \w{3} \d{2} \d{4})|(\d{1,2}\/\d{1,2}\/\d{4})/);
     const fecha=fm?fm[0]:rawFecha.split(' ')[0];
     const nomInfo=NOM_BY_DNI[rDni];
-    peopleByStore2[s].push({nombre:nomInfo?nomInfo.nombre:nombre,cargo:nomInfo?nomInfo.cargo:(r[5]||'').trim(),score:score2,fecha,st:'r'});
+    peopleByStore2[s].push({nombre:nomInfo?nomInfo.nombre:nombre,cargo:nomInfo?nomInfo.cargo:(r[5]||'').trim(),score:score2,fecha,st:'r',dni:rDni});
   });
   nomToUse.forEach(r=>{
     const s=(r[1]||'').toUpperCase().trim();if(!STORES.includes(s))return;
@@ -1099,7 +1114,7 @@ function renderAll2(rawResp, nom) {
     if(dniNom&&seenDNIs2.has(dniNom))return;
     if((seenNorms2[s]||[]).some(rn=>sameNorm(normName(nombre),rn)))return;
     if(!peopleByStore2[s])peopleByStore2[s]=[];
-    peopleByStore2[s].push({nombre,cargo:r[2]||'',score:null,fecha:'—',st:'p'});
+    peopleByStore2[s].push({nombre,cargo:r[2]||'',score:null,fecha:'—',st:'p',dni:dniNom});
   });
   G2.peopleByStore=peopleByStore2;
 
@@ -1420,6 +1435,81 @@ async function tryLive(){
   }
 }
 
+
+// ═══════════════════════════════════════════════════════════════════
+// BUSCADOR GLOBAL DE COLABORADORES
+// ═══════════════════════════════════════════════════════════════════
+function searchCollab(query, G, resultsId, countId) {
+  const q = query.trim();
+  const container = document.getElementById(resultsId);
+  const counter   = document.getElementById(countId);
+  if (!q || q.length < 2) {
+    container.style.display = 'none';
+    container.innerHTML = '';
+    counter.textContent = '';
+    return;
+  }
+  const qNorm = normName(q);
+  const qDni  = q.replace(/\D/g,''); // solo dígitos para búsqueda por DNI
+  const isDniSearch = /^\d+$/.test(q.trim()); // true si el query es solo números
+
+  const matches = [];
+  const seen = new Set();
+  Object.entries(G.peopleByStore).forEach(([store, people]) => {
+    people.forEach(p => {
+      const key = (p.nombre||'') + '||' + store;
+      if (seen.has(key)) return;
+      let match = false;
+      if (isDniSearch) {
+        // Solo buscar por DNI si el query es numérico
+        match = p.dni && p.dni.startsWith(qDni) && qDni.length >= 3;
+      } else {
+        // Buscar por nombre: todas las palabras del query deben aparecer en el nombre
+        const words = qNorm.split(' ').filter(w => w.length > 0);
+        const nombre = normName(p.nombre);
+        match = words.every(w => nombre.includes(w));
+      }
+      if (match) { seen.add(key); matches.push({...p, store}); }
+    });
+  });
+
+  counter.textContent = matches.length ? `${matches.length} resultado${matches.length>1?'s':''}` : 'Sin resultados';
+
+  if (!matches.length) {
+    container.innerHTML = '<div style="font-size:13px;color:#aaa;padding:8px 4px">No se encontraron colaboradores con ese nombre o DNI.</div>';
+    container.style.display = 'block';
+    return;
+  }
+
+  const rows = matches.map(p => {
+    let pill, scStr;
+    if(p.st==='p'){pill='<span class="pill pa">Pendiente</span>';scStr='—';}
+    else if(p.score===null){pill='—';scStr='—';}
+    else if(p.score>=10){pill='<span class="pill pg">Aprobado</span>';scStr=p.score+' / 20';}
+    else{pill='<span class="pill pr">Desaprobado</span>';scStr=p.score+' / 20';}
+    return `<tr>
+      <td style="font-weight:500">${p.nombre}</td>
+      <td style="color:#888;font-size:12px">${p.cargo||'—'}</td>
+      <td style="color:#aaa;font-size:12px">${p.store}</td>
+      <td>${scStr}</td><td>${pill}</td>
+      <td style="color:#bbb;font-size:12px">${p.fecha||'—'}</td>
+    </tr>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div style="background:#fff;border:0.5px solid rgba(0,0,0,.1);border-radius:8px;overflow:hidden">
+      <table style="font-size:12px">
+        <thead><tr>
+          <th>Nombre</th><th>Cargo</th><th>Tienda</th><th>Nota</th><th>Estado</th><th>Fecha</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  container.style.display = 'block';
+}
+
+function searchCollab1(q) { searchCollab(q, G1, 'collab-results1', 'collab-result1'); }
+function searchCollab2(q) { searchCollab(q, G2, 'collab-results2', 'collab-result2'); }
 // ═══════════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════════
