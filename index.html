@@ -1018,7 +1018,7 @@ function parseNomCSV(rows) {
     const dni=r[2]?String(r[2]).replace(/\.0$/,'').trim():'';
     const un=(r[8]||'').trim().toUpperCase(); // Unidad de Negocio
     return [nombre,tienda,cargo,area,dni,un]; // 6 elementos: [0-4] como antes + [5]=UN
-  });
+  }).filter(r=>r[5]!=='EXCLUIR'); // excluir personas marcadas como EXCLUIR en la nómina
 }
 
 // ═══════════════════════════════════════════════════════════════════
