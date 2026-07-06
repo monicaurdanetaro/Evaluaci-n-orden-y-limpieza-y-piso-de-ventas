@@ -105,6 +105,7 @@
   <div class="main-tab" id="mtab-4" onclick="switchModule(4)">Módulo 3 — Inventarios</div>
   <div class="main-tab" id="mtab-3" onclick="switchModule(3)">Asesoría Farmacéutica</div>
   <div class="main-tab" id="mtab-5" onclick="switchModule(5)">Mostrador de farmacia</div>
+  <div class="main-tab" id="mtab-6" onclick="switchModule(6)">5 Conductas de Servicio</div>
 </div>
 
 <div class="wrap">
@@ -422,6 +423,58 @@
           <table>
             <thead><tr><th style="width:20px"></th><th>Tienda</th><th>Área</th><th>APV farmacia</th><th>Asistieron</th><th>Participación</th></tr></thead>
             <tbody id="store-tb5"></tbody>
+          </table>
+          <div class="store-tip">↓ Hacé clic en una tienda para ver el detalle</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ MÓDULO 6 — 5 CONDUCTAS DE SERVICIO ═══════════ -->
+  <div class="tab-panel" id="panel-6">
+    <div class="gbar">
+      <div class="gbar-left">
+        <span class="gbar-label">Filtrar por área:</span>
+        <button class="afbtn on" onclick="setArea6(0,this)">Todas</button>
+        <button class="afbtn" onclick="setArea6(1,this)">Área 1</button>
+        <button class="afbtn" onclick="setArea6(2,this)">Área 2</button>
+        <button class="afbtn" onclick="setArea6(3,this)">Área 3</button>
+      </div>
+    </div>
+    <div class="mgrid" style="grid-template-columns:repeat(2,1fr)">
+      <div class="mc"><div class="ml">APV formados</div><div class="mv blue" id="m6-resp">—</div><div class="ms" id="m6-resp-s"></div></div>
+      <div class="mc"><div class="ml">% Participación</div><div class="mv" id="m6-pct">—</div><div class="ms" id="m6-pct-s"></div></div>
+    </div>
+    <div class="sec">
+      <div class="sh" onclick="tog('area6')"><h2>Participación por área — APV</h2><span class="chev open" id="ch-area6">▾</span></div>
+      <div class="sb open" id="bd-area6">
+        <div class="crow" style="grid-template-columns:1fr">
+          <div><div class="clbl">% Participación por área</div><div style="position:relative;height:200px"><canvas id="cArea6"></canvas></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sh" onclick="tog('store6')">
+        <h2>Detalle por tienda — APV</h2>
+        <div style="display:flex;align-items:center;gap:8px" onclick="event.stopPropagation()">
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">🏪</span>
+            <input type="text" id="store-search6" placeholder="Buscar tienda..." oninput="filterByStore6(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:120px">
+          </div>
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">👤</span>
+            <input type="text" id="collab-search6" placeholder="Nombre o DNI..." oninput="searchCollab6(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:130px">
+            <span id="collab-result6" style="font-size:11px;color:#bbb;white-space:nowrap;margin-left:4px"></span>
+          </div>
+          <span class="chev open" id="ch-store6" onclick="event.stopPropagation();tog('store6')">▾</span>
+        </div>
+      </div>
+      <div class="sb open" id="bd-store6">
+        <div style="padding-top:16px">
+          <div id="collab-results6" style="display:none;margin-bottom:14px"></div>
+          <table>
+            <thead><tr><th style="width:20px"></th><th>Tienda</th><th>Área</th><th>APV</th><th>Asistieron</th><th>Participación</th></tr></thead>
+            <tbody id="store-tb6"></tbody>
           </table>
           <div class="store-tip">↓ Hacé clic en una tienda para ver el detalle</div>
         </div>
@@ -1531,6 +1584,7 @@ function switchModule(n){
   if(n===3 && !cA3) updateMetrics3(ACTIVE_AREA3);
   if(n===4 && !cA4) updateMetrics4(ACTIVE_AREA4);
   if(n===5 && !cA5) updateMetrics5(ACTIVE_AREA5);
+  if(n===6 && !cA6) updateMetrics6(ACTIVE_AREA6);
 }
 
 function tog(id){
@@ -1573,6 +1627,7 @@ function showEmbedded(reason){
   renderAll3([], NOM_DATA);
   renderAll4([], NOM_DATA);
   renderAll5([], NOM_DATA);
+  renderAll6([], NOM_DATA);
   document.getElementById('btn-live').textContent='↻ Refrescar';
   document.getElementById('btn-live').disabled=false;
   document.getElementById('upd').textContent=reason;
@@ -1593,17 +1648,19 @@ async function tryLive(){
 
   try {
     // Fetch nómina, resp1 y resp2 en paralelo
-    const [r1,r2,r3,rN,rA,rM]=await Promise.all([
+    const [r1,r2,r3,rN,rA,rM,rC]=await Promise.all([
       fetchT(`${API}?gid=${GID_RESP1}`,12000),
       fetchT(`${API}?gid=${GID_RESP2}`,12000),
       fetchT(`${API}?gid=${GID_RESP3}`,12000),
       fetchT(`${API}?gid=${GID_NOM}`,12000),
       fetchT(`${API}?gid=${GID_ASIST}`,12000),
-      fetchT(`${API}?gid=${GID_MOST}`,12000)
+      fetchT(`${API}?gid=${GID_MOST}`,12000),
+      fetchT(`${API}?gid=${GID_COND}`,12000)
     ]);
 
-    if(!r1.ok||!r2.ok||!r3.ok||!rN.ok||!rA.ok||!rM.ok) throw new Error('HTTP error');
-    const[txt1,txt2,txt3,txtN,txtA,txtM]=await Promise.all([r1.text(),r2.text(),r3.text(),rN.text(),rA.text(),rM.text()]);
+    if(!r1.ok||!r2.ok||!r3.ok||!rN.ok||!rA.ok||!rM.ok||!rC.ok) throw new Error('HTTP error');
+    const[r1r,r2r,r3r,rNr,rAr,rMr,rCr]=await Promise.all([r1.text(),r2.text(),r3.text(),rN.text(),rA.text(),rM.text(),rC.text()]);
+    const[txt1,txt2,txt3,txtN,txtA,txtM,txtC]=[r1r,r2r,r3r,rNr,rAr,rMr,rCr];
     if(!txt1||txt1.trim().length<50) throw new Error('Respuesta vacía');
 
     // Parse nómina
@@ -1655,6 +1712,10 @@ async function tryLive(){
     // Parse mostrador
     const mostRows=parseMostCSV(parseCSV(txtM));
     renderAll5(mostRows, nomLive);
+
+    // Parse 5 Conductas de Servicio
+    const condRows=parseMostCSV(parseCSV(txtC));
+    renderAll6(condRows, nomLive);
 
     renderAll3(asistRows, nomLive);
     updateResumen();
@@ -1956,6 +2017,121 @@ function applyFilters5(){
   });
 }
 function searchCollab5(q){searchCollab(q,G5,'collab-results5','collab-result5');}
+
+// ═══════════════════════════════════════════════════════════════════
+// MÓDULO 6 — 5 CONDUCTAS DE SERVICIO (APV, solo asistencia)
+// ═══════════════════════════════════════════════════════════════════
+let ACTIVE_AREA6=0, STORE_SEARCH6='';
+let cA6=null;
+let G6={nomByStore:{},rByStore:{},nomByArea:{1:0,2:0,3:0},rByArea:{1:0,2:0,3:0},peopleByStore:{}};
+
+function renderAll6(asistRows, nom){
+  const apvNom=nom.filter(r=>{
+    const un=(r[5]||'').toUpperCase().trim();
+    return un==='APV';
+  });
+  const nomToUse=apvNom.length>0?apvNom:[];
+
+  const nomByStore={},nomByArea={1:0,2:0,3:0};
+  const storesSet=new Set();
+  nomToUse.forEach(r=>{
+    const s=(r[1]||'').toUpperCase().trim();if(!STORES.includes(s))return;
+    storesSet.add(s);
+    nomByStore[s]=(nomByStore[s]||0)+1;
+    const a=+r[3]||0;if(a>=1&&a<=3)nomByArea[a]++;
+  });
+  asistRows.forEach(r=>{const s=r.tienda;if(STORES.includes(s))storesSet.add(s);});
+
+  const rByStore={},rByArea={1:0,2:0,3:0},peopleByStore={};
+  STORES.forEach(s=>{peopleByStore[s]=[];});
+
+  asistRows.forEach(r=>{
+    const s=r.tienda;if(!STORES.includes(s))return;
+    if(!r.asistio)return;
+    rByStore[s]=(rByStore[s]||0)+1;
+    const a=r.area||STORE_AREA[s]||0;
+    if(a>=1&&a<=3)rByArea[a]++;
+    peopleByStore[s].push({nombre:r.nombre,cargo:r.cargo,dni:r.dni,st:'r',fecha:'—'});
+  });
+
+  const asistDNIs=new Set(asistRows.filter(r=>r.asistio).map(r=>r.dni).filter(Boolean));
+  const asistNorms={};
+  asistRows.filter(r=>r.asistio).forEach(r=>{
+    if(!asistNorms[r.tienda])asistNorms[r.tienda]=[];
+    asistNorms[r.tienda].push(normName(r.nombre));
+  });
+  nomToUse.forEach(r=>{
+    const s=(r[1]||'').toUpperCase().trim();if(!STORES.includes(s))return;
+    const dniNom=(r[4]||'').toString().trim();
+    if(dniNom&&asistDNIs.has(dniNom))return;
+    if((asistNorms[s]||[]).some(n=>sameNorm(normName(r[0]),n)))return;
+    peopleByStore[s].push({nombre:r[0],cargo:r[2],dni:dniNom,st:'p',fecha:'—'});
+  });
+
+  G6={nomByStore,rByStore,nomByArea,rByArea,peopleByStore};
+  updateMetrics6(0);
+
+  const aL=['Área 1','Área 2','Área 3'];
+  const aPt=[1,2,3].map(a=>nomByArea[a]>0?Math.round(rByArea[a]/nomByArea[a]*100):0);
+  if(cA6)cA6.destroy();
+  cA6=new Chart(document.getElementById('cArea6'),{type:'bar',plugins:[datalabelPlugin],
+    data:{labels:aL,datasets:[{data:aPt,backgroundColor:['#f4b5d4','#dd3778','#7c0c3c'],borderRadius:5,label:'% Part.',_labelFmt:v=>v+'%'}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},
+      scales:{y:{max:100,ticks:{callback:v=>v+'%',font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
+  });
+
+  const storeList6=[...storesSet].filter(s=>(nomByStore[s]||0)+(rByStore[s]||0)>0).sort((a,b)=>a.localeCompare(b));
+  buildStoreTableAsist('store-tb6', storeList6, G6, 'store6', toggleStore6);
+}
+
+function updateMetrics6(a){
+  const $=id=>document.getElementById(id);
+  let totN,totR;
+  if(!a){totN=Object.values(G6.nomByStore).reduce((x,y)=>x+y,0);totR=Object.values(G6.rByStore).reduce((x,y)=>x+y,0);}
+  else{totN=G6.nomByArea[a]||0;totR=G6.rByArea[a]||0;}
+  const pct=totN>0?Math.round(totR/totN*100):0;
+  $('m6-resp').textContent=totR;$('m6-resp-s').textContent=`de ${totN} APV`;
+  $('m6-pct').textContent=pct+'%';$('m6-pct').className='mv '+(pct>=70?'green':pct>=40?'amber':'red');
+  $('m6-pct-s').textContent=`${totN-totR} pendientes`;
+}
+
+function toggleStore6(store, storeRow){
+  const safeId=store.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'')+'_store6';
+  const prow=document.getElementById('prow-'+safeId);
+  const inner=document.getElementById('pinner-'+safeId);
+  if(!prow)return;
+  if(prow.style.display!=='none'){prow.style.display='none';storeRow.classList.remove('expanded');return;}
+  const people=G6.peopleByStore[store]||[];
+  const resp_count=people.filter(p=>p.st==='r').length;
+  const rows=people.map(p=>{
+    const pill=p.st==='p'?'<span class="pill pa">Pendiente</span>':'<span class="pill pg">Asistió</span>';
+    return `<tr data-result="${p.st==='p'?'pending':'pass'}" data-name="${(p.nombre||'').toLowerCase()}">
+      <td style="font-weight:500">${p.nombre}</td>
+      <td style="color:#888;font-size:12px">${p.cargo}</td>
+      <td>${pill}</td>
+    </tr>`;
+  }).join('');
+  inner.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <span style="font-size:12px;font-weight:500;color:#555">${store} — ${people.length} APV (${resp_count} asistieron)</span>
+      <select onchange="filterInner3('${safeId}',this.value)" style="font-size:12px;padding:4px 8px;border:0.5px solid rgba(0,0,0,.15);border-radius:6px;background:#fff;outline:none">
+        <option value="">Todos</option><option value="pass">Asistieron</option><option value="pending">Pendientes</option>
+      </select>
+    </div>
+    <table><thead><tr><th>Nombre</th><th>Cargo</th><th>Estado</th></tr></thead>
+    <tbody id="pbody-${safeId}">${rows}</tbody></table>`;
+  prow.style.display='';storeRow.classList.add('expanded');
+}
+
+function setArea6(a,btn){ACTIVE_AREA6=a;document.querySelectorAll('#panel-6 .afbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');const el=document.getElementById('store-search6');if(el)el.value='';STORE_SEARCH6='';updateMetrics6(a);applyFilters6();}
+function filterByStore6(val){STORE_SEARCH6=val.trim().toLowerCase();applyFilters6();}
+function applyFilters6(){
+  document.getElementById('store-tb6').querySelectorAll('tr').forEach(tr=>{
+    if(tr.classList.contains('store-row')){const ok=(!ACTIVE_AREA6||tr.dataset.area==ACTIVE_AREA6)&&(!STORE_SEARCH6||tr.dataset.store.toLowerCase().includes(STORE_SEARCH6));tr.style.display=ok?'':'none';}
+    else if(tr.classList.contains('people-row')){const ok=(!ACTIVE_AREA6||tr.dataset.area==ACTIVE_AREA6)&&(!STORE_SEARCH6||(tr.previousElementSibling?.dataset?.store||'').toLowerCase().includes(STORE_SEARCH6));if(!ok){tr.style.display='none';tr.previousElementSibling?.classList.remove('expanded');}}
+  });
+}
+function searchCollab6(q){searchCollab(q,G6,'collab-results6','collab-result6');}
 // ═══════════════════════════════════════════════════════════════════
 // BUSCADOR GLOBAL DE COLABORADORES
 // ═══════════════════════════════════════════════════════════════════
@@ -2161,6 +2337,7 @@ function updateResumen() {
 const GID_ASIST  = '281104057';
 const GID_RESP3  = '489869547';
 const GID_MOST   = '2125432282';
+const GID_COND   = '528961235';
 let ACTIVE_AREA3 = 0, STORE_SEARCH3 = '';
 let cA3 = null;
 let G3 = {nomByStore:{}, rByStore:{}, nomByArea:{1:0,2:0,3:0}, rByArea:{1:0,2:0,3:0}, peopleByStore:{}};
@@ -2376,6 +2553,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   renderAll3([], NOM_DATA);
   renderAll4([], NOM_DATA);
   renderAll5([], NOM_DATA);
+  renderAll6([], NOM_DATA);
   updateResumen();
   document.getElementById('mode-badge').textContent='Actualizando...';
   tryLive();
