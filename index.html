@@ -2045,31 +2045,31 @@ function updateResumen() {
 
   const modules = [
     {
-      nombre: 'Módulo 1 — Orden y limpieza',
+      nombre: 'Módulo 1 — Orden y limpieza', poblacion: 'Toda la tienda',
       nom: Object.values(G1.nomByStore).reduce((a,b)=>a+b,0),
       form: Object.values(G1.rByStore).reduce((a,b)=>a+b,0),
       valid: true
     },
     {
-      nombre: 'Módulo 2 — Pilares de la operación',
+      nombre: 'Módulo 2 — Pilares de la operación', poblacion: 'Supervisores',
       nom: mod2hasSupv ? mod2nom : 0,
       form: Object.values(G2.rByStore).reduce((a,b)=>a+b,0),
       valid: mod2hasSupv
     },
     {
-      nombre: 'Módulo 3 — Inventarios',
+      nombre: 'Módulo 3 — Inventarios', poblacion: 'Supervisores',
       nom: NOM_LIVE!==null ? Object.values(G4.nomByStore).reduce((a,b)=>a+b,0) : 0,
       form: Object.values(G4.rByStore).reduce((a,b)=>a+b,0),
       valid: NOM_LIVE!==null
     },
     {
-      nombre: 'Asesoría Farmacéutica',
+      nombre: 'Asesoría Farmacéutica', poblacion: 'Farmacéuticos',
       nom: mod3hasData ? mod3nom : 0,
       form: Object.values(G3.rByStore).reduce((a,b)=>a+b,0),
       valid: mod3hasData
     },
     {
-      nombre: 'Mostrador de farmacia',
+      nombre: 'Mostrador de farmacia', poblacion: 'APV de farmacia',
       nom: NOM_LIVE!==null ? Object.values(G5.nomByStore).reduce((a,b)=>a+b,0) : 0,
       form: Object.values(G5.rByStore).reduce((a,b)=>a+b,0),
       valid: NOM_LIVE!==null
@@ -2095,7 +2095,7 @@ function updateResumen() {
     const pctColor = pct >= META ? '#3b6d11' : pct >= 50 ? '#854f0b' : '#a32d2d';
 
     return `<tr>
-      <td style="padding:12px 10px;font-weight:500;border-bottom:0.5px solid rgba(0,0,0,.06)">${m.nombre}</td>
+      <td style="padding:12px 10px;border-bottom:0.5px solid rgba(0,0,0,.06)"><div style="font-weight:500">${m.nombre}</div><div style="font-size:11px;color:#aaa;margin-top:2px">${m.poblacion||''}</div></td>
       <td style="padding:12px 10px;text-align:center;border-bottom:0.5px solid rgba(0,0,0,.06);color:#666">${m.valid ? (m.nom || '—') : '<span style=\'color:#ccc\'>Sin conexión</span>'}</td>
       <td style="padding:12px 10px;text-align:center;border-bottom:0.5px solid rgba(0,0,0,.06);color:#666">${m.valid ? (m.form || 0) : '<span style=\'color:#ccc\'>—</span>'}</td>
       <td style="padding:12px 10px;text-align:center;border-bottom:0.5px solid rgba(0,0,0,.06);font-weight:500;color:${pctColor}">${m.valid && m.nom > 0 ? pct+'%' : '—'}</td>
