@@ -1726,7 +1726,7 @@ function updateResumen() {
   const avPct2 = globalPct >= META ? 100 : Math.round(globalPct / META * 100);
   const metaEl = document.getElementById('res-avance-meta');
   if(metaEl) {
-    metaEl.textContent = globalPct >= META ? '✓ 100%' : avPct2 + '%';
+    metaEl.textContent = globalPct >= META ? '✓ 100% — meta alcanzada' : avPct2 + '% de avance respecto a la meta';
     metaEl.style.color = avPct2 >= 100 ? '#3b6d11' : avPct2 >= 60 ? '#854f0b' : '#a32d2d';
     metaEl.style.fontWeight = '600';
     metaEl.style.fontSize = '13px';
