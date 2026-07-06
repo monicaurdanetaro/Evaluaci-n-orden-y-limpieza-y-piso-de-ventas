@@ -102,8 +102,8 @@
   <div class="main-tab on" id="mtab-0" onclick="switchModule(0)">Resumen</div>
   <div class="main-tab" id="mtab-1" onclick="switchModule(1)">Módulo 1 — Orden y limpieza</div>
   <div class="main-tab" id="mtab-2" onclick="switchModule(2)">Módulo 2 — Pilares de la operación</div>
-  <div class="main-tab" id="mtab-3" onclick="switchModule(3)">Asesoría Farmacéutica</div>
   <div class="main-tab" id="mtab-4" onclick="switchModule(4)">Módulo 3 — Inventarios</div>
+  <div class="main-tab" id="mtab-3" onclick="switchModule(3)">Asesoría Farmacéutica</div>
   <div class="main-tab" id="mtab-5" onclick="switchModule(5)">Mostrador de farmacia</div>
 </div>
 
@@ -1852,7 +1852,7 @@ function parseMostCSV(rows){
 }
 
 function renderAll5(asistRows, nom){
-  const apvNom=nom.filter(r=>(r[5]||'').toUpperCase().includes('APV DE FARMACIA'));
+  const apvNom=nom.filter(r=>(r[5]||'').toUpperCase().includes('APV FARMACIA'));
   const nomToUse=apvNom.length>0?apvNom:[];
 
   const nomByStore={},nomByArea={1:0,2:0,3:0};
