@@ -1223,8 +1223,12 @@ function renderAll1(rawResp, nom) {
 
   const rByStore={},sByStore={},rByArea={1:[],2:[],3:[]};
   resp.forEach(r=>{
-    const s=storeCol1(r);if(!STORES.includes(s))return;
-    const a=areaCol1(r),score=sc(r[1]);
+    const dni=dniCol1(r);
+    // Always use nomina store if DNI matches
+    const nomInfo=dni?NOM_BY_DNI[dni]:null;
+    const s=nomInfo?nomInfo.tienda.toUpperCase().trim():storeCol1(r);
+    if(!STORES.includes(s))return;
+    const a=nomInfo?nomInfo.area:(areaCol1(r)||STORE_AREA[s]||0),score=sc(r[1]);
     rByStore[s]=(rByStore[s]||0)+1;
     if(!sByStore[s])sByStore[s]=[];
     if(score!==null)sByStore[s].push(score);
@@ -1252,17 +1256,19 @@ function renderAll1(rawResp, nom) {
   const seen=new Set(),seenNorms={},seenDNIs=new Set(),peopleByStore={};
   STORES.forEach(s=>{peopleByStore[s]=[];});
   resp.forEach(r=>{
-    const s=storeCol1(r);if(!STORES.includes(s))return;
-    const nombre=(r[2]||'').trim(),score2=sc(r[1]);
-    seen.add(normName(nombre)+'||'+s);
-    if(!seenNorms[s])seenNorms[s]=[];
-    seenNorms[s].push(normName(nombre));
     const rDni=dniCol1(r);
+    const nomInfo=rDni?NOM_BY_DNI[rDni]:null;
+    // Use nomina store if DNI found, otherwise form store
+    const s=nomInfo?nomInfo.tienda.toUpperCase().trim():storeCol1(r);
+    if(!STORES.includes(s))return;
+    const nombre=(r[2]||'').trim(),score2=sc(r[1]);
+    seen.add(rDni?rDni+'||'+s:normName(nombre)+'||'+s);
+    if(!seenNorms[s])seenNorms[s]=[];
+    seenNorms[s].push(normName(nomInfo?nomInfo.nombre:nombre));
     if(rDni&&rDni!=='—'&&rDni.length>4)seenDNIs.add(rDni);
     const rawFecha=(r[0]||'');
     const fm=rawFecha.match(/(\w{3} \w{3} \d{2} \d{4})|(\d{1,2}\/\d{1,2}\/\d{4})/);
     const fecha=fm?fm[0]:rawFecha.split(' ')[0];
-    const nomInfo=NOM_BY_DNI[rDni];
     peopleByStore[s].push({nombre:nomInfo?nomInfo.nombre:nombre,cargo:nomInfo?nomInfo.cargo:(r[4]||'').trim(),score:score2,fecha,st:'r',dni:rDni});
   });
   nom.forEach(r=>{
@@ -1328,8 +1334,11 @@ function renderAll2(rawResp, nom) {
 
   const rByStore={},sByStore={},rByArea={1:[],2:[],3:[]};
   resp.forEach(r=>{
-    const s=storeCol2(r);if(!STORES.includes(s))return;
-    const a=areaCol2(r)||STORE_AREA[s]||0,score=sc(r[1]);
+    const dni=dniCol2(r);
+    const nomInfo=dni?NOM_BY_DNI[dni]:null;
+    const s=nomInfo?nomInfo.tienda.toUpperCase().trim():storeCol2(r);
+    if(!STORES.includes(s))return;
+    const a=nomInfo?nomInfo.area:(areaCol2(r)||STORE_AREA[s]||0),score=sc(r[1]);
     rByStore[s]=(rByStore[s]||0)+1;
     if(!sByStore[s])sByStore[s]=[];
     if(score!==null)sByStore[s].push(score);
@@ -1357,17 +1366,19 @@ function renderAll2(rawResp, nom) {
   const seenDNIs2=new Set(),seenNorms2={},peopleByStore2={};
   STORES.forEach(s=>{peopleByStore2[s]=[];});
   resp.forEach(r=>{
-    const s=storeCol2(r);if(!STORES.includes(s))return;
+    const rDni=dniCol2(r);
+    const nomInfo=rDni?NOM_BY_DNI[rDni]:null;
+    const s=nomInfo?nomInfo.tienda.toUpperCase().trim():storeCol2(r);
+    if(!STORES.includes(s))return;
     const nombre=(r[2]||'').trim(),score2=sc(r[1]);
     if(!seenNorms2[s])seenNorms2[s]=[];
-    seenNorms2[s].push(normName(nombre));
-    const rDni=dniCol2(r);
-    if(rDni&&rDni!=='—'&&rDni.length>4)seenDNIs2.add(rDni);
+    seenNorms2[s].push(normName(nomInfo?nomInfo.nombre:nombre));
+    const rDni2=rDni;
+    if(rDni2&&rDni2!=='—'&&rDni2.length>4)seenDNIs2.add(rDni2);
     const rawFecha=(r[0]||'');
     const fm=rawFecha.match(/(\w{3} \w{3} \d{2} \d{4})|(\d{1,2}\/\d{1,2}\/\d{4})/);
     const fecha=fm?fm[0]:rawFecha.split(' ')[0];
-    const nomInfo=NOM_BY_DNI[rDni];
-    peopleByStore2[s].push({nombre:nomInfo?nomInfo.nombre:nombre,cargo:nomInfo?nomInfo.cargo:(r[5]||'').trim(),score:score2,fecha,st:'r',dni:rDni});
+    peopleByStore2[s].push({nombre:nomInfo?nomInfo.nombre:nombre,cargo:nomInfo?nomInfo.cargo:(r[5]||'').trim(),score:score2,fecha,st:'r',dni:rDni2});
   });
   nomToUse.forEach(r=>{
     const s=(r[1]||'').toUpperCase().trim();if(!STORES.includes(s))return;
@@ -1806,8 +1817,11 @@ function renderAll4(rawResp, nom) {
 
   const rByStore={},sByStore={},rByArea={1:[],2:[],3:[]};
   resp.forEach(r=>{
-    const s=storeCol4(r);if(!STORES.includes(s))return;
-    const a=areaCol4(r)||STORE_AREA[s]||0, score=sc(r[1]);
+    const dni=dniCol4(r);
+    const nomInfo=dni?NOM_BY_DNI[dni]:null;
+    const s=nomInfo?nomInfo.tienda.toUpperCase().trim():storeCol4(r);
+    if(!STORES.includes(s))return;
+    const a=nomInfo?nomInfo.area:(areaCol4(r)||STORE_AREA[s]||0),score=sc(r[1]);
     rByStore[s]=(rByStore[s]||0)+1;
     if(!sByStore[s])sByStore[s]=[];
     if(score!==null)sByStore[s].push(score);
@@ -1834,15 +1848,17 @@ function renderAll4(rawResp, nom) {
   const seenDNIs4=new Set(),seenNorms4={},peopleByStore4={};
   STORES.forEach(s=>{peopleByStore4[s]=[];});
   resp.forEach(r=>{
-    const s=storeCol4(r);if(!STORES.includes(s))return;
+    const rDni=dniCol4(r);
+    const nomInfo=rDni?NOM_BY_DNI[rDni]:null;
+    const s=nomInfo?nomInfo.tienda.toUpperCase().trim():storeCol4(r);
+    if(!STORES.includes(s))return;
     const nombre=(r[3]||'').trim(),score2=sc(r[1]);
     if(!seenNorms4[s])seenNorms4[s]=[];
-    seenNorms4[s].push(normName(nombre));
-    const rDni=dniCol4(r);if(rDni&&rDni.length>4)seenDNIs4.add(rDni);
+    seenNorms4[s].push(normName(nomInfo?nomInfo.nombre:nombre));
+    if(rDni&&rDni.length>4)seenDNIs4.add(rDni);
     const rawFecha=(r[0]||'');
     const fm=rawFecha.match(/(\w{3} \w{3} \d{2} \d{4})|(\d{1,2}\/\d{1,2}\/\d{4})/);
     const fecha=fm?fm[0]:rawFecha.split(' ')[0];
-    const nomInfo=NOM_BY_DNI[rDni];
     peopleByStore4[s].push({nombre:nomInfo?nomInfo.nombre:nombre,cargo:nomInfo?nomInfo.cargo:(r[5]||'').trim(),score:score2,fecha,st:'r',dni:rDni});
   });
   nomToUse.forEach(r=>{
