@@ -1135,6 +1135,7 @@ async function tryLive(){
     setTimeout(()=>{btn.textContent='↻ Refrescar';btn.disabled=false;},2000);
 
   } catch(e){
+    console.error('Error cargando datos en vivo:', e);
     showEmbedded('Sin conexión — mostrando datos embebidos');
   }
 }
