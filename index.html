@@ -103,6 +103,8 @@
   <div class="main-tab" id="mtab-1" onclick="switchModule(1)">Módulo 1 — Orden y limpieza</div>
   <div class="main-tab" id="mtab-2" onclick="switchModule(2)">Módulo 2 — Pilares de la operación</div>
   <div class="main-tab" id="mtab-3" onclick="switchModule(3)">Asesoría Farmacéutica</div>
+  <div class="main-tab" id="mtab-4" onclick="switchModule(4)">Módulo 3 — Inventarios</div>
+  <div class="main-tab" id="mtab-5" onclick="switchModule(5)">Mostrador de farmacia</div>
 </div>
 
 <div class="wrap">
@@ -313,6 +315,113 @@
           <table>
             <thead><tr><th style="width:20px"></th><th>Tienda</th><th>Área</th><th>Farmacéuticos</th><th>Asistieron</th><th>Participación</th></tr></thead>
             <tbody id="store-tb3"></tbody>
+          </table>
+          <div class="store-tip">↓ Hacé clic en una tienda para ver el detalle</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ MÓDULO 4 — INVENTARIOS ═══════════ -->
+  <div class="tab-panel" id="panel-4">
+    <div class="gbar">
+      <div class="gbar-left">
+        <span class="gbar-label">Filtrar por área:</span>
+        <button class="afbtn on" onclick="setArea4(0,this)">Todas</button>
+        <button class="afbtn" onclick="setArea4(1,this)">Área 1</button>
+        <button class="afbtn" onclick="setArea4(2,this)">Área 2</button>
+        <button class="afbtn" onclick="setArea4(3,this)">Área 3</button>
+      </div>
+    </div>
+    <div class="mgrid">
+      <div class="mc"><div class="ml">Respuestas totales</div><div class="mv blue" id="m4-resp">—</div><div class="ms" id="m4-resp-s"></div></div>
+      <div class="mc"><div class="ml">% Participación</div><div class="mv" id="m4-pct">—</div><div class="ms" id="m4-pct-s"></div></div>
+      <div class="mc"><div class="ml">Nota promedio</div><div class="mv" id="m4-avg">—</div><div class="ms">sobre 20 puntos</div></div>
+      <div class="mc"><div class="ml">% Aprobados (≥ 10)</div><div class="mv green" id="m4-pass">—</div><div class="ms" id="m4-pass-s"></div></div>
+    </div>
+    <div class="sec">
+      <div class="sh" onclick="tog('area4')"><h2>Participación y resultados por área — Supervisores</h2><span class="chev open" id="ch-area4">▾</span></div>
+      <div class="sb open" id="bd-area4">
+        <div class="crow">
+          <div><div class="clbl">% Participación</div><div style="position:relative;height:200px"><canvas id="cArea4"></canvas></div></div>
+          <div><div class="clbl">Nota promedio</div><div style="position:relative;height:200px"><canvas id="cScore4"></canvas></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sh" onclick="tog('store4')">
+        <h2>Detalle por tienda — Supervisores</h2>
+        <div style="display:flex;align-items:center;gap:8px" onclick="event.stopPropagation()">
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">🏪</span>
+            <input type="text" id="store-search4" placeholder="Buscar tienda..." oninput="filterByStore4(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:120px">
+          </div>
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">👤</span>
+            <input type="text" id="collab-search4" placeholder="Nombre o DNI..." oninput="searchCollab4(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:130px">
+            <span id="collab-result4" style="font-size:11px;color:#bbb;white-space:nowrap;margin-left:4px"></span>
+          </div>
+          <span class="chev open" id="ch-store4" onclick="event.stopPropagation();tog('store4')">▾</span>
+        </div>
+      </div>
+      <div class="sb open" id="bd-store4">
+        <div style="padding-top:16px">
+          <div id="collab-results4" style="display:none;margin-bottom:14px"></div>
+          <table>
+            <thead><tr><th style="width:20px"></th><th>Tienda</th><th>Área</th><th>Supervisores</th><th>Respondieron</th><th>Participación</th><th>Nota prom.</th><th>% Aprobados</th></tr></thead>
+            <tbody id="store-tb4"></tbody>
+          </table>
+          <div class="store-tip">↓ Hacé clic en una tienda para ver el detalle</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ MÓDULO 5 — MOSTRADOR DE FARMACIA ═══════════ -->
+  <div class="tab-panel" id="panel-5">
+    <div class="gbar">
+      <div class="gbar-left">
+        <span class="gbar-label">Filtrar por área:</span>
+        <button class="afbtn on" onclick="setArea5(0,this)">Todas</button>
+        <button class="afbtn" onclick="setArea5(1,this)">Área 1</button>
+        <button class="afbtn" onclick="setArea5(2,this)">Área 2</button>
+        <button class="afbtn" onclick="setArea5(3,this)">Área 3</button>
+      </div>
+    </div>
+    <div class="mgrid" style="grid-template-columns:repeat(2,1fr)">
+      <div class="mc"><div class="ml">APV formados</div><div class="mv blue" id="m5-resp">—</div><div class="ms" id="m5-resp-s"></div></div>
+      <div class="mc"><div class="ml">% Participación</div><div class="mv" id="m5-pct">—</div><div class="ms" id="m5-pct-s"></div></div>
+    </div>
+    <div class="sec">
+      <div class="sh" onclick="tog('area5')"><h2>Participación por área — APV de farmacia</h2><span class="chev open" id="ch-area5">▾</span></div>
+      <div class="sb open" id="bd-area5">
+        <div class="crow" style="grid-template-columns:1fr">
+          <div><div class="clbl">% Participación por área</div><div style="position:relative;height:200px"><canvas id="cArea5"></canvas></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sh" onclick="tog('store5')">
+        <h2>Detalle por tienda — APV de farmacia</h2>
+        <div style="display:flex;align-items:center;gap:8px" onclick="event.stopPropagation()">
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">🏪</span>
+            <input type="text" id="store-search5" placeholder="Buscar tienda..." oninput="filterByStore5(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:120px">
+          </div>
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">👤</span>
+            <input type="text" id="collab-search5" placeholder="Nombre o DNI..." oninput="searchCollab5(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:130px">
+            <span id="collab-result5" style="font-size:11px;color:#bbb;white-space:nowrap;margin-left:4px"></span>
+          </div>
+          <span class="chev open" id="ch-store5" onclick="event.stopPropagation();tog('store5')">▾</span>
+        </div>
+      </div>
+      <div class="sb open" id="bd-store5">
+        <div style="padding-top:16px">
+          <div id="collab-results5" style="display:none;margin-bottom:14px"></div>
+          <table>
+            <thead><tr><th style="width:20px"></th><th>Tienda</th><th>Área</th><th>APV farmacia</th><th>Asistieron</th><th>Participación</th></tr></thead>
+            <tbody id="store-tb5"></tbody>
           </table>
           <div class="store-tip">↓ Hacé clic en una tienda para ver el detalle</div>
         </div>
@@ -1006,11 +1115,11 @@ function areaCol1(r)  { const a=parseInt(r[17])||0; return(a>=1&&a<=3)?a:0; }
 // ── Columnas Formulario 2: [0]fecha [1]score [2]nombre [3]DNI [4]tienda [5]cargo [6-15]Q1-10 [16]AREA ──
 function dniCol2(r)   { return (r[3]||'').toString().trim(); }
 function storeCol2(r) {
-  const s=(r[4]||'').toUpperCase().trim();
+  let s=(r[4]||'').toUpperCase().trim();
+  if(s==='NERES'||s.includes('NERES'))return 'CALLAO';
   if(STORES.includes(s))return s;
-  // normalizar NERES→CALLAO
-  if(s==='NERES')return 'CALLAO';
-  // fallback: buscar por nombre en NOM_BY_DNI
+  const found=STORES.find(st=>s.includes(st)||st.includes(s)||normName(s)===normName(st));
+  if(found)return found;
   const dni=dniCol2(r);
   if(dni&&NOM_BY_DNI[dni])return NOM_BY_DNI[dni].tienda.toUpperCase().trim();
   return s;
@@ -1419,7 +1528,9 @@ function switchModule(n){
   document.getElementById('mtab-'+n).classList.add('on');
   document.getElementById('panel-'+n).classList.add('on');
   if(n===0) updateResumen();
-  if(n===3 && !cA3 && G3.nomByArea) updateMetrics3(ACTIVE_AREA3);
+  if(n===3 && !cA3) updateMetrics3(ACTIVE_AREA3);
+  if(n===4 && !cA4) updateMetrics4(ACTIVE_AREA4);
+  if(n===5 && !cA5) updateMetrics5(ACTIVE_AREA5);
 }
 
 function tog(id){
@@ -1460,6 +1571,8 @@ function showEmbedded(reason){
   renderAll1(RESP_DATA, NOM_DATA);
   renderAll2(RESP_DATA2, NOM_DATA);
   renderAll3([], NOM_DATA);
+  renderAll4([], NOM_DATA);
+  renderAll5([], NOM_DATA);
   document.getElementById('btn-live').textContent='↻ Refrescar';
   document.getElementById('btn-live').disabled=false;
   document.getElementById('upd').textContent=reason;
@@ -1480,15 +1593,17 @@ async function tryLive(){
 
   try {
     // Fetch nómina, resp1 y resp2 en paralelo
-    const [r1,r2,rN,rA]=await Promise.all([
+    const [r1,r2,r3,rN,rA,rM]=await Promise.all([
       fetchT(`${API}?gid=${GID_RESP1}`,12000),
       fetchT(`${API}?gid=${GID_RESP2}`,12000),
+      fetchT(`${API}?gid=${GID_RESP3}`,12000),
       fetchT(`${API}?gid=${GID_NOM}`,12000),
-      fetchT(`${API}?gid=${GID_ASIST}`,12000)
+      fetchT(`${API}?gid=${GID_ASIST}`,12000),
+      fetchT(`${API}?gid=${GID_MOST}`,12000)
     ]);
 
-    if(!r1.ok||!r2.ok||!rN.ok||!rA.ok) throw new Error('HTTP error');
-    const[txt1,txt2,txtN,txtA]=await Promise.all([r1.text(),r2.text(),rN.text(),rA.text()]);
+    if(!r1.ok||!r2.ok||!r3.ok||!rN.ok||!rA.ok||!rM.ok) throw new Error('HTTP error');
+    const[txt1,txt2,txt3,txtN,txtA,txtM]=await Promise.all([r1.text(),r2.text(),r3.text(),rN.text(),rA.text(),rM.text()]);
     if(!txt1||txt1.trim().length<50) throw new Error('Respuesta vacía');
 
     // Parse nómina
@@ -1529,6 +1644,18 @@ async function tryLive(){
 
     // Parse asistencia farmacéutica
     const asistRows = parseAsistCSV(parseCSV(txtA));
+    // Parse resp3 — Inventarios: [0]fecha [1]score [2]DNI [3]nombre [4]tienda [5]cargo [6-15]Q1-10 [16]AREA
+    const resp3=parseCSV(txt3).slice(1).filter(r=>r[0]&&r[3]).map(r=>{
+      const rr=[...r];
+      if(rr[1]&&/^\d+$/.test(rr[1].trim()))rr[1]=rr[1].trim()+' / 20';
+      return rr;
+    });
+    renderAll4(resp3, nomLive);
+
+    // Parse mostrador
+    const mostRows=parseMostCSV(parseCSV(txtM));
+    renderAll5(mostRows, nomLive);
+
     renderAll3(asistRows, nomLive);
     updateResumen();
 
@@ -1545,6 +1672,290 @@ async function tryLive(){
 }
 
 
+
+
+// Generic store table builder for asistencia-only modules (no score)
+function buildStoreTableAsist(tbodyId, storeList, G, prefix, toggleFn) {
+  const tb=document.getElementById(tbodyId);
+  if(!tb) return;
+  tb.innerHTML='';
+  storeList.forEach(s=>{
+    const n=G.nomByStore[s]||0, res=G.rByStore[s]||0;
+    if(n===0&&res===0) return;
+    const pct=n>0?Math.round(res/n*100):0;
+    const area=STORE_AREA[s]||0;
+    const bc=pct>=70?'bg-g':pct>=40?'bg-a':'bg-r';
+    const tr=document.createElement('tr');
+    tr.className='store-row';tr.dataset.area=area;tr.dataset.store=s;
+    tr.onclick=()=>toggleFn(s,tr);
+    tr.innerHTML=`
+      <td><span class="expand-icon">▶</span></td>
+      <td style="font-weight:500">${s}</td>
+      <td><span class="pill pb">Área ${area||'?'}</span></td>
+      <td>${n}</td><td>${res}</td>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <div class="bar"><div class="bf ${bc}" style="width:${Math.min(pct,100)}%"></div></div>
+        <span style="font-size:12px;min-width:28px">${pct}%</span>
+      </div></td>`;
+    tb.appendChild(tr);
+    const pr=document.createElement('tr');
+    const safeId=s.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'')+'_'+prefix;
+    pr.className='people-row';pr.id='prow-'+safeId;pr.style.display='none';pr.dataset.area=area;
+    pr.innerHTML=`<td colspan="6"><div class="people-inner" id="pinner-${safeId}"></div></td>`;
+    tb.appendChild(pr);
+  });
+}
+// ═══════════════════════════════════════════════════════════════════
+// MÓDULO 4 — INVENTARIOS (Supervisores, con nota)
+// ═══════════════════════════════════════════════════════════════════
+let ACTIVE_AREA4=0, STORE_SEARCH4='';
+let cA4=null, cS4=null;
+let G4={nomByStore:{},rByStore:{},sByStore:{},nomByArea:{1:0,2:0,3:0},rByArea:{1:[],2:[],3:[]},peopleByStore:{}};
+
+// Cols: [0]fecha [1]score [2]DNI [3]nombre [4]tienda [5]cargo [6-15]Q1-10 [16]AREA
+function dniCol4(r)   { return (r[2]||'').toString().trim(); }
+function storeCol4(r) {
+  let s=(r[4]||'').toUpperCase().trim();
+  if(s==='NERES'||s==='NERES (VILLA DEL PARQUE 1)')return 'CALLAO';
+  if(STORES.includes(s))return s;
+  // fuzzy: find store that contains or is contained in s
+  const found=STORES.find(st=>s.includes(st)||st.includes(s)||normName(s)===normName(st));
+  if(found)return found;
+  // try NOM_BY_DNI lookup
+  const dni=dniCol4(r);
+  if(dni&&NOM_BY_DNI[dni])return NOM_BY_DNI[dni].tienda.toUpperCase().trim();
+  return '';
+}
+function areaCol4(r)  { const a=parseInt(r[16])||0; return(a>=1&&a<=3)?a:0; }
+
+function renderAll4(rawResp, nom) {
+  const supNom = nom.filter(r=>(r[5]||'').toUpperCase().includes('SUPERVISOR'));
+  const nomToUse = supNom.length>0?supNom:[];
+  const resp = dedup(rawResp, dniCol4, storeCol4);
+
+  const nomByStore={},nomByArea={1:0,2:0,3:0},storesWithSup=new Set();
+  nomToUse.forEach(r=>{
+    const s=(r[1]||'').toUpperCase().trim();if(!STORES.includes(s))return;
+    storesWithSup.add(s);
+    nomByStore[s]=(nomByStore[s]||0)+1;
+    const a=+r[3]||0;if(a>=1&&a<=3)nomByArea[a]++;
+  });
+  // If no nom data yet, still show stores from responses
+  resp.forEach(r=>{const s=storeCol4(r);if(STORES.includes(s))storesWithSup.add(s);});
+
+  const rByStore={},sByStore={},rByArea={1:[],2:[],3:[]};
+  resp.forEach(r=>{
+    const s=storeCol4(r);if(!STORES.includes(s))return;
+    const a=areaCol4(r)||STORE_AREA[s]||0, score=sc(r[1]);
+    rByStore[s]=(rByStore[s]||0)+1;
+    if(!sByStore[s])sByStore[s]=[];
+    if(score!==null)sByStore[s].push(score);
+    if(a>=1&&a<=3)rByArea[a].push(score);
+  });
+
+  G4={nomByStore,rByStore,sByStore,nomByArea,rByArea,peopleByStore:{}};
+  updateMetrics4(0);
+
+  const aL=['Área 1','Área 2','Área 3'];
+  const aPt=[1,2,3].map(a=>nomByArea[a]>0?Math.round(rByArea[a].length/nomByArea[a]*100):0);
+  const aAv=[1,2,3].map(a=>{const s=rByArea[a].filter(x=>x!==null);return s.length?parseFloat((s.reduce((x,y)=>x+y,0)/s.length).toFixed(1)):0;});
+
+  if(cA4)cA4.destroy();if(cS4)cS4.destroy();
+  cA4=new Chart(document.getElementById('cArea4'),{type:'bar',plugins:[datalabelPlugin],
+    data:{labels:aL,datasets:[{data:aPt,backgroundColor:['#d4b5f4','#7837dd','#3c0c7c'],borderRadius:5,label:'% Part.',_labelFmt:v=>v+'%'}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:{y:{max:100,ticks:{callback:v=>v+'%',font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
+  });
+  cS4=new Chart(document.getElementById('cScore4'),{type:'bar',plugins:[datalabelPlugin],
+    data:{labels:aL,datasets:[{data:aAv,backgroundColor:aAv.map(v=>v>=14?'#97c459':v>=10?'#ef9f27':'#f09595'),borderRadius:5,label:'Nota prom.',_labelFmt:v=>v+' pts'}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:{y:{max:20,ticks:{font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
+  });
+
+  const seenDNIs4=new Set(),seenNorms4={},peopleByStore4={};
+  STORES.forEach(s=>{peopleByStore4[s]=[];});
+  resp.forEach(r=>{
+    const s=storeCol4(r);if(!STORES.includes(s))return;
+    const nombre=(r[3]||'').trim(),score2=sc(r[1]);
+    if(!seenNorms4[s])seenNorms4[s]=[];
+    seenNorms4[s].push(normName(nombre));
+    const rDni=dniCol4(r);if(rDni&&rDni.length>4)seenDNIs4.add(rDni);
+    const rawFecha=(r[0]||'');
+    const fm=rawFecha.match(/(\w{3} \w{3} \d{2} \d{4})|(\d{1,2}\/\d{1,2}\/\d{4})/);
+    const fecha=fm?fm[0]:rawFecha.split(' ')[0];
+    const nomInfo=NOM_BY_DNI[rDni];
+    peopleByStore4[s].push({nombre:nomInfo?nomInfo.nombre:nombre,cargo:nomInfo?nomInfo.cargo:(r[5]||'').trim(),score:score2,fecha,st:'r',dni:rDni});
+  });
+  nomToUse.forEach(r=>{
+    const s=(r[1]||'').toUpperCase().trim();if(!STORES.includes(s))return;
+    const nombre=(r[0]||'').trim();if(!nombre)return;
+    const dniNom=(r[4]||'').toString().trim();
+    if(dniNom&&seenDNIs4.has(dniNom))return;
+    if((seenNorms4[s]||[]).some(rn=>sameNorm(normName(nombre),rn)))return;
+    peopleByStore4[s].push({nombre,cargo:r[2]||'',score:null,fecha:'—',st:'p',dni:dniNom});
+  });
+  G4.peopleByStore=peopleByStore4;
+
+  const storeList4=[...storesWithSup].sort((a,b)=>a.localeCompare(b));
+  buildStoreTable('store-tb4', storeList4, G4, 'store4', (s,tr,G,p)=>storeToggle1(s,tr,G,p));
+}
+
+function updateMetrics4(a){
+  const $=id=>document.getElementById(id);
+  let totN,totR,allSc;
+  if(!a){totN=Object.values(G4.nomByStore).reduce((x,y)=>x+y,0);totR=Object.values(G4.rByStore).reduce((x,y)=>x+y,0);allSc=Object.values(G4.sByStore).flat();}
+  else{totN=G4.nomByArea[a]||0;totR=(G4.rByArea[a]||[]).length;allSc=(G4.rByArea[a]||[]).filter(x=>x!==null);}
+  const avgSc=allSc.length?(allSc.reduce((x,y)=>x+y,0)/allSc.length):null;
+  const passed=allSc.filter(s=>s>=10).length;
+  const pctP=totN>0?Math.round(totR/totN*100):0;
+  const pctPas=allSc.length?Math.round(passed/allSc.length*100):0;
+  $('m4-resp').textContent=totR;$('m4-resp-s').textContent=`de ${totN} supervisores`;
+  $('m4-pct').textContent=pctP+'%';$('m4-pct').className='mv '+(pctP>=70?'green':pctP>=40?'amber':'red');
+  $('m4-pct-s').textContent=`${totN-totR} pendientes`;
+  $('m4-avg').textContent=avgSc!==null?avgSc.toFixed(1):'—';$('m4-avg').className='mv '+(avgSc!==null&&avgSc>=10?'green':'amber');
+  $('m4-pass').textContent=pctPas+'%';$('m4-pass-s').textContent=`${passed} de ${allSc.length} respondieron`;
+}
+function setArea4(a,btn){ACTIVE_AREA4=a;document.querySelectorAll('#panel-4 .afbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');const el=document.getElementById('store-search4');if(el)el.value='';STORE_SEARCH4='';updateMetrics4(a);applyFilters4();}
+function filterByStore4(val){STORE_SEARCH4=val.trim().toLowerCase();applyFilters4();}
+function applyFilters4(){
+  document.getElementById('store-tb4').querySelectorAll('tr').forEach(tr=>{
+    if(tr.classList.contains('store-row')){const ok=(!ACTIVE_AREA4||tr.dataset.area==ACTIVE_AREA4)&&(!STORE_SEARCH4||tr.dataset.store.toLowerCase().includes(STORE_SEARCH4));tr.style.display=ok?'':'none';}
+    else if(tr.classList.contains('people-row')){const ok=(!ACTIVE_AREA4||tr.dataset.area==ACTIVE_AREA4)&&(!STORE_SEARCH4||(tr.previousElementSibling?.dataset?.store||'').toLowerCase().includes(STORE_SEARCH4));if(!ok){tr.style.display='none';tr.previousElementSibling?.classList.remove('expanded');}}
+  });
+}
+function searchCollab4(q){searchCollab(q,G4,'collab-results4','collab-result4');}
+
+// ═══════════════════════════════════════════════════════════════════
+// MÓDULO 5 — MOSTRADOR DE FARMACIA (APV de farmacia, solo asistencia)
+// ═══════════════════════════════════════════════════════════════════
+let ACTIVE_AREA5=0, STORE_SEARCH5='';
+let cA5=null;
+let G5={nomByStore:{},rByStore:{},nomByArea:{1:0,2:0,3:0},rByArea:{1:0,2:0,3:0},peopleByStore:{}};
+
+// Cols: [0]CUIL [1]DNI [2]Apellido [3]Nombre [4]NombreApellido [5]ÁREA [6]Tienda [7]CARGO [8]CAPACITACION [9]OBSERVACION
+function parseMostCSV(rows){
+  return rows.slice(1).filter(r=>r[4]&&r[6]).map(r=>{
+    let tienda=(r[6]||'').trim().toUpperCase();
+    if(tienda==='NERES'||tienda.includes('NERES'))tienda='CALLAO';
+    // fuzzy match to STORES
+    if(!STORES.includes(tienda)){
+      const found=STORES.find(st=>tienda.includes(st)||st.includes(tienda)||normName(tienda)===normName(st));
+      if(found)tienda=found;
+    }
+    return {
+      nombre:(r[4]||'').trim().toUpperCase(),
+      dni:(r[1]||'').toString().replace(/\.0$/,'').trim(),
+      tienda,
+      area:parseInt(r[5])||0,
+      cargo:(r[7]||'').trim().toUpperCase(),
+      asistio:(r[8]||'').toString().trim().toUpperCase()==='SI'
+    };
+  });
+}
+
+function renderAll5(asistRows, nom){
+  const apvNom=nom.filter(r=>(r[5]||'').toUpperCase().includes('APV DE FARMACIA'));
+  const nomToUse=apvNom.length>0?apvNom:[];
+
+  const nomByStore={},nomByArea={1:0,2:0,3:0};
+  const storesSet=new Set();
+  nomToUse.forEach(r=>{
+    const s=(r[1]||'').toUpperCase().trim();if(!STORES.includes(s))return;
+    storesSet.add(s);
+    nomByStore[s]=(nomByStore[s]||0)+1;
+    const a=+r[3]||0;if(a>=1&&a<=3)nomByArea[a]++;
+  });
+
+  asistRows.forEach(r=>{const s=r.tienda;if(STORES.includes(s))storesSet.add(s);});
+
+  const rByStore={},rByArea={1:0,2:0,3:0},peopleByStore={};
+  STORES.forEach(s=>{peopleByStore[s]=[];});
+
+  // Also count stores even when asistio=false to show pendientes
+  asistRows.forEach(r=>{const s=r.tienda;if(STORES.includes(s))storesSet.add(s);});
+
+  asistRows.forEach(r=>{
+    const s=r.tienda;if(!STORES.includes(s))return;
+    if(!r.asistio)return;
+    rByStore[s]=(rByStore[s]||0)+1;
+    const a=r.area||STORE_AREA[s]||0;
+    if(a>=1&&a<=3)rByArea[a]++;
+    peopleByStore[s].push({nombre:r.nombre,cargo:r.cargo,dni:r.dni,st:'r',fecha:'—'});
+  });
+
+  const asistDNIs=new Set(asistRows.filter(r=>r.asistio).map(r=>r.dni).filter(Boolean));
+  const asistNorms={};
+  asistRows.filter(r=>r.asistio).forEach(r=>{if(!asistNorms[r.tienda])asistNorms[r.tienda]=[];asistNorms[r.tienda].push(normName(r.nombre));});
+  nomToUse.forEach(r=>{
+    const s=(r[1]||'').toUpperCase().trim();if(!STORES.includes(s))return;
+    const dniNom=(r[4]||'').toString().trim();
+    if(dniNom&&asistDNIs.has(dniNom))return;
+    if((asistNorms[s]||[]).some(n=>sameNorm(normName(r[0]),n)))return;
+    peopleByStore[s].push({nombre:r[0],cargo:r[2],dni:dniNom,st:'p',fecha:'—'});
+  });
+
+  G5={nomByStore,rByStore,nomByArea,rByArea,peopleByStore};
+  updateMetrics5(0);
+
+  const aL=['Área 1','Área 2','Área 3'];
+  const aPt=[1,2,3].map(a=>nomByArea[a]>0?Math.round(rByArea[a]/nomByArea[a]*100):0);
+  if(cA5)cA5.destroy();
+  cA5=new Chart(document.getElementById('cArea5'),{type:'bar',plugins:[datalabelPlugin],
+    data:{labels:aL,datasets:[{data:aPt,backgroundColor:['#f4e4b5','#ddad37','#7c5c0c'],borderRadius:5,label:'% Part.',_labelFmt:v=>v+'%'}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},
+      scales:{y:{max:100,ticks:{callback:v=>v+'%',font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
+  });
+
+  const storeList5=[...storesSet].filter(s=>(nomByStore[s]||0)+(rByStore[s]||0)>0).sort((a,b)=>a.localeCompare(b));
+  buildStoreTableAsist('store-tb5', storeList5, G5, 'store5', toggleStore5);
+}
+
+function updateMetrics5(a){
+  const $=id=>document.getElementById(id);
+  let totN,totR;
+  if(!a){totN=Object.values(G5.nomByStore).reduce((x,y)=>x+y,0);totR=Object.values(G5.rByStore).reduce((x,y)=>x+y,0);}
+  else{totN=G5.nomByArea[a]||0;totR=G5.rByArea[a]||0;}
+  const pct=totN>0?Math.round(totR/totN*100):0;
+  $('m5-resp').textContent=totR;$('m5-resp-s').textContent=`de ${totN} APV de farmacia`;
+  $('m5-pct').textContent=pct+'%';$('m5-pct').className='mv '+(pct>=70?'green':pct>=40?'amber':'red');
+  $('m5-pct-s').textContent=`${totN-totR} pendientes`;
+}
+
+function toggleStore5(store,storeRow){
+  const safeId=store.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'')+'_store5';
+  const prow=document.getElementById('prow-'+safeId);
+  const inner=document.getElementById('pinner-'+safeId);
+  if(!prow)return;
+  if(prow.style.display!=='none'){prow.style.display='none';storeRow.classList.remove('expanded');return;}
+  const people=G5.peopleByStore[store]||[];
+  const resp_count=people.filter(p=>p.st==='r').length;
+  const rows=people.map(p=>{
+    const pill=p.st==='p'?'<span class="pill pa">Pendiente</span>':'<span class="pill pg">Asistió</span>';
+    return `<tr data-result="${p.st==='p'?'pending':'pass'}" data-name="${(p.nombre||'').toLowerCase()}">
+      <td style="font-weight:500">${p.nombre}</td>
+      <td style="color:#888;font-size:12px">${p.cargo}</td>
+      <td>${pill}</td>
+    </tr>`;
+  }).join('');
+  inner.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <span style="font-size:12px;font-weight:500;color:#555">${store} — ${people.length} APV (${resp_count} asistieron)</span>
+      <select onchange="filterInner3('${safeId}',this.value)" style="font-size:12px;padding:4px 8px;border:0.5px solid rgba(0,0,0,.15);border-radius:6px;background:#fff;outline:none">
+        <option value="">Todos</option><option value="pass">Asistieron</option><option value="pending">Pendientes</option>
+      </select>
+    </div>
+    <table><thead><tr><th>Nombre</th><th>Cargo</th><th>Estado</th></tr></thead>
+    <tbody id="pbody-${safeId}">${rows}</tbody></table>`;
+  prow.style.display='';storeRow.classList.add('expanded');
+}
+
+function setArea5(a,btn){ACTIVE_AREA5=a;document.querySelectorAll('#panel-5 .afbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');const el=document.getElementById('store-search5');if(el)el.value='';STORE_SEARCH5='';updateMetrics5(a);applyFilters5();}
+function filterByStore5(val){STORE_SEARCH5=val.trim().toLowerCase();applyFilters5();}
+function applyFilters5(){
+  document.getElementById('store-tb5').querySelectorAll('tr').forEach(tr=>{
+    if(tr.classList.contains('store-row')){const ok=(!ACTIVE_AREA5||tr.dataset.area==ACTIVE_AREA5)&&(!STORE_SEARCH5||tr.dataset.store.toLowerCase().includes(STORE_SEARCH5));tr.style.display=ok?'':'none';}
+    else if(tr.classList.contains('people-row')){const ok=(!ACTIVE_AREA5||tr.dataset.area==ACTIVE_AREA5)&&(!STORE_SEARCH5||(tr.previousElementSibling?.dataset?.store||'').toLowerCase().includes(STORE_SEARCH5));if(!ok){tr.style.display='none';tr.previousElementSibling?.classList.remove('expanded');}}
+  });
+}
+function searchCollab5(q){searchCollab(q,G5,'collab-results5','collab-result5');}
 // ═══════════════════════════════════════════════════════════════════
 // BUSCADOR GLOBAL DE COLABORADORES
 // ═══════════════════════════════════════════════════════════════════
@@ -1650,6 +2061,18 @@ function updateResumen() {
       nom: mod3hasData ? mod3nom : 0,
       form: Object.values(G3.rByStore).reduce((a,b)=>a+b,0),
       valid: mod3hasData
+    },
+    {
+      nombre: 'Módulo 3 — Inventarios',
+      nom: NOM_LIVE!==null ? Object.values(G4.nomByStore).reduce((a,b)=>a+b,0) : 0,
+      form: Object.values(G4.rByStore).reduce((a,b)=>a+b,0),
+      valid: NOM_LIVE!==null
+    },
+    {
+      nombre: 'Mostrador de farmacia',
+      nom: NOM_LIVE!==null ? Object.values(G5.nomByStore).reduce((a,b)=>a+b,0) : 0,
+      form: Object.values(G5.rByStore).reduce((a,b)=>a+b,0),
+      valid: NOM_LIVE!==null
     }
   ];
 
@@ -1735,7 +2158,9 @@ function updateResumen() {
 // ═══════════════════════════════════════════════════════════════════
 // MÓDULO 3 — ASESORÍA FARMACÉUTICA
 // ═══════════════════════════════════════════════════════════════════
-const GID_ASIST = '281104057';
+const GID_ASIST  = '281104057';
+const GID_RESP3  = '489869547';
+const GID_MOST   = '2125432282';
 let ACTIVE_AREA3 = 0, STORE_SEARCH3 = '';
 let cA3 = null;
 let G3 = {nomByStore:{}, rByStore:{}, nomByArea:{1:0,2:0,3:0}, rByArea:{1:0,2:0,3:0}, peopleByStore:{}};
@@ -1743,14 +2168,22 @@ let G3 = {nomByStore:{}, rByStore:{}, nomByArea:{1:0,2:0,3:0}, rByArea:{1:0,2:0,
 // Parse hoja Asistencia: fila 1 = header, datos desde fila 2
 // cols: [0]CUIL [1]DNI [2]Apellido [3]Nombre [4]NombreApellido [5]AREA [6]Tienda [7]Cargo [8]APACITACION
 function parseAsistCSV(rows) {
-  return rows.slice(1).filter(r => r[4] && r[6]).map(r => ({
-    nombre: (r[4]||'').trim().toUpperCase(),
-    dni:    (r[1]||'').toString().replace(/\.0$/,'').trim(),
-    tienda: (r[6]||'').trim().toUpperCase().replace('NERES','CALLAO'),
-    area:   parseInt(r[5])||0,
-    cargo:  (r[7]||'').trim().toUpperCase(),
-    asistio:(r[8]||'').toString().trim().toUpperCase() === 'SI'
-  }));
+  return rows.slice(1).filter(r => r[4] && r[6]).map(r => {
+    let tienda=(r[6]||'').trim().toUpperCase();
+    if(tienda==='NERES'||tienda.includes('NERES'))tienda='CALLAO';
+    if(!STORES.includes(tienda)){
+      const found=STORES.find(st=>tienda.includes(st)||st.includes(tienda)||normName(tienda)===normName(st));
+      if(found)tienda=found;
+    }
+    return {
+      nombre: (r[4]||'').trim().toUpperCase(),
+      dni:    (r[1]||'').toString().replace(/\.0$/,'').trim(),
+      tienda,
+      area:   parseInt(r[5])||0,
+      cargo:  (r[7]||'').trim().toUpperCase(),
+      asistio:(r[8]||'').toString().trim().toUpperCase() === 'SI'
+    };
+  });
 }
 
 function renderAll3(asistRows, nom) {
@@ -1941,6 +2374,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   renderAll2(RESP_DATA2, NOM_DATA);
   renderAll3([], NOM_DATA);
   renderAll3([], NOM_DATA);
+  renderAll4([], NOM_DATA);
+  renderAll5([], NOM_DATA);
   updateResumen();
   document.getElementById('mode-badge').textContent='Actualizando...';
   tryLive();
