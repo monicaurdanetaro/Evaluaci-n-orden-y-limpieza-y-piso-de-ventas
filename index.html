@@ -1399,6 +1399,34 @@ function updateMetrics5(a){
   $('m5-pass-s').textContent=`${passed} de ${allSc?allSc.length:0} respondieron`;
 }
 
+function toggleStore5(store, storeRow){
+  const safeId=store.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'')+'_store5';
+  const prow=document.getElementById('prow-'+safeId);
+  const inner=document.getElementById('pinner-'+safeId);
+  if(!prow)return;
+  if(prow.style.display!=='none'){prow.style.display='none';storeRow.classList.remove('expanded');return;}
+  const people=G5.peopleByStore[store]||[];
+  const resp_count=people.filter(p=>p.st==='r').length;
+  const rows=people.map(p=>{
+    const pill=p.st==='p'?'<span class="pill pa">Pendiente</span>':'<span class="pill pg">Asistió</span>';
+    return `<tr data-result="${p.st==='p'?'pending':'pass'}" data-name="${(p.nombre||'').toLowerCase()}">
+      <td style="font-weight:500">${p.nombre}</td>
+      <td style="color:#888;font-size:12px">${p.cargo}</td>
+      <td>${pill}</td>
+    </tr>`;
+  }).join('');
+  inner.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <span style="font-size:12px;font-weight:500;color:#555">${store} — ${people.length} APV de farmacia (${resp_count} asistieron)</span>
+      <select onchange="filterInner3('${safeId}',this.value)" style="font-size:12px;padding:4px 8px;border:0.5px solid rgba(0,0,0,.15);border-radius:6px;background:#fff;outline:none">
+        <option value="">Todos</option><option value="pass">Asistieron</option><option value="pending">Pendientes</option>
+      </select>
+    </div>
+    <table><thead><tr><th>Nombre</th><th>Cargo</th><th>Estado</th></tr></thead>
+    <tbody id="pbody-${safeId}">${rows}</tbody></table>`;
+  prow.style.display='';storeRow.classList.add('expanded');
+}
+
 // toggleStore5 replaced by storeToggle1
 
 function setArea5(a,btn){ACTIVE_AREA5=a;document.querySelectorAll('#panel-5 .afbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');const el=document.getElementById('store-search5');if(el)el.value='';STORE_SEARCH5='';updateMetrics5(a);applyFilters5();}
