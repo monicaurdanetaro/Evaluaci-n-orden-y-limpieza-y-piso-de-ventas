@@ -101,6 +101,7 @@
 <div class="main-tabs">
   <div class="main-tab on" id="mtab-1" onclick="switchModule(1)">Módulo 1 — Orden y limpieza</div>
   <div class="main-tab" id="mtab-2" onclick="switchModule(2)">Módulo 2 — Pilares de la operación</div>
+  <div class="main-tab" id="mtab-3" onclick="switchModule(3)">Asesoría Farmacéutica</div>
 </div>
 
 <div class="wrap">
@@ -219,6 +220,58 @@
     </div>
   </div>
 
+
+  <!-- ═══════════ MÓDULO 3 — ASESORÍA FARMACÉUTICA ═══════════ -->
+  <div class="tab-panel" id="panel-3">
+    <div class="gbar">
+      <div class="gbar-left">
+        <span class="gbar-label">Filtrar por área:</span>
+        <button class="afbtn on" onclick="setArea3(0,this)">Todas</button>
+        <button class="afbtn" onclick="setArea3(1,this)">Área 1</button>
+        <button class="afbtn" onclick="setArea3(2,this)">Área 2</button>
+        <button class="afbtn" onclick="setArea3(3,this)">Área 3</button>
+      </div>
+    </div>
+    <div class="mgrid" style="grid-template-columns:repeat(2,1fr)">
+      <div class="mc"><div class="ml">Farmacéuticos formados</div><div class="mv blue" id="m3-resp">—</div><div class="ms" id="m3-resp-s"></div></div>
+      <div class="mc"><div class="ml">% Participación</div><div class="mv" id="m3-pct">—</div><div class="ms" id="m3-pct-s"></div></div>
+    </div>
+    <div class="sec">
+      <div class="sh" onclick="tog('area3')"><h2>Participación por área</h2><span class="chev open" id="ch-area3">▾</span></div>
+      <div class="sb open" id="bd-area3">
+        <div class="crow" style="grid-template-columns:1fr">
+          <div><div class="clbl">% Participación por área</div><div style="position:relative;height:200px"><canvas id="cArea3"></canvas></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sh" onclick="tog('store3')">
+        <h2>Detalle por tienda — Farmacéuticos</h2>
+        <div style="display:flex;align-items:center;gap:8px" onclick="event.stopPropagation()">
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">🏪</span>
+            <input type="text" id="store-search3" placeholder="Buscar tienda..." oninput="filterByStore3(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:120px">
+          </div>
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">👤</span>
+            <input type="text" id="collab-search3" placeholder="Nombre o DNI..." oninput="searchCollab3(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:130px">
+            <span id="collab-result3" style="font-size:11px;color:#bbb;white-space:nowrap;margin-left:4px"></span>
+          </div>
+          <span class="chev open" id="ch-store3" onclick="event.stopPropagation();tog('store3')">▾</span>
+        </div>
+      </div>
+      <div class="sb open" id="bd-store3">
+        <div style="padding-top:16px">
+          <div id="collab-results3" style="display:none;margin-bottom:14px"></div>
+          <table>
+            <thead><tr><th style="width:20px"></th><th>Tienda</th><th>Área</th><th>Farmacéuticos</th><th>Asistieron</th><th>Participación</th></tr></thead>
+            <tbody id="store-tb3"></tbody>
+          </table>
+          <div class="store-tip">↓ Hacé clic en una tienda para ver el detalle</div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div><!-- end wrap -->
 
 <script>
@@ -1318,6 +1371,8 @@ function switchModule(n){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('on'));
   document.getElementById('mtab-'+n).classList.add('on');
   document.getElementById('panel-'+n).classList.add('on');
+  // Init mod3 chart if switching to it for first time
+  if(n===3 && !cA3 && G3.nomByArea) updateMetrics3(ACTIVE_AREA3);
 }
 
 function tog(id){
@@ -1357,6 +1412,7 @@ function parseNomCSV(rows) {
 function showEmbedded(reason){
   renderAll1(RESP_DATA, NOM_DATA);
   renderAll2(RESP_DATA2, NOM_DATA);
+  renderAll3([], NOM_DATA);
   document.getElementById('btn-live').textContent='↻ Refrescar';
   document.getElementById('btn-live').disabled=false;
   document.getElementById('upd').textContent=reason;
@@ -1377,14 +1433,15 @@ async function tryLive(){
 
   try {
     // Fetch nómina, resp1 y resp2 en paralelo
-    const [r1,r2,rN]=await Promise.all([
+    const [r1,r2,rN,rA]=await Promise.all([
       fetchT(`${API}?gid=${GID_RESP1}`,12000),
       fetchT(`${API}?gid=${GID_RESP2}`,12000),
-      fetchT(`${API}?gid=${GID_NOM}`,12000)
+      fetchT(`${API}?gid=${GID_NOM}`,12000),
+      fetchT(`${API}?gid=${GID_ASIST}`,12000)
     ]);
 
-    if(!r1.ok||!r2.ok||!rN.ok) throw new Error('HTTP error');
-    const[txt1,txt2,txtN]=await Promise.all([r1.text(),r2.text(),rN.text()]);
+    if(!r1.ok||!r2.ok||!rN.ok||!rA.ok) throw new Error('HTTP error');
+    const[txt1,txt2,txtN,txtA]=await Promise.all([r1.text(),r2.text(),rN.text(),rA.text()]);
     if(!txt1||txt1.trim().length<50) throw new Error('Respuesta vacía');
 
     // Parse nómina
@@ -1422,6 +1479,10 @@ async function tryLive(){
 
     renderAll1(resp1.length>=1?resp1:RESP_DATA, nomLive);
     renderAll2(resp2, nomLive);
+
+    // Parse asistencia farmacéutica
+    const asistRows = parseAsistCSV(parseCSV(txtA));
+    renderAll3(asistRows, nomLive);
 
     document.getElementById('upd').textContent='En vivo — '+new Date().toLocaleString('es-AR');
     document.getElementById('mode-badge').textContent='En vivo';
@@ -1510,12 +1571,216 @@ function searchCollab(query, G, resultsId, countId) {
 
 function searchCollab1(q) { searchCollab(q, G1, 'collab-results1', 'collab-result1'); }
 function searchCollab2(q) { searchCollab(q, G2, 'collab-results2', 'collab-result2'); }
+
+// ═══════════════════════════════════════════════════════════════════
+// MÓDULO 3 — ASESORÍA FARMACÉUTICA
+// ═══════════════════════════════════════════════════════════════════
+const GID_ASIST = '281104057';
+let ACTIVE_AREA3 = 0, STORE_SEARCH3 = '';
+let cA3 = null;
+let G3 = {nomByStore:{}, rByStore:{}, nomByArea:{1:0,2:0,3:0}, rByArea:{1:0,2:0,3:0}, peopleByStore:{}};
+
+// Parse hoja Asistencia: fila 1 = header, datos desde fila 2
+// cols: [0]CUIL [1]DNI [2]Apellido [3]Nombre [4]NombreApellido [5]AREA [6]Tienda [7]Cargo [8]APACITACION
+function parseAsistCSV(rows) {
+  return rows.slice(1).filter(r => r[4] && r[6]).map(r => ({
+    nombre: (r[4]||'').trim().toUpperCase(),
+    dni:    (r[1]||'').toString().replace(/\.0$/,'').trim(),
+    tienda: (r[6]||'').trim().toUpperCase().replace('NERES','CALLAO'),
+    area:   parseInt(r[5])||0,
+    cargo:  (r[7]||'').trim().toUpperCase(),
+    asistio:(r[8]||'').toString().trim().toUpperCase() === 'SI'
+  }));
+}
+
+function renderAll3(asistRows, nom) {
+  // Farmacéuticos de la nómina (UN = FARMACEUTICO)
+  const farmNom = nom.filter(r => (r[5]||'').toUpperCase().includes('FARMACEUTICO'));
+  const nomToUse = farmNom.length > 0 ? farmNom : [];
+
+  const nomByStore={}, nomByArea={1:0,2:0,3:0};
+  const storesSet = new Set();
+  nomToUse.forEach(r => {
+    const s = (r[1]||'').toUpperCase().trim();
+    if(!STORES.includes(s)) return;
+    storesSet.add(s);
+    nomByStore[s] = (nomByStore[s]||0) + 1;
+    const a = +r[3]||0; if(a>=1&&a<=3) nomByArea[a]++;
+  });
+
+  // También agregar tiendas que aparecen en la hoja de asistencia
+  asistRows.forEach(r => {
+    const s = r.tienda; if(!STORES.includes(s)) return;
+    storesSet.add(s);
+  });
+
+  const rByStore={}, rByArea={1:0,2:0,3:0}, peopleByStore={};
+  STORES.forEach(s => { peopleByStore[s]=[]; });
+
+  asistRows.forEach(r => {
+    const s = r.tienda; if(!STORES.includes(s)) return;
+    if(!r.asistio) return; // solo contar los que asistieron (SI)
+    rByStore[s] = (rByStore[s]||0) + 1;
+    const a = r.area || STORE_AREA[s] || 0;
+    if(a>=1&&a<=3) rByArea[a]++;
+    peopleByStore[s].push({nombre:r.nombre, cargo:r.cargo, dni:r.dni, st:'r', fecha:'—'});
+  });
+
+  // Pendientes: farmacéuticos de nómina que no asistieron
+  const asistDNIs = new Set(asistRows.filter(r=>r.asistio).map(r=>r.dni).filter(Boolean));
+  const asistNorms = {};
+  asistRows.filter(r=>r.asistio).forEach(r => {
+    if(!asistNorms[r.tienda]) asistNorms[r.tienda]=[];
+    asistNorms[r.tienda].push(normName(r.nombre));
+  });
+  nomToUse.forEach(r => {
+    const s=(r[1]||'').toUpperCase().trim(); if(!STORES.includes(s)) return;
+    const dniNom=(r[4]||'').toString().trim();
+    if(dniNom && asistDNIs.has(dniNom)) return;
+    if((asistNorms[s]||[]).some(n=>sameNorm(normName(r[0]),n))) return;
+    peopleByStore[s].push({nombre:r[0], cargo:r[2], dni:dniNom, st:'p', fecha:'—'});
+  });
+
+  G3={nomByStore, rByStore, nomByArea, rByArea, peopleByStore};
+  updateMetrics3(0);
+
+  // Chart
+  const aL=['Área 1','Área 2','Área 3'];
+  const aPt=[1,2,3].map(a=>nomByArea[a]>0?Math.round(rByArea[a]/nomByArea[a]*100):0);
+  if(cA3) cA3.destroy();
+  cA3 = new Chart(document.getElementById('cArea3'),{type:'bar',plugins:[datalabelPlugin],
+    data:{labels:aL,datasets:[{data:aPt,backgroundColor:['#b5f4d4','#37ad6b','#0c5c35'],borderRadius:5,label:'% Part.',_labelFmt:v=>v+'%'}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},
+      scales:{y:{max:100,ticks:{callback:v=>v+'%',font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
+  });
+
+  // Build store table — only stores that have farmacéuticos
+  const storeList3 = [...storesSet].filter(s=>(nomByStore[s]||0)+(rByStore[s]||0)>0).sort((a,b)=>a.localeCompare(b));
+  buildStoreTable3('store-tb3', storeList3, G3);
+}
+
+function updateMetrics3(a) {
+  const $=id=>document.getElementById(id);
+  let totN, totR;
+  if(!a){
+    totN=Object.values(G3.nomByStore).reduce((x,y)=>x+y,0);
+    totR=Object.values(G3.rByStore).reduce((x,y)=>x+y,0);
+  } else {
+    totN=G3.nomByArea[a]||0;
+    totR=G3.rByArea[a]||0;
+  }
+  const pct=totN>0?Math.round(totR/totN*100):0;
+  $('m3-resp').textContent=totR;
+  $('m3-resp-s').textContent=`de ${totN} farmacéuticos`;
+  $('m3-pct').textContent=pct+'%';
+  $('m3-pct').className='mv '+(pct>=70?'green':pct>=40?'amber':'red');
+  $('m3-pct-s').textContent=`${totN-totR} pendientes`;
+}
+
+function buildStoreTable3(tbodyId, storeList, G) {
+  const tb=document.getElementById(tbodyId);
+  tb.innerHTML='';
+  storeList.forEach(s=>{
+    const n=G.nomByStore[s]||0, res=G.rByStore[s]||0;
+    if(n===0&&res===0) return;
+    const pct=n>0?Math.round(res/n*100):0;
+    const area=STORE_AREA[s]||0;
+    const bc=pct>=70?'bg-g':pct>=40?'bg-a':'bg-r';
+    const tr=document.createElement('tr');
+    tr.className='store-row';tr.dataset.area=area;tr.dataset.store=s;
+    tr.onclick=()=>toggleStore3(s,tr);
+    tr.innerHTML=`
+      <td><span class="expand-icon">▶</span></td>
+      <td style="font-weight:500">${s}</td>
+      <td><span class="pill pb">Área ${area||'?'}</span></td>
+      <td>${n}</td><td>${res}</td>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <div class="bar"><div class="bf ${bc}" style="width:${Math.min(pct,100)}%"></div></div>
+        <span style="font-size:12px;min-width:28px">${pct}%</span>
+      </div></td>`;
+    tb.appendChild(tr);
+    const pr=document.createElement('tr');
+    const safeId=s.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'')+'_store3';
+    pr.className='people-row';pr.id='prow-'+safeId;pr.style.display='none';pr.dataset.area=area;
+    pr.innerHTML=`<td colspan="6"><div class="people-inner" id="pinner-${safeId}"></div></td>`;
+    tb.appendChild(pr);
+  });
+}
+
+function toggleStore3(store, storeRow) {
+  const safeId=store.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'')+'_store3';
+  const prow=document.getElementById('prow-'+safeId);
+  const inner=document.getElementById('pinner-'+safeId);
+  if(!prow) return;
+  if(prow.style.display!=='none'){prow.style.display='none';storeRow.classList.remove('expanded');return;}
+  const people=G3.peopleByStore[store]||[];
+  const resp_count=people.filter(p=>p.st==='r').length;
+  const rows=people.map(p=>{
+    const pill=p.st==='p'?'<span class="pill pa">Pendiente</span>':'<span class="pill pg">Asistió</span>';
+    return `<tr data-result="${p.st==='p'?'pending':'pass'}" data-name="${(p.nombre||'').toLowerCase()}">
+      <td style="font-weight:500">${p.nombre}</td>
+      <td style="color:#888;font-size:12px">${p.cargo}</td>
+      <td>${pill}</td>
+    </tr>`;
+  }).join('');
+  inner.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <span style="font-size:12px;font-weight:500;color:#555">${store} — ${people.length} farmacéuticos (${resp_count} asistieron)</span>
+      <select onchange="filterInner3('${safeId}',this.value)" style="font-size:12px;padding:4px 8px;border:0.5px solid rgba(0,0,0,.15);border-radius:6px;background:#fff;outline:none">
+        <option value="">Todos</option>
+        <option value="pass">Asistieron</option>
+        <option value="pending">Pendientes</option>
+      </select>
+    </div>
+    <table id="ptable-${safeId}">
+      <thead><tr><th>Nombre</th><th>Cargo</th><th>Estado</th></tr></thead>
+      <tbody id="pbody-${safeId}">${rows}</tbody>
+    </table>`;
+  prow.style.display='';storeRow.classList.add('expanded');
+}
+
+function filterInner3(id, result) {
+  const tbody=document.getElementById('pbody-'+id); if(!tbody) return;
+  tbody.querySelectorAll('tr').forEach(tr=>{
+    tr.style.display=(!result||tr.dataset.result===result)?'':'none';
+  });
+}
+
+function setArea3(a,btn){
+  ACTIVE_AREA3=a;
+  document.querySelectorAll('#panel-3 .afbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const el=document.getElementById('store-search3');if(el)el.value='';STORE_SEARCH3='';
+  updateMetrics3(a);applyFilters3();
+  if(cA3) updateCharts3();
+}
+function filterByStore3(val){STORE_SEARCH3=val.trim().toLowerCase();applyFilters3();}
+function applyFilters3(){
+  document.getElementById('store-tb3').querySelectorAll('tr').forEach(tr=>{
+    if(tr.classList.contains('store-row')){
+      const ok=(!ACTIVE_AREA3||tr.dataset.area==ACTIVE_AREA3)&&(!STORE_SEARCH3||tr.dataset.store.toLowerCase().includes(STORE_SEARCH3));
+      tr.style.display=ok?'':'none';
+    } else if(tr.classList.contains('people-row')){
+      const ok=(!ACTIVE_AREA3||tr.dataset.area==ACTIVE_AREA3)&&(!STORE_SEARCH3||(tr.previousElementSibling?.dataset?.store||'').toLowerCase().includes(STORE_SEARCH3));
+      if(!ok){tr.style.display='none';tr.previousElementSibling?.classList.remove('expanded');}
+    }
+  });
+}
+function updateCharts3(){
+  const a=ACTIVE_AREA3;
+  const base=['#b5f4d4','#37ad6b','#0c5c35'],dim=['#d8f5e8','#8fd4b0','#6aad8c'];
+  cA3.data.datasets[0].backgroundColor=base.map((c,i)=>(!a||i+1===a)?c:dim[i]);
+  cA3.update();
+}
+function searchCollab3(q){searchCollab(q,G3,'collab-results3','collab-result3');}
 // ═══════════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded',()=>{
   renderAll1(RESP_DATA, NOM_DATA);
   renderAll2(RESP_DATA2, NOM_DATA);
+  renderAll3([], NOM_DATA);
+  renderAll3([], NOM_DATA);
   document.getElementById('mode-badge').textContent='Actualizando...';
   tryLive();
 });
