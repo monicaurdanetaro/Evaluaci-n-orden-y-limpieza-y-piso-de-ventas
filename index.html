@@ -1105,7 +1105,7 @@ const GID_RESP1 = '1142498963';
 const GID_RESP2 = '1095051768';
 const GID_NOM   = '1331171004';
 
-const STORES = ['WALKER','CABALLITO','SM CENTER','ALESEL','LA NOBLEZA','JUNCAL PODIUM','OLLEROS','SANFAR','DEVOTO','VILLA DEL PARQUE','COLECTORA','OLIVOS','PERDRIEL','CALLAO','MARK','BOTANICO','ESPER','SAN ISIDRO','GRAN FERRARI','IGLESIA','SCALABRINI','RIVADAVIA','MS PATRICIOS','LAS HERAS','KM 47.5','ALCORTA','FLOTANTES ÁREA 1','FLOTANTES ÁREA 2','QUINTA 46','SORIA','PARQUE CHACABUCO','LUPO'];
+const STORES = ['WALKER','CABALLITO','SM CENTER','ALESEL','LA NOBLEZA','JUNCAL PODIUM','OLLEROS','SANFAR','DEVOTO','VILLA DEL PARQUE','COLECTORA','OLIVOS','PERDRIEL','CALLAO','MARK','BOTANICO','ESPER','SAN ISIDRO','GRAN FERRARI','IGLESIA','SCALABRINI','RIVADAVIA','MS PATRICIOS','LAS HERAS','KM 47.5','ALCORTA','FLOTANTES ÁREA 1','FLOTANTES ÁREA 2','FLOTANTES ÁREA 3','QUINTA 46','SORIA','PARQUE CHACABUCO','LUPO'];
 
 const STORE_AREA = {};
 NOM_DATA.forEach(r => { if(r[1]&&r[3]) STORE_AREA[r[1].toUpperCase().trim()]=+r[3]; });
@@ -2264,6 +2264,12 @@ function updateResumen() {
       nombre: 'Mostrador de farmacia', poblacion: 'APV de farmacia',
       nom: NOM_LIVE!==null ? Object.values(G5.nomByStore).reduce((a,b)=>a+b,0) : 0,
       form: Object.values(G5.rByStore).reduce((a,b)=>a+b,0),
+      valid: NOM_LIVE!==null
+    },
+    {
+      nombre: '5 Conductas de Servicio', poblacion: 'APV',
+      nom: NOM_LIVE!==null ? Object.values(G6.nomByStore).reduce((a,b)=>a+b,0) : 0,
+      form: Object.values(G6.rByStore).reduce((a,b)=>a+b,0),
       valid: NOM_LIVE!==null
     }
   ];
