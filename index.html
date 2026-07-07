@@ -116,6 +116,15 @@
 
   <!-- ═══════════ RESUMEN GENERAL ═══════════ -->
   <div class="tab-panel on" id="panel-0">
+    <div class="gbar">
+      <div class="gbar-left">
+        <span class="gbar-label">Filtrar por área:</span>
+        <button class="afbtn on" onclick="setAreaResumen(0,this)">Todas</button>
+        <button class="afbtn" onclick="setAreaResumen(1,this)">Área 1</button>
+        <button class="afbtn" onclick="setAreaResumen(2,this)">Área 2</button>
+        <button class="afbtn" onclick="setAreaResumen(3,this)">Área 3</button>
+      </div>
+    </div>
     <div style="margin-bottom:20px">
       <h2 style="font-size:15px;font-weight:500;color:#555;margin-bottom:14px">Estado de avance — Meta: 85% de participación por formación</h2>
 
@@ -1636,49 +1645,78 @@ function searchCollab2(q) { searchCollab(q, G2, 'collab-results2', 'collab-resul
 // ═══════════════════════════════════════════════════════════════════
 // RESUMEN GENERAL
 // ═══════════════════════════════════════════════════════════════════
-function updateResumen() {
+let ACTIVE_AREA_RESUMEN = 0;
+
+function setAreaResumen(a, btn) {
+  ACTIVE_AREA_RESUMEN = a;
+  document.querySelectorAll('#panel-0 .afbtn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  updateResumen(a);
+}
+
+function statsFor(G, area) {
+  if (!area) {
+    return {
+      nom: Object.values(G.nomByStore || {}).reduce((a, b) => a + b, 0),
+      form: Object.values(G.rByStore || {}).reduce((a, b) => a + b, 0)
+    };
+  }
+  const nom = (G.nomByArea && G.nomByArea[area]) || 0;
+  const rArea = (G.rByArea && G.rByArea[area]) || [];
+  // rByArea holds either an array of responses (form modules) or a number (attendance modules)
+  const form = Array.isArray(rArea) ? rArea.length : rArea;
+  return { nom, form };
+}
+
+function updateResumen(area) {
+  area = area || ACTIVE_AREA_RESUMEN || 0;
   // Collect stats from each module
   // Only count mod2 if supervisors were identified (live nomina loaded)
-  const mod2nom = Object.values(G2.nomByStore).reduce((a,b)=>a+b,0);
   const mod2hasSupv = NOM_LIVE !== null; // only valid when live nomina loaded
-  const mod3nom = Object.values(G3.nomByStore).reduce((a,b)=>a+b,0);
   const mod3hasData = NOM_LIVE !== null;
+
+  const s1 = statsFor(G1, area);
+  const s2 = statsFor(G2, area);
+  const s3 = statsFor(G3, area);
+  const s4 = statsFor(G4, area);
+  const s5 = statsFor(G5, area);
+  const s6 = statsFor(G6, area);
 
   const modules = [
     {
       nombre: 'Módulo 1 — Orden y limpieza', poblacion: 'Toda la tienda',
-      nom: Object.values(G1.nomByStore).reduce((a,b)=>a+b,0),
-      form: Object.values(G1.rByStore).reduce((a,b)=>a+b,0),
+      nom: s1.nom,
+      form: s1.form,
       valid: true
     },
     {
       nombre: 'Módulo 2 — Pilares de la operación', poblacion: 'Supervisores',
-      nom: mod2hasSupv ? mod2nom : 0,
-      form: Object.values(G2.rByStore).reduce((a,b)=>a+b,0),
+      nom: mod2hasSupv ? s2.nom : 0,
+      form: s2.form,
       valid: mod2hasSupv
     },
     {
       nombre: 'Módulo 3 — Inventarios', poblacion: 'Supervisores',
-      nom: NOM_LIVE!==null ? Object.values(G4.nomByStore).reduce((a,b)=>a+b,0) : 0,
-      form: Object.values(G4.rByStore).reduce((a,b)=>a+b,0),
+      nom: NOM_LIVE!==null ? s4.nom : 0,
+      form: s4.form,
       valid: NOM_LIVE!==null
     },
     {
       nombre: 'Asesoría Farmacéutica', poblacion: 'Farmacéuticos',
-      nom: mod3hasData ? mod3nom : 0,
-      form: Object.values(G3.rByStore).reduce((a,b)=>a+b,0),
+      nom: mod3hasData ? s3.nom : 0,
+      form: s3.form,
       valid: mod3hasData
     },
     {
       nombre: 'Mostrador de farmacia', poblacion: 'APV de farmacia',
-      nom: NOM_LIVE!==null ? Object.values(G5.nomByStore).reduce((a,b)=>a+b,0) : 0,
-      form: Object.values(G5.rByStore).reduce((a,b)=>a+b,0),
+      nom: NOM_LIVE!==null ? s5.nom : 0,
+      form: s5.form,
       valid: NOM_LIVE!==null
     },
     {
       nombre: '5 Conductas de Servicio', poblacion: 'APV',
-      nom: NOM_LIVE!==null ? Object.values(G6.nomByStore).reduce((a,b)=>a+b,0) : 0,
-      form: Object.values(G6.rByStore).reduce((a,b)=>a+b,0),
+      nom: NOM_LIVE!==null ? s6.nom : 0,
+      form: s6.form,
       valid: NOM_LIVE!==null
     }
   ];
