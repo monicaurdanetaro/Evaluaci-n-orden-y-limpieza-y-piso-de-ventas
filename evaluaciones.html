@@ -1,3 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Evaluaciones Farmatodo Argentina</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Nunito',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;color:#1a1a18;font-size:15px;line-height:1.6}
+  h1{font-size:20px;font-weight:500}h2{font-size:16px;font-weight:500}
+  .hdr{background:#0f1e4a;border-bottom:3px solid #3b5fe2;padding:20px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  .hdr h1{color:#fff}
+  .hdr .upd{color:rgba(255,255,255,.55)}
+  .badge{font-size:11px;background:#eaf3de;color:#3b6d11;padding:3px 10px;border-radius:20px}
+  .upd{font-size:12px;color:#aaa;margin-top:2px}
+  .wrap{max-width:1120px;margin:0 auto;padding:28px 20px}
+  .mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+  .mc{background:#fff;border:0.5px solid rgba(0,0,0,.1);border-radius:10px;padding:16px 18px}
+  .ml{font-size:12px;color:#999;margin-bottom:5px}
+  .mv{font-size:28px;font-weight:500;line-height:1.2}
+  .ms{font-size:12px;color:#bbb;margin-top:4px}
+  .green{color:#3b6d11}.amber{color:#854f0b}.blue{color:#185fa5}.red{color:#a32d2d}
+  .sec{background:#fff;border:0.5px solid rgba(0,0,0,.1);border-radius:12px;margin-bottom:14px;overflow:hidden}
+  .sh{padding:15px 20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+  .sh:hover{background:#fafaf8}
+  .chev{font-size:14px;color:#ccc;transition:transform .2s;display:inline-block}
+  .chev.open{transform:rotate(180deg)}
+  .sb{display:none;padding:0 20px 20px;border-top:0.5px solid rgba(0,0,0,.07)}
+  .sb.open{display:block}
+  .crow{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding-top:20px}
+  .clbl{font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{font-size:11px;font-weight:500;color:#aaa;text-align:left;padding:8px 10px;border-bottom:0.5px solid rgba(0,0,0,.1);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+  td{padding:9px 10px;border-bottom:0.5px solid rgba(0,0,0,.06);vertical-align:middle}
+  tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
+  .bar{height:6px;background:#f0eeea;border-radius:3px;overflow:hidden;min-width:70px}
+  .bf{height:100%;border-radius:3px}
+  .bg-g{background:#63991b}.bg-a{background:#ef9f27}.bg-r{background:#e24b4a}
+  .pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500;white-space:nowrap}
+  .pg{background:#eaf3de;color:#3b6d11}.pa{background:#faeeda;color:#854f0b}
+  .pr{background:#fcebeb;color:#a32d2d}.pb{background:#e6f1fb;color:#185fa5}
+  .pgy{background:#f1efe8;color:#5f5e5a}
+  /* Main module tabs */
+  .main-tabs{display:flex;gap:0;border-bottom:0.5px solid rgba(0,0,0,.12);background:#fff;padding:0 32px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .main-tab{font-size:13px;font-weight:500;padding:14px 20px;border-bottom:2px solid transparent;cursor:pointer;color:#888;white-space:nowrap;transition:all .15s}
+  .main-tab.on{color:#3b5fe2;border-bottom-color:#3b5fe2}
+  .main-tab:hover:not(.on){color:#444;background:#fafaf8}
+  .tab-panel{display:none}.tab-panel.on{display:block}
+  /* Area filter */
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;padding:16px 0 4px}
+  .tab{font-size:12px;padding:5px 12px;border-radius:20px;border:0.5px solid rgba(0,0,0,.15);cursor:pointer;background:#fff;color:#666}
+  .tab.on{background:#185fa5;color:#fff;border-color:#185fa5}
+  .tab:hover:not(.on){background:#f0f0ee}
+  .filt{display:flex;gap:10px;flex-wrap:wrap;padding:16px 0 12px}
+  .filt input,.filt select{font-size:13px;padding:7px 12px;border:0.5px solid rgba(0,0,0,.18);border-radius:8px;background:#fff;outline:none;color:#1a1a18}
+  .filt input{flex:1;min-width:180px}
+  .info-banner{background:#e6f1fb;color:#185fa5;border-radius:8px;padding:12px 16px;font-size:13px;margin-bottom:20px;line-height:1.6}
+  .area-filter-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#fff;border:0.5px solid rgba(0,0,0,.1);border-radius:12px;padding:14px 20px;margin-bottom:14px}
+  .afbtn{font-size:13px;padding:6px 16px;border-radius:20px;border:0.5px solid rgba(0,0,0,.15);cursor:pointer;background:#fff;color:#555;font-weight:400;transition:all .15s}
+  .afbtn.on{background:#1a1a18;color:#fff;border-color:#1a1a18}
+  .afbtn:hover:not(.on){background:#f0f0ee}
+  .store-search-wrap{display:flex;align-items:center;gap:6px;background:#f5f5f0;border:0.5px solid rgba(0,0,0,.12);border-radius:8px;padding:5px 10px;cursor:text}
+  .store-search-wrap input::placeholder{color:#bbb}
+  .gbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fff;border:0.5px solid rgba(0,0,0,.1);border-radius:12px;padding:12px 20px;margin-bottom:14px}
+  .gbar-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .gbar-label{font-size:12px;font-weight:500;color:#888;margin-right:4px}
+  .gbar-search{display:flex;align-items:center;gap:8px;background:#f5f5f0;border:0.5px solid rgba(0,0,0,.12);border-radius:8px;padding:6px 12px;min-width:200px}
+  .gbar-search input{border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:100%}
+  #store-tb tr.store-row,#store-tb2 tr.store-row{cursor:pointer;transition:background .1s}
+  #store-tb tr.store-row:hover td,#store-tb2 tr.store-row:hover td{background:#f0f5ff}
+  #store-tb tr.store-row.expanded td,#store-tb2 tr.store-row.expanded td{background:#e8f0fe;font-weight:500}
+  .expand-icon{font-size:11px;color:#aaa;transition:transform .2s;display:inline-block}
+  .expanded .expand-icon{transform:rotate(90deg);color:#185fa5}
+  tr.people-row{background:#f8faff}
+  tr.people-row td{padding:0}
+  .people-inner{padding:12px 16px 16px 36px}
+  .people-inner table{font-size:12px}
+  .people-inner th{font-size:10px;color:#bbb;padding:5px 8px}
+  .people-inner td{padding:6px 8px;border-bottom:0.5px solid rgba(0,0,0,.05)}
+  .people-inner tr:last-child td{border-bottom:none}
+  .store-tip{font-size:12px;color:#bbb;margin-top:10px;text-align:center}
+  @media(max-width:680px){
+    .mgrid{grid-template-columns:repeat(2,1fr)}
+    .crow{grid-template-columns:1fr}
+    .wrap{padding:14px}
+    .hdr{padding:14px 16px}
+    .main-tabs{padding:0 16px}
+    h1{font-size:17px}
+    .sb table{display:block;overflow-x:auto;white-space:nowrap}
+    .sb table thead,.sb table tbody{display:table;width:100%}
+    .gbar{flex-direction:column;align-items:flex-start}
+    .gbar-left{width:100%}
+    .area-filter-bar{flex-direction:column;align-items:flex-start}
+    .store-search-wrap{width:100%}
+    .store-search-wrap input{width:100% !important}
+    .sh{flex-wrap:wrap;gap:10px}
+    .sh > div{flex-wrap:wrap;width:100%}
+    .filt input{min-width:0}
+    .people-inner{padding:12px 10px 16px 14px}
+    .people-inner table{display:block;overflow-x:auto;white-space:nowrap}
+  }
+  @media(max-width:420px){
+    .mv{font-size:22px}
+    .mgrid{grid-template-columns:1fr 1fr;gap:8px}
+    .mc{padding:12px 14px}
+  }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div style="display:flex;align-items:center;gap:14px">
+    <div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <h1>Estatus de participación - Capacitaciones ARG</h1>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" style="height:20px;border-radius:2px;vertical-align:middle;box-shadow:0 0 0 0.5px rgba(0,0,0,.15)"><rect width="900" height="600" fill="#74acdf"/><rect y="200" width="900" height="200" fill="#fff"/><g transform="translate(450,300)"><circle r="40" fill="#F6B40E" stroke="#843511" stroke-width="3.5"/><g fill="#843511"><path d="M0-58 L4-42 L0-46 L-4-42Z"/><path d="M0 58 L4 42 L0 46 L-4 42Z"/><path d="M-58 0 L-42-4 L-46 0 L-42 4Z"/><path d="M58 0 L42-4 L46 0 L42 4Z"/><path d="M-41-41 L-32-28 L-36-32 L-28-36Z"/><path d="M41-41 L28-36 L32-32 L36-28Z"/><path d="M-41 41 L-28 36 L-32 32 L-36 28Z"/><path d="M41 41 L36 28 L32 32 L28 36Z"/><path d="M-22-55 L-18-39 L-22-44 L-26-39Z"/><path d="M22-55 L26-39 L22-44 L18-39Z"/><path d="M-22 55 L-26 39 L-22 44 L-18 39Z"/><path d="M22 55 L18 39 L22 44 L26 39Z"/><path d="M-55-22 L-39-18 L-44-22 L-39-26Z"/><path d="M55-22 L39-26 L44-22 L39-18Z"/><path d="M-55 22 L-39 26 L-44 22 L-39 18Z"/><path d="M55 22 L39 18 L44 22 L39 26Z"/></g><circle r="28" fill="#F6B40E" stroke="#843511" stroke-width="2"/><ellipse cx="-8" cy="-6" rx="5" ry="6" fill="#843511"/><ellipse cx="8" cy="-6" rx="5" ry="6" fill="#843511"/><path d="M-12 8 Q0 16 12 8" stroke="#843511" stroke-width="2" fill="none"/></g></svg>
+      </div>
+      <div class="upd" id="upd">Actualizando datos...</div>
+    </div>
+    <span class="badge" id="mode-badge" style="background:#faeeda;color:#854f0b">Cargando...</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <a href="index.html" style="font-size:13px;padding:7px 14px;border:1.5px solid #fff;border-radius:8px;background:#fff;cursor:pointer;color:#0f1e4a;text-decoration:none;white-space:nowrap;font-weight:700">← Inicio</a>
+    <button onclick="tryLive()" id="btn-live" style="font-size:13px;padding:7px 14px;border:1.5px solid rgba(255,255,255,.4);border-radius:8px;background:transparent;cursor:pointer;color:#fff;font-weight:700">↻ Refrescar</button>
+  </div>
+</div>
+
+<!-- MAIN MODULE TABS -->
+<div class="main-tabs">
+  <div class="main-tab on" id="mtab-0" onclick="switchModule(0)">Resumen</div>
+  <div class="main-tab" id="mtab-1" onclick="switchModule(1)">Módulo 1 — Orden y limpieza</div>
+  <div class="main-tab" id="mtab-2" onclick="switchModule(2)">Módulo 2 — Pilares de la operación</div>
+  <div class="main-tab" id="mtab-4" onclick="switchModule(4)">Módulo 3 — Inventarios</div>
+  <div class="main-tab" id="mtab-3" onclick="switchModule(3)">Asesoría Farmacéutica</div>
+  <div class="main-tab" id="mtab-5" onclick="switchModule(5)">Mostrador de farmacia</div>
+  <div class="main-tab" id="mtab-6" onclick="switchModule(6)">5 Conductas de Servicio</div>
+</div>
+
+<div class="wrap">
+
+  <div class="info-banner" id="info-banner" style="display:none">
+    ⚠️ No se pudieron cargar los datos en vivo. Mostrando datos embebidos. Intenta con <b>↻ Refrescar</b>.
+  </div>
+
+  <!-- ═══════════ RESUMEN GENERAL ═══════════ -->
+  <div class="tab-panel on" id="panel-0">
+    <div class="gbar">
+      <div class="gbar-left">
+        <span class="gbar-label">Filtrar por área:</span>
+        <button class="afbtn on" onclick="setAreaResumen(0,this)">Todas</button>
+        <button class="afbtn" onclick="setAreaResumen(1,this)">Área 1</button>
+        <button class="afbtn" onclick="setAreaResumen(2,this)">Área 2</button>
+        <button class="afbtn" onclick="setAreaResumen(3,this)">Área 3</button>
+      </div>
+    </div>
+    <div style="margin-bottom:20px">
+      <h2 style="font-size:15px;font-weight:500;color:#555;margin-bottom:14px">Estado de avance — Meta: 85% de participación por formación</h2>
+
+      <!-- Progress bar global -->
+      <div style="background:#fff;border:0.5px solid rgba(0,0,0,.1);border-radius:12px;padding:20px 24px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+          <span style="font-size:13px;font-weight:500;color:#444">Participación global (todas las formaciones)</span>
+          <span style="font-size:22px;font-weight:500" id="res-global-pct">—</span>
+        </div>
+        <div style="background:#f0eeea;border-radius:6px;height:12px;position:relative;margin-bottom:8px">
+          <div id="res-global-bar" style="height:100%;border-radius:6px;background:#3b6d11;transition:width .4s;position:relative;z-index:1"></div>
+          <!-- Meta line at 85% -->
+          <div style="position:absolute;left:85%;top:-4px;height:20px;width:2.5px;background:#854f0b;border-radius:2px;z-index:2"></div>
+          <div style="position:absolute;left:85%;top:-18px;transform:translateX(-50%);font-size:10px;color:#854f0b;font-weight:600;white-space:nowrap">Meta 85%</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:#bbb;margin-top:6px">
+          <span id="res-global-sub">— formados de — en nómina total</span>
+          <span id="res-avance-meta" style="font-weight:500"></span>
+        </div>
+      </div>
+
+      <!-- Avance vs meta -->
+      <div style="background:#fff;border:0.5px solid rgba(0,0,0,.1);border-radius:12px;padding:20px 24px;margin-bottom:14px">
+        <div style="font-size:13px;font-weight:500;color:#444;margin-bottom:16px">Avance por formación vs meta del 85%</div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead>
+            <tr>
+              <th style="text-align:left;padding:8px 10px;border-bottom:0.5px solid rgba(0,0,0,.1);font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:.04em">Formación</th>
+              <th style="text-align:center;padding:8px 10px;border-bottom:0.5px solid rgba(0,0,0,.1);font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:.04em">A formar</th>
+              <th style="text-align:center;padding:8px 10px;border-bottom:0.5px solid rgba(0,0,0,.1);font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:.04em">Formados</th>
+              <th style="text-align:center;padding:8px 10px;border-bottom:0.5px solid rgba(0,0,0,.1);font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:.04em">% Participación</th>
+              <th style="text-align:center;padding:8px 10px;border-bottom:0.5px solid rgba(0,0,0,.1);font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:.04em">Avance vs meta (85%)</th>
+            </tr>
+          </thead>
+          <tbody id="res-table-body">
+            <tr><td colspan="5" style="padding:20px;text-align:center;color:#bbb;font-size:13px">Cargando datos...</td></tr>
+          </tbody>
+          <tfoot id="res-table-foot"></tfoot>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════ MÓDULO 1 ═══════════ -->
+  <div class="tab-panel" id="panel-1">
+    <div class="gbar">
+      <div class="gbar-left">
+        <span class="gbar-label">Filtrar por área:</span>
+        <button class="afbtn on" onclick="setArea1(0,this)">Todas</button>
+        <button class="afbtn" onclick="setArea1(1,this)">Área 1</button>
+        <button class="afbtn" onclick="setArea1(2,this)">Área 2</button>
+        <button class="afbtn" onclick="setArea1(3,this)">Área 3</button>
+      </div>
+    </div>
+    <div class="mgrid">
+      <div class="mc"><div class="ml">Respuestas totales</div><div class="mv blue" id="m1-resp">—</div><div class="ms" id="m1-resp-s"></div></div>
+      <div class="mc"><div class="ml">% Participación</div><div class="mv" id="m1-pct">—</div><div class="ms" id="m1-pct-s"></div></div>
+      <div class="mc"><div class="ml">Nota promedio</div><div class="mv" id="m1-avg">—</div><div class="ms">sobre 20 puntos</div></div>
+      <div class="mc"><div class="ml">% Aprobados (≥ 10)</div><div class="mv green" id="m1-pass">—</div><div class="ms" id="m1-pass-s"></div></div>
+    </div>
+    <div class="sec">
+      <div class="sh" onclick="tog('area1')"><h2>Participación y resultados por área</h2><span class="chev open" id="ch-area1">▾</span></div>
+      <div class="sb open" id="bd-area1">
+        <div class="crow">
+          <div><div class="clbl">% Participación</div><div style="position:relative;height:200px"><canvas id="cArea1"></canvas></div></div>
+          <div><div class="clbl">Nota promedio</div><div style="position:relative;height:200px"><canvas id="cScore1"></canvas></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sh" onclick="tog('store1')">
+        <h2>Detalle por tienda</h2>
+        <div style="display:flex;align-items:center;gap:8px" onclick="event.stopPropagation()">
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">🏪</span>
+            <input type="text" id="store-search1" placeholder="Buscar tienda..." oninput="filterByStore1(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:120px">
+          </div>
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">👤</span>
+            <input type="text" id="collab-search1" placeholder="Nombre o DNI..." oninput="searchCollab1(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:130px">
+            <span id="collab-result1" style="font-size:11px;color:#bbb;white-space:nowrap;margin-left:4px"></span>
+          </div>
+          <span class="chev open" id="ch-store1" onclick="event.stopPropagation();tog('store1')">▾</span>
+        </div>
+      </div>
+      <div class="sb open" id="bd-store1">
+        <div style="padding-top:16px">
+          <div id="collab-results1" style="display:none;margin-bottom:14px"></div>
+          <table>
+            <thead><tr><th style="width:20px"></th><th>Tienda</th><th>Área</th><th>Nómina</th><th>Respondieron</th><th>Participación</th><th>Nota prom.</th><th>% Aprobados</th></tr></thead>
+            <tbody id="store-tb"></tbody>
+          </table>
+          <div class="store-tip">↓ Haz clic en una tienda para ver el detalle de sus colaboradores</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ MÓDULO 2 ═══════════ -->
+  <div class="tab-panel" id="panel-2">
+    <div class="gbar">
+      <div class="gbar-left">
+        <span class="gbar-label">Filtrar por área:</span>
+        <button class="afbtn on" id="a2-all" onclick="setArea2(0,this)">Todas</button>
+        <button class="afbtn" onclick="setArea2(1,this)">Área 1</button>
+        <button class="afbtn" onclick="setArea2(2,this)">Área 2</button>
+        <button class="afbtn" onclick="setArea2(3,this)">Área 3</button>
+      </div>
+    </div>
+    <div class="mgrid">
+      <div class="mc"><div class="ml">Respuestas totales</div><div class="mv blue" id="m2-resp">—</div><div class="ms" id="m2-resp-s"></div></div>
+      <div class="mc"><div class="ml">% Participación</div><div class="mv" id="m2-pct">—</div><div class="ms" id="m2-pct-s"></div></div>
+      <div class="mc"><div class="ml">Nota promedio</div><div class="mv" id="m2-avg">—</div><div class="ms">sobre 20 puntos</div></div>
+      <div class="mc"><div class="ml">% Aprobados (≥ 10)</div><div class="mv green" id="m2-pass">—</div><div class="ms" id="m2-pass-s"></div></div>
+    </div>
+    <div class="sec">
+      <div class="sh" onclick="tog('area2')"><h2>Participación y resultados por área — Supervisores</h2><span class="chev open" id="ch-area2">▾</span></div>
+      <div class="sb open" id="bd-area2">
+        <div class="crow">
+          <div><div class="clbl">% Participación</div><div style="position:relative;height:200px"><canvas id="cArea2"></canvas></div></div>
+          <div><div class="clbl">Nota promedio</div><div style="position:relative;height:200px"><canvas id="cScore2"></canvas></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sh" onclick="tog('store2')">
+        <h2>Detalle por tienda — Supervisores</h2>
+        <div style="display:flex;align-items:center;gap:8px" onclick="event.stopPropagation()">
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">🏪</span>
+            <input type="text" id="store-search2" placeholder="Buscar tienda..." oninput="filterByStore2(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:120px">
+          </div>
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">👤</span>
+            <input type="text" id="collab-search2" placeholder="Nombre o DNI..." oninput="searchCollab2(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:130px">
+            <span id="collab-result2" style="font-size:11px;color:#bbb;white-space:nowrap;margin-left:4px"></span>
+          </div>
+          <span class="chev open" id="ch-store2" onclick="event.stopPropagation();tog('store2')">▾</span>
+        </div>
+      </div>
+      <div class="sb open" id="bd-store2">
+        <div style="padding-top:16px">
+          <div id="collab-results2" style="display:none;margin-bottom:14px"></div>
+          <table>
+            <thead><tr><th style="width:20px"></th><th>Tienda</th><th>Área</th><th>Supervisores</th><th>Respondieron</th><th>Participación</th><th>Nota prom.</th><th>% Aprobados</th></tr></thead>
+            <tbody id="store-tb2"></tbody>
+          </table>
+          <div class="store-tip">↓ Haz clic en una tienda para ver el detalle de sus supervisores</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════ MÓDULO 3 — ASESORÍA FARMACÉUTICA ═══════════ -->
+  <div class="tab-panel" id="panel-3">
+    <div class="gbar">
+      <div class="gbar-left">
+        <span class="gbar-label">Filtrar por área:</span>
+        <button class="afbtn on" onclick="setArea3(0,this)">Todas</button>
+        <button class="afbtn" onclick="setArea3(1,this)">Área 1</button>
+        <button class="afbtn" onclick="setArea3(2,this)">Área 2</button>
+        <button class="afbtn" onclick="setArea3(3,this)">Área 3</button>
+      </div>
+    </div>
+    <div class="mgrid" style="grid-template-columns:repeat(2,1fr)">
+      <div class="mc"><div class="ml">Farmacéuticos formados</div><div class="mv blue" id="m3-resp">—</div><div class="ms" id="m3-resp-s"></div></div>
+      <div class="mc"><div class="ml">% Participación</div><div class="mv" id="m3-pct">—</div><div class="ms" id="m3-pct-s"></div></div>
+    </div>
+    <div class="sec">
+      <div class="sh" onclick="tog('area3')"><h2>Participación por área</h2><span class="chev open" id="ch-area3">▾</span></div>
+      <div class="sb open" id="bd-area3">
+        <div class="crow" style="grid-template-columns:1fr">
+          <div><div class="clbl">% Participación por área</div><div style="position:relative;height:200px"><canvas id="cArea3"></canvas></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sh" onclick="tog('store3')">
+        <h2>Detalle por tienda — Farmacéuticos</h2>
+        <div style="display:flex;align-items:center;gap:8px" onclick="event.stopPropagation()">
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">🏪</span>
+            <input type="text" id="store-search3" placeholder="Buscar tienda..." oninput="filterByStore3(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:120px">
+          </div>
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">👤</span>
+            <input type="text" id="collab-search3" placeholder="Nombre o DNI..." oninput="searchCollab3(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:130px">
+            <span id="collab-result3" style="font-size:11px;color:#bbb;white-space:nowrap;margin-left:4px"></span>
+          </div>
+          <span class="chev open" id="ch-store3" onclick="event.stopPropagation();tog('store3')">▾</span>
+        </div>
+      </div>
+      <div class="sb open" id="bd-store3">
+        <div style="padding-top:16px">
+          <div id="collab-results3" style="display:none;margin-bottom:14px"></div>
+          <table>
+            <thead><tr><th style="width:20px"></th><th>Tienda</th><th>Área</th><th>Farmacéuticos</th><th>Asistieron</th><th>Participación</th></tr></thead>
+            <tbody id="store-tb3"></tbody>
+          </table>
+          <div class="store-tip">↓ Haz clic en una tienda para ver el detalle</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ MÓDULO 4 — INVENTARIOS ═══════════ -->
+  <div class="tab-panel" id="panel-4">
+    <div class="gbar">
+      <div class="gbar-left">
+        <span class="gbar-label">Filtrar por área:</span>
+        <button class="afbtn on" onclick="setArea4(0,this)">Todas</button>
+        <button class="afbtn" onclick="setArea4(1,this)">Área 1</button>
+        <button class="afbtn" onclick="setArea4(2,this)">Área 2</button>
+        <button class="afbtn" onclick="setArea4(3,this)">Área 3</button>
+      </div>
+    </div>
+    <div class="mgrid">
+      <div class="mc"><div class="ml">Respuestas totales</div><div class="mv blue" id="m4-resp">—</div><div class="ms" id="m4-resp-s"></div></div>
+      <div class="mc"><div class="ml">% Participación</div><div class="mv" id="m4-pct">—</div><div class="ms" id="m4-pct-s"></div></div>
+      <div class="mc"><div class="ml">Nota promedio</div><div class="mv" id="m4-avg">—</div><div class="ms">sobre 20 puntos</div></div>
+      <div class="mc"><div class="ml">% Aprobados (≥ 10)</div><div class="mv green" id="m4-pass">—</div><div class="ms" id="m4-pass-s"></div></div>
+    </div>
+    <div class="sec">
+      <div class="sh" onclick="tog('area4')"><h2>Participación y resultados por área — Supervisores</h2><span class="chev open" id="ch-area4">▾</span></div>
+      <div class="sb open" id="bd-area4">
+        <div class="crow">
+          <div><div class="clbl">% Participación</div><div style="position:relative;height:200px"><canvas id="cArea4"></canvas></div></div>
+          <div><div class="clbl">Nota promedio</div><div style="position:relative;height:200px"><canvas id="cScore4"></canvas></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sh" onclick="tog('store4')">
+        <h2>Detalle por tienda — Supervisores</h2>
+        <div style="display:flex;align-items:center;gap:8px" onclick="event.stopPropagation()">
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">🏪</span>
+            <input type="text" id="store-search4" placeholder="Buscar tienda..." oninput="filterByStore4(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:120px">
+          </div>
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">👤</span>
+            <input type="text" id="collab-search4" placeholder="Nombre o DNI..." oninput="searchCollab4(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:130px">
+            <span id="collab-result4" style="font-size:11px;color:#bbb;white-space:nowrap;margin-left:4px"></span>
+          </div>
+          <span class="chev open" id="ch-store4" onclick="event.stopPropagation();tog('store4')">▾</span>
+        </div>
+      </div>
+      <div class="sb open" id="bd-store4">
+        <div style="padding-top:16px">
+          <div id="collab-results4" style="display:none;margin-bottom:14px"></div>
+          <table>
+            <thead><tr><th style="width:20px"></th><th>Tienda</th><th>Área</th><th>Supervisores</th><th>Respondieron</th><th>Participación</th><th>Nota prom.</th><th>% Aprobados</th></tr></thead>
+            <tbody id="store-tb4"></tbody>
+          </table>
+          <div class="store-tip">↓ Haz clic en una tienda para ver el detalle</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ MÓDULO 5 — MOSTRADOR DE FARMACIA ═══════════ -->
+  <div class="tab-panel" id="panel-5">
+    <div class="gbar">
+      <div class="gbar-left">
+        <span class="gbar-label">Filtrar por área:</span>
+        <button class="afbtn on" onclick="setArea5(0,this)">Todas</button>
+        <button class="afbtn" onclick="setArea5(1,this)">Área 1</button>
+        <button class="afbtn" onclick="setArea5(2,this)">Área 2</button>
+        <button class="afbtn" onclick="setArea5(3,this)">Área 3</button>
+      </div>
+    </div>
+    <div class="mgrid">
+      <div class="mc"><div class="ml">Respuestas totales</div><div class="mv blue" id="m5-resp">—</div><div class="ms" id="m5-resp-s"></div></div>
+      <div class="mc"><div class="ml">% Participación</div><div class="mv" id="m5-pct">—</div><div class="ms" id="m5-pct-s"></div></div>
+      <div class="mc"><div class="ml">Nota promedio</div><div class="mv" id="m5-avg">—</div><div class="ms">sobre 20 puntos</div></div>
+      <div class="mc"><div class="ml">% Aprobados (≥ 10)</div><div class="mv green" id="m5-pass">—</div><div class="ms" id="m5-pass-s"></div></div>
+    </div>
+    <div class="sec">
+      <div class="sh" onclick="tog('area5')"><h2>Participación y resultados por área — APV de farmacia</h2><span class="chev open" id="ch-area5">▾</span></div>
+      <div class="sb open" id="bd-area5">
+        <div class="crow">
+          <div><div class="clbl">% Participación</div><div style="position:relative;height:200px"><canvas id="cArea5"></canvas></div></div>
+          <div><div class="clbl">Nota promedio</div><div style="position:relative;height:200px"><canvas id="cScore5"></canvas></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sh" onclick="tog('store5')">
+        <h2>Detalle por tienda — APV de farmacia</h2>
+        <div style="display:flex;align-items:center;gap:8px" onclick="event.stopPropagation()">
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">🏪</span>
+            <input type="text" id="store-search5" placeholder="Buscar tienda..." oninput="filterByStore5(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:120px">
+          </div>
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">👤</span>
+            <input type="text" id="collab-search5" placeholder="Nombre o DNI..." oninput="searchCollab5(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:130px">
+            <span id="collab-result5" style="font-size:11px;color:#bbb;white-space:nowrap;margin-left:4px"></span>
+          </div>
+          <span class="chev open" id="ch-store5" onclick="event.stopPropagation();tog('store5')">▾</span>
+        </div>
+      </div>
+      <div class="sb open" id="bd-store5">
+        <div style="padding-top:16px">
+          <div id="collab-results5" style="display:none;margin-bottom:14px"></div>
+          <table>
+            <thead><tr><th style="width:20px"></th><th>Tienda</th><th>Área</th><th>APV farmacia</th><th>Respondieron</th><th>Participación</th><th>Nota prom.</th><th>% Aprobados</th></tr></thead>
+            <tbody id="store-tb5"></tbody>
+          </table>
+          <div class="store-tip">↓ Haz clic en una tienda para ver el detalle</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ MÓDULO 6 — 5 CONDUCTAS DE SERVICIO ═══════════ -->
+  <div class="tab-panel" id="panel-6">
+    <div class="gbar">
+      <div class="gbar-left">
+        <span class="gbar-label">Filtrar por área:</span>
+        <button class="afbtn on" onclick="setArea6(0,this)">Todas</button>
+        <button class="afbtn" onclick="setArea6(1,this)">Área 1</button>
+        <button class="afbtn" onclick="setArea6(2,this)">Área 2</button>
+        <button class="afbtn" onclick="setArea6(3,this)">Área 3</button>
+      </div>
+    </div>
+    <div class="mgrid" style="grid-template-columns:repeat(2,1fr)">
+      <div class="mc"><div class="ml">APV formados</div><div class="mv blue" id="m6-resp">—</div><div class="ms" id="m6-resp-s"></div></div>
+      <div class="mc"><div class="ml">% Participación</div><div class="mv" id="m6-pct">—</div><div class="ms" id="m6-pct-s"></div></div>
+    </div>
+    <div class="sec">
+      <div class="sh" onclick="tog('area6')"><h2>Participación por área — APV</h2><span class="chev open" id="ch-area6">▾</span></div>
+      <div class="sb open" id="bd-area6">
+        <div class="crow" style="grid-template-columns:1fr">
+          <div><div class="clbl">% Participación por área</div><div style="position:relative;height:200px"><canvas id="cArea6"></canvas></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sh" onclick="tog('store6')">
+        <h2>Detalle por tienda — APV</h2>
+        <div style="display:flex;align-items:center;gap:8px" onclick="event.stopPropagation()">
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">🏪</span>
+            <input type="text" id="store-search6" placeholder="Buscar tienda..." oninput="filterByStore6(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:120px">
+          </div>
+          <div class="store-search-wrap">
+            <span style="color:#bbb;font-size:13px">👤</span>
+            <input type="text" id="collab-search6" placeholder="Nombre o DNI..." oninput="searchCollab6(this.value)" style="border:none;background:transparent;outline:none;font-size:13px;color:#1a1a18;width:130px">
+            <span id="collab-result6" style="font-size:11px;color:#bbb;white-space:nowrap;margin-left:4px"></span>
+          </div>
+          <span class="chev open" id="ch-store6" onclick="event.stopPropagation();tog('store6')">▾</span>
+        </div>
+      </div>
+      <div class="sb open" id="bd-store6">
+        <div style="padding-top:16px">
+          <div id="collab-results6" style="display:none;margin-bottom:14px"></div>
+          <table>
+            <thead><tr><th style="width:20px"></th><th>Tienda</th><th>Área</th><th>APV</th><th>Asistieron</th><th>Participación</th></tr></thead>
+            <tbody id="store-tb6"></tbody>
+          </table>
+          <div class="store-tip">↓ Haz clic en una tienda para ver el detalle</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- end wrap -->
+
+<script>
 // ═══════════════════════════════════════════════════════════════════
 // DATOS EMBEBIDOS
 // ═══════════════════════════════════════════════════════════════════
@@ -598,3 +1126,1533 @@ const NOM_DATA = [
 ["CANDELA ALEJANDRA BAREIRO", "MARK", "ASISTENTE DE PISO DE VENTAS", 3, "43986596", "APV"],
 ["JOAQUIN EZEQUIEL GONZALEZ", "SM CENTER", "ASISTENTE DE PISO DE VENTAS", 3, "40910994", "APV FARMACIA"]
 ].filter(r => (r[5]||'').trim().toUpperCase() !== 'EXCLUIR');
+
+</script>
+<script>
+
+// ═══════════════════════════════════════════════════════════════════
+// CONFIGURACIÓN
+// ═══════════════════════════════════════════════════════════════════
+const API       = 'https://script.google.com/macros/s/AKfycbwMoGhL_56BE90DbpGrV5qa1fZQgKgYF0TMZbORFAe40Vi3Jgh0f4bBBkHoGcUQR2_6/exec';
+const GID_RESP1 = '1142498963';
+const GID_RESP2 = '1095051768';
+const GID_NOM   = '1331171004';
+
+const STORES = ['WALKER','CABALLITO','SM CENTER','ALESEL','LA NOBLEZA','JUNCAL','PODIUM JUNCAL','OLLEROS','SANFAR','DEVOTO','VILLA DEL PARQUE','COLECTORA','OLIVOS','PERDRIEL','CALLAO','MARK','BOTANICO','ESPER','SAN ISIDRO','GRAN FERRARI','IGLESIA','SCALABRINI','RIVADAVIA','MS PATRICIOS','LAS HERAS','KM 47.5','ALCORTA','FLOTANTES ÁREA 1','FLOTANTES ÁREA 2','FLOTANTES ÁREA 3','QUINTA 46','SORIA','PARQUE CHACABUCO','LUPO'];
+
+const STORE_AREA = {};
+NOM_DATA.forEach(r => { if(r[1]&&r[3]) STORE_AREA[r[1].toUpperCase().trim()]=+r[3]; });
+STORE_AREA['FLOTANTES ÁREA 1'] = 1;
+
+const NOM_BY_DNI = {};
+NOM_DATA.forEach(r => {
+  const dni=(r[4]||'').toString().trim();
+  if(dni) NOM_BY_DNI[dni]={nombre:r[0],cargo:r[2],tienda:r[1],area:+r[3]};
+});
+
+// ── Estado global ──
+let ACTIVE_AREA1=0, ACTIVE_AREA2=0;
+let STORE_SEARCH1='', STORE_SEARCH2='';
+let cA1=null,cS1=null,cA2=null,cS2=null;
+let G1={nomByStore:{},rByStore:{},sByStore:{},nomByArea:{},rByArea:{},peopleByStore:{}};
+let G2={nomByStore:{},rByStore:{},sByStore:{},nomByArea:{},rByArea:{},peopleByStore:{}};
+
+// NOM vivo (se actualiza en tryLive)
+let NOM_LIVE = null; // null = usar NOM_DATA embebida
+
+function getNom() { return NOM_LIVE || NOM_DATA; }
+
+// ═══════════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════════
+const sc = s => { const m=String(s||'').match(/^(\d+)/); return m?+m[1]:null; };
+
+function normName(n) {
+  return (n||'').trim().toUpperCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^A-Z0-9 ]/g,'').replace(/\s+/g,' ').trim();
+}
+function similar(a,b){
+  if(a===b)return true;
+  if(Math.abs(a.length-b.length)>2)return false;
+  if(a.length===b.length){let d=0;for(let i=0;i<a.length;i++)if(a[i]!==b[i])d++;return d<=1;}
+  const[sh,lo]=a.length<b.length?[a,b]:[b,a];
+  for(let i=0;i<lo.length;i++)if(lo.slice(0,i)+lo.slice(i+1)===sh)return true;
+  return false;
+}
+function sameNorm(a,b){
+  if(a===b)return true;
+  const wa=a.split(' '),wb=b.split(' ');
+  const[shorter,longer]=wa.length<=wb.length?[wa,wb]:[wb,wa];
+  const shared=shorter.filter(w=>w.length>1&&longer.some(lw=>similar(w,lw)));
+  return shared.length>=Math.min(2,shorter.length);
+}
+
+// ── Columnas Formulario 1: [0]fecha [1]score [2]nombre [3]farmacia [4]cargo [5-14]Q1-10 [15]DNI [16]TIENDA [17]AREA ──
+function dniCol1(r)   { return (r[15]||'').toString().trim(); }
+function storeCol1(r) {
+  const s=(r[16]||'').toUpperCase().trim();
+  if(STORES.includes(s))return s;
+  for(let i=r.length-1;i>=10;i--){const v=(r[i]||'').toUpperCase().trim();if(STORES.includes(v))return v;}
+  return '';
+}
+function areaCol1(r)  { const a=parseInt(r[17])||0; return(a>=1&&a<=3)?a:0; }
+
+// ── Columnas Formulario 2: [0]fecha [1]score [2]nombre [3]DNI [4]tienda [5]cargo [6-15]Q1-10 [16]AREA ──
+function dniCol2(r)   { return (r[3]||'').toString().trim(); }
+function storeCol2(r) {
+  let s=(r[4]||'').toUpperCase().trim();
+  if(s==='NERES'||s.includes('NERES'))return 'CALLAO';
+  if(STORES.includes(s))return s;
+  const found=STORES.find(st=>s.includes(st)||st.includes(s)||normName(s)===normName(st));
+  if(found)return found;
+  const dni=dniCol2(r);
+  if(dni&&NOM_BY_DNI[dni])return NOM_BY_DNI[dni].tienda.toUpperCase().trim();
+  return s;
+}
+function areaCol2(r)  { const a=parseInt(r[16])||0; return(a>=1&&a<=3)?a:0; }
+
+function dedup(resp, dniColFn, storeColFn) {
+  const map=new Map();
+  resp.forEach(r=>{
+    const store=storeColFn(r), dni=dniColFn(r);
+    const key=(dni&&dni!=='—'&&dni.length>4)?dni+'||'+store:normName(r[2])+'||'+store;
+    const score=sc(r[1])??-1;
+    if(!map.has(key)||score>(sc(map.get(key)[1])??-1))map.set(key,r);
+  });
+  return Array.from(map.values());
+}
+
+// ── Chart plugin ──
+const datalabelPlugin={
+  id:'topLabel',
+  afterDatasetsDraw(chart){
+    const{ctx}=chart;
+    chart.data.datasets.forEach((ds,di)=>{
+      chart.getDatasetMeta(di).data.forEach((bar,i)=>{
+        const val=ds.data[i];
+        if(val===null||val===undefined)return;
+        const label=ds._labelFmt?ds._labelFmt(val):String(val);
+        ctx.save();ctx.font='bold 12px -apple-system,sans-serif';
+        ctx.fillStyle='#444';ctx.textAlign='center';ctx.textBaseline='bottom';
+        ctx.fillText(label,bar.x,bar.y-3);ctx.restore();
+      });
+    });
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// MÓDULO 1 — renderAll1
+// ═══════════════════════════════════════════════════════════════════
+function renderAll1(rawResp, nom) {
+  const resp = dedup(rawResp, dniCol1, storeCol1);
+  const nomByStore={},nomByArea={1:0,2:0,3:0};
+  nom.forEach(r=>{
+    const s=(r[1]||'').toUpperCase().trim();
+    if(!STORES.includes(s))return;
+    nomByStore[s]=(nomByStore[s]||0)+1;
+    const a=+r[3]||0;if(a>=1&&a<=3)nomByArea[a]++;
+  });
+
+  const rByStore={},sByStore={},rByArea={1:[],2:[],3:[]};
+  resp.forEach(r=>{
+    const dni=dniCol1(r);
+    // Always use nomina store if DNI matches
+    const nomInfo=dni?NOM_BY_DNI[dni]:null;
+    const s=nomInfo?nomInfo.tienda.toUpperCase().trim():storeCol1(r);
+    if(!STORES.includes(s))return;
+    const a=nomInfo?nomInfo.area:(areaCol1(r)||STORE_AREA[s]||0),score=sc(r[1]);
+    rByStore[s]=(rByStore[s]||0)+1;
+    if(!sByStore[s])sByStore[s]=[];
+    if(score!==null)sByStore[s].push(score);
+    if(a>=1&&a<=3)rByArea[a].push(score);
+  });
+
+  G1={nomByStore,rByStore,sByStore,nomByArea,rByArea,peopleByStore:{}};
+  updateMetrics1(0);
+
+  const aL=['Área 1','Área 2','Área 3'];
+  const aPt=[1,2,3].map(a=>nomByArea[a]>0?Math.round(rByArea[a].length/nomByArea[a]*100):0);
+  const aAv=[1,2,3].map(a=>{const s=rByArea[a].filter(x=>x!==null);return s.length?parseFloat((s.reduce((x,y)=>x+y,0)/s.length).toFixed(1)):0;});
+
+  if(cA1)cA1.destroy();if(cS1)cS1.destroy();
+  cA1=new Chart(document.getElementById('cArea1'),{type:'bar',plugins:[datalabelPlugin],
+    data:{labels:aL,datasets:[{data:aPt,backgroundColor:['#b5d4f4','#378add','#0c447c'],borderRadius:5,label:'% Part.',_labelFmt:v=>v+'%'}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:{y:{max:100,ticks:{callback:v=>v+'%',font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
+  });
+  cS1=new Chart(document.getElementById('cScore1'),{type:'bar',plugins:[datalabelPlugin],
+    data:{labels:aL,datasets:[{data:aAv,backgroundColor:aAv.map(v=>v>=14?'#97c459':v>=10?'#ef9f27':'#f09595'),borderRadius:5,label:'Nota prom.',_labelFmt:v=>v+' pts'}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:{y:{max:20,ticks:{font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
+  });
+
+  // Build people
+  const seen=new Set(),seenNorms={},seenDNIs=new Set(),peopleByStore={};
+  STORES.forEach(s=>{peopleByStore[s]=[];});
+  resp.forEach(r=>{
+    const rDni=dniCol1(r);
+    const nomInfo=rDni?NOM_BY_DNI[rDni]:null;
+    // Use nomina store if DNI found, otherwise form store
+    const s=nomInfo?nomInfo.tienda.toUpperCase().trim():storeCol1(r);
+    if(!STORES.includes(s))return;
+    const nombre=(r[2]||'').trim(),score2=sc(r[1]);
+    seen.add(rDni?rDni+'||'+s:normName(nombre)+'||'+s);
+    if(!seenNorms[s])seenNorms[s]=[];
+    seenNorms[s].push(normName(nomInfo?nomInfo.nombre:nombre));
+    if(rDni&&rDni!=='—'&&rDni.length>4)seenDNIs.add(rDni);
+    const rawFecha=(r[0]||'');
+    const fm=rawFecha.match(/(\w{3} \w{3} \d{2} \d{4})|(\d{1,2}\/\d{1,2}\/\d{4})/);
+    const fecha=fm?fm[0]:rawFecha.split(' ')[0];
+    peopleByStore[s].push({nombre:nomInfo?nomInfo.nombre:nombre,cargo:nomInfo?nomInfo.cargo:(r[4]||'').trim(),score:score2,fecha,st:'r',dni:rDni});
+  });
+  nom.forEach(r=>{
+    const s=(r[1]||'').toUpperCase().trim();if(!STORES.includes(s))return;
+    const nombre=(r[0]||'').trim();if(!nombre)return;
+    const dniNom=(r[4]||'').toString().trim();
+    if(dniNom&&seenDNIs.has(dniNom))return;
+    if((seenNorms[s]||[]).some(rn=>sameNorm(normName(nombre),rn)))return;
+    peopleByStore[s].push({nombre,cargo:r[2]||'',score:null,fecha:'—',st:'p',dni:dniNom});
+  });
+  G1.peopleByStore=peopleByStore;
+
+  buildStoreTable('store-tb', STORES, G1, 'store1', storeToggle1);
+}
+
+function updateMetrics1(a) {
+  const $=id=>document.getElementById(id);
+  let totN,totR,allSc;
+  if(!a){
+    totN=Object.values(G1.nomByStore).reduce((x,y)=>x+y,0);
+    totR=Object.values(G1.rByStore).reduce((x,y)=>x+y,0);
+    allSc=STORES.flatMap(s=>G1.sByStore[s]||[]);
+  } else {
+    totN=G1.nomByArea[a]||0;
+    totR=(G1.rByArea[a]||[]).length;
+    allSc=(G1.rByArea[a]||[]).filter(x=>x!==null);
+  }
+  const avgSc=allSc.length?(allSc.reduce((x,y)=>x+y,0)/allSc.length):null;
+  const passed=allSc.filter(s=>s>=10).length;
+  const pctP=totN>0?Math.round(totR/totN*100):0;
+  const pctPas=allSc.length?Math.round(passed/allSc.length*100):0;
+  $('m1-resp').textContent=totR;
+  $('m1-resp-s').textContent=`de ${totN} en nómina`;
+  $('m1-pct').textContent=pctP+'%';
+  $('m1-pct').className='mv '+(pctP>=70?'green':pctP>=40?'amber':'red');
+  $('m1-pct-s').textContent=`${totN-totR} pendientes`;
+  $('m1-avg').textContent=avgSc!==null?avgSc.toFixed(1):'—';
+  $('m1-avg').className='mv '+(avgSc!==null&&avgSc>=10?'green':'amber');
+  $('m1-pass').textContent=pctPas+'%';
+  $('m1-pass-s').textContent=`${passed} de ${allSc.length} respondieron`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MÓDULO 2 — renderAll2
+// ═══════════════════════════════════════════════════════════════════
+function renderAll2(rawResp, nom) {
+  // Solo supervisores en la nómina (Unidad de Negocio = SUPERVISOR)
+  const supNom = nom.filter(r => (r[5]||'').toUpperCase().includes('SUPERVISOR'));
+  // Si NOM_LIVE tiene columna [5] con UN; si es NOM_DATA embebida (solo 5 cols) no hay UN → usar todos
+  const nomToUse = supNom.length > 0 ? supNom : nom;
+
+  const resp = dedup(rawResp, dniCol2, storeCol2);
+
+  const nomByStore={},nomByArea={1:0,2:0,3:0};
+  const storesWithSup=new Set();
+  nomToUse.forEach(r=>{
+    const s=(r[1]||'').toUpperCase().trim();
+    if(!STORES.includes(s))return;
+    storesWithSup.add(s);
+    nomByStore[s]=(nomByStore[s]||0)+1;
+    const a=+r[3]||0;if(a>=1&&a<=3)nomByArea[a]++;
+  });
+
+  const rByStore={},sByStore={},rByArea={1:[],2:[],3:[]};
+  resp.forEach(r=>{
+    const dni=dniCol2(r);
+    const nomInfo=dni?NOM_BY_DNI[dni]:null;
+    const s=nomInfo?nomInfo.tienda.toUpperCase().trim():storeCol2(r);
+    if(!STORES.includes(s))return;
+    const a=nomInfo?nomInfo.area:(areaCol2(r)||STORE_AREA[s]||0),score=sc(r[1]);
+    rByStore[s]=(rByStore[s]||0)+1;
+    if(!sByStore[s])sByStore[s]=[];
+    if(score!==null)sByStore[s].push(score);
+    if(a>=1&&a<=3)rByArea[a].push(score);
+  });
+
+  G2={nomByStore,rByStore,sByStore,nomByArea,rByArea,peopleByStore:{}};
+  updateMetrics2(0);
+
+  const aL=['Área 1','Área 2','Área 3'];
+  const aPt=[1,2,3].map(a=>nomByArea[a]>0?Math.round(rByArea[a].length/nomByArea[a]*100):0);
+  const aAv=[1,2,3].map(a=>{const s=rByArea[a].filter(x=>x!==null);return s.length?parseFloat((s.reduce((x,y)=>x+y,0)/s.length).toFixed(1)):0;});
+
+  if(cA2)cA2.destroy();if(cS2)cS2.destroy();
+  cA2=new Chart(document.getElementById('cArea2'),{type:'bar',plugins:[datalabelPlugin],
+    data:{labels:aL,datasets:[{data:aPt,backgroundColor:['#f4c4b5','#dd6537','#7c2c0c'],borderRadius:5,label:'% Part.',_labelFmt:v=>v+'%'}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:{y:{max:100,ticks:{callback:v=>v+'%',font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
+  });
+  cS2=new Chart(document.getElementById('cScore2'),{type:'bar',plugins:[datalabelPlugin],
+    data:{labels:aL,datasets:[{data:aAv,backgroundColor:aAv.map(v=>v>=14?'#97c459':v>=10?'#ef9f27':'#f09595'),borderRadius:5,label:'Nota prom.',_labelFmt:v=>v+' pts'}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:{y:{max:20,ticks:{font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
+  });
+
+  // Build people for module 2
+  const seenDNIs2=new Set(),seenNorms2={},peopleByStore2={};
+  STORES.forEach(s=>{peopleByStore2[s]=[];});
+  resp.forEach(r=>{
+    const rDni=dniCol2(r);
+    const nomInfo=rDni?NOM_BY_DNI[rDni]:null;
+    const s=nomInfo?nomInfo.tienda.toUpperCase().trim():storeCol2(r);
+    if(!STORES.includes(s))return;
+    const nombre=(r[2]||'').trim(),score2=sc(r[1]);
+    if(!seenNorms2[s])seenNorms2[s]=[];
+    seenNorms2[s].push(normName(nomInfo?nomInfo.nombre:nombre));
+    const rDni2=rDni;
+    if(rDni2&&rDni2!=='—'&&rDni2.length>4)seenDNIs2.add(rDni2);
+    const rawFecha=(r[0]||'');
+    const fm=rawFecha.match(/(\w{3} \w{3} \d{2} \d{4})|(\d{1,2}\/\d{1,2}\/\d{4})/);
+    const fecha=fm?fm[0]:rawFecha.split(' ')[0];
+    peopleByStore2[s].push({nombre:nomInfo?nomInfo.nombre:nombre,cargo:nomInfo?nomInfo.cargo:(r[5]||'').trim(),score:score2,fecha,st:'r',dni:rDni2});
+  });
+  nomToUse.forEach(r=>{
+    const s=(r[1]||'').toUpperCase().trim();if(!STORES.includes(s))return;
+    const nombre=(r[0]||'').trim();if(!nombre)return;
+    const dniNom=(r[4]||'').toString().trim();
+    if(dniNom&&seenDNIs2.has(dniNom))return;
+    if((seenNorms2[s]||[]).some(rn=>sameNorm(normName(nombre),rn)))return;
+    if(!peopleByStore2[s])peopleByStore2[s]=[];
+    peopleByStore2[s].push({nombre,cargo:r[2]||'',score:null,fecha:'—',st:'p',dni:dniNom});
+  });
+  G2.peopleByStore=peopleByStore2;
+
+  // Only show stores that have supervisors
+  const storeList2=[...storesWithSup].sort((a,b)=>a.localeCompare(b));
+  buildStoreTable('store-tb2', storeList2, G2, 'store2', storeToggle2);
+}
+
+function updateMetrics2(a) {
+  const $=id=>document.getElementById(id);
+  let totN,totR,allSc;
+  if(!a){
+    totN=Object.values(G2.nomByStore).reduce((x,y)=>x+y,0);
+    totR=Object.values(G2.rByStore).reduce((x,y)=>x+y,0);
+    allSc=Object.values(G2.sByStore).flat();
+  } else {
+    totN=G2.nomByArea[a]||0;
+    totR=(G2.rByArea[a]||[]).length;
+    allSc=(G2.rByArea[a]||[]).filter(x=>x!==null);
+  }
+  const avgSc=allSc.length?(allSc.reduce((x,y)=>x+y,0)/allSc.length):null;
+  const passed=allSc.filter(s=>s>=10).length;
+  const pctP=totN>0?Math.round(totR/totN*100):0;
+  const pctPas=allSc.length?Math.round(passed/allSc.length*100):0;
+  $('m2-resp').textContent=totR;
+  $('m2-resp-s').textContent=`de ${totN} supervisores`;
+  $('m2-pct').textContent=pctP+'%';
+  $('m2-pct').className='mv '+(pctP>=70?'green':pctP>=40?'amber':'red');
+  $('m2-pct-s').textContent=`${totN-totR} pendientes`;
+  $('m2-avg').textContent=avgSc!==null?avgSc.toFixed(1):'—';
+  $('m2-avg').className='mv '+(avgSc!==null&&avgSc>=10?'green':'amber');
+  $('m2-pass').textContent=pctPas+'%';
+  $('m2-pass-s').textContent=`${passed} de ${allSc.length} respondieron`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TABLA DE TIENDAS (genérica)
+// ═══════════════════════════════════════════════════════════════════
+function buildStoreTable(tbodyId, storeList, G, prefix, toggleFn) {
+  const stTb=document.getElementById(tbodyId);
+  stTb.innerHTML='';
+  storeList.forEach(s=>{
+    const n=G.nomByStore[s]||0,res=G.rByStore[s]||0,sc2=G.sByStore[s]||[];
+    if(n===0&&res===0)return;
+    const avg=sc2.length?(sc2.reduce((a,b)=>a+b,0)/sc2.length).toFixed(1):null;
+    const pp=sc2.length?Math.round(sc2.filter(x=>x>=10).length/sc2.length*100):null;
+    const pct=n>0?Math.round(res/n*100):0;
+    const area=STORE_AREA[s]||0;
+    const bc=pct>=70?'bg-g':pct>=40?'bg-a':'bg-r';
+    const pc=pp===null?'pgy':pp>=70?'pg':pp>=50?'pa':'pr';
+    const tr=document.createElement('tr');
+    tr.className='store-row';tr.dataset.area=area;tr.dataset.store=s;
+    tr.onclick=()=>toggleFn(s,tr,G,prefix);
+    tr.innerHTML=`
+      <td><span class="expand-icon">▶</span></td>
+      <td style="font-weight:500">${s}</td>
+      <td><span class="pill pb">Área ${area||'?'}</span></td>
+      <td>${n}</td><td>${res}</td>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <div class="bar"><div class="bf ${bc}" style="width:${Math.min(pct,100)}%"></div></div>
+        <span style="font-size:12px;min-width:28px">${pct}%</span>
+      </div></td>
+      <td>${avg!==null?avg+' / 20':'—'}</td>
+      <td>${pp!==null?`<span class="pill ${pc}">${pp}%</span>`:'—'}</td>`;
+    stTb.appendChild(tr);
+    const pr=document.createElement('tr');
+    const safeId=s.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'')+'_'+prefix;
+    pr.className='people-row';pr.id='prow-'+safeId;pr.style.display='none';pr.dataset.area=area;
+    pr.innerHTML=`<td colspan="8"><div class="people-inner" id="pinner-${safeId}"></div></td>`;
+    stTb.appendChild(pr);
+  });
+}
+
+function buildPeopleInner(store, G, safeId) {
+  const people=G.peopleByStore[store]||[];
+  const resp_count=people.filter(p=>p.st==='r').length;
+  const rows=people.map(p=>{
+    let pill,scStr;
+    if(p.st==='p'){pill='<span class="pill pa">Pendiente</span>';scStr='—';}
+    else if(p.score===null){pill='—';scStr='—';}
+    else if(p.score>=10){pill='<span class="pill pg">Aprobado</span>';scStr=p.score+' / 20';}
+    else{pill='<span class="pill pr">Desaprobado</span>';scStr=p.score+' / 20';}
+    const res=p.st==='p'?'pending':p.score>=10?'pass':'fail';
+    return `<tr data-result="${res}" data-name="${(p.nombre||'').toLowerCase()}">
+      <td style="font-weight:500">${p.nombre}</td>
+      <td style="color:#888;font-size:12px">${p.cargo}</td>
+      <td>${scStr}</td><td>${pill}</td>
+      <td style="color:#bbb;font-size:12px">${p.fecha}</td>
+    </tr>`;
+  }).join('');
+  return `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <span style="font-size:12px;font-weight:500;color:#555">${store} — ${people.length} personas (${resp_count} respondieron)</span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:6px;background:#f5f5f0;border:0.5px solid rgba(0,0,0,.12);border-radius:6px;padding:4px 10px">
+          <span style="color:#bbb;font-size:13px">🔍</span>
+          <input type="text" placeholder="Buscar..." oninput="filterInner('${safeId}',this.value)" style="border:none;background:transparent;outline:none;font-size:12px;width:100px">
+        </div>
+        <select onchange="filterInner('${safeId}',null,this.value)" style="font-size:12px;padding:4px 8px;border:0.5px solid rgba(0,0,0,.15);border-radius:6px;background:#fff;outline:none">
+          <option value="">Todos</option>
+          <option value="pass">Aprobados</option>
+          <option value="fail">Desaprobados</option>
+          <option value="pending">Pendientes</option>
+        </select>
+      </div>
+    </div>
+    <table id="ptable-${safeId}">
+      <thead><tr><th>Nombre</th><th>Cargo</th><th>Nota</th><th>Estado</th><th>Fecha</th></tr></thead>
+      <tbody id="pbody-${safeId}">${rows}</tbody>
+    </table>`;
+}
+
+function storeToggle1(store, storeRow, G, prefix) {
+  const safeId=store.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'')+'_'+prefix;
+  const prow=document.getElementById('prow-'+safeId);
+  const inner=document.getElementById('pinner-'+safeId);
+  if(!prow)return;
+  if(prow.style.display!=='none'){prow.style.display='none';storeRow.classList.remove('expanded');return;}
+  inner.innerHTML=buildPeopleInner(store,G,safeId);
+  prow.style.display='';storeRow.classList.add('expanded');
+}
+function storeToggle2(store,storeRow,G,prefix){storeToggle1(store,storeRow,G,prefix);}
+
+function filterInner(id,text,result){
+  const tbody=document.getElementById('pbody-'+id);if(!tbody)return;
+  const wrap=tbody.closest('.people-inner');
+  const srch=text!==null?text.toLowerCase():(wrap.querySelector('input').value||'').toLowerCase();
+  const res=result!==undefined?result:(wrap.querySelector('select').value||'');
+  tbody.querySelectorAll('tr').forEach(tr=>{
+    const okName=!srch||tr.dataset.name.includes(srch);
+    const okResult=!res||tr.dataset.result===res;
+    tr.style.display=(okName&&okResult)?'':'none';
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FILTROS DE ÁREA
+// ═══════════════════════════════════════════════════════════════════
+function setArea1(a,btn){
+  ACTIVE_AREA1=a;
+  document.querySelectorAll('#panel-1 .afbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const el=document.getElementById('store-search1');if(el)el.value='';STORE_SEARCH1='';
+  updateMetrics1(a);applyFilters1();
+  if(cA1&&cS1)updateCharts1();
+}
+function setArea2(a,btn){
+  ACTIVE_AREA2=a;
+  document.querySelectorAll('#panel-2 .afbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const el=document.getElementById('store-search2');if(el)el.value='';STORE_SEARCH2='';
+  updateMetrics2(a);applyFilters2();
+  if(cA2&&cS2)updateCharts2();
+}
+function filterByStore1(val){STORE_SEARCH1=val.trim().toLowerCase();applyFilters1();}
+function filterByStore2(val){STORE_SEARCH2=val.trim().toLowerCase();applyFilters2();}
+
+function applyFilters1(){
+  document.getElementById('store-tb').querySelectorAll('tr').forEach(tr=>{
+    if(tr.classList.contains('store-row')){
+      const ok=(!ACTIVE_AREA1||tr.dataset.area==ACTIVE_AREA1)&&(!STORE_SEARCH1||tr.dataset.store.toLowerCase().includes(STORE_SEARCH1));
+      tr.style.display=ok?'':'none';
+    } else if(tr.classList.contains('people-row')){
+      const ok=(!ACTIVE_AREA1||tr.dataset.area==ACTIVE_AREA1)&&(!STORE_SEARCH1||(tr.previousElementSibling?.dataset?.store||'').toLowerCase().includes(STORE_SEARCH1));
+      if(!ok){tr.style.display='none';tr.previousElementSibling?.classList.remove('expanded');}
+    }
+  });
+}
+function applyFilters2(){
+  document.getElementById('store-tb2').querySelectorAll('tr').forEach(tr=>{
+    if(tr.classList.contains('store-row')){
+      const ok=(!ACTIVE_AREA2||tr.dataset.area==ACTIVE_AREA2)&&(!STORE_SEARCH2||tr.dataset.store.toLowerCase().includes(STORE_SEARCH2));
+      tr.style.display=ok?'':'none';
+    } else if(tr.classList.contains('people-row')){
+      const ok=(!ACTIVE_AREA2||tr.dataset.area==ACTIVE_AREA2)&&(!STORE_SEARCH2||(tr.previousElementSibling?.dataset?.store||'').toLowerCase().includes(STORE_SEARCH2));
+      if(!ok){tr.style.display='none';tr.previousElementSibling?.classList.remove('expanded');}
+    }
+  });
+}
+
+function updateCharts1(){
+  const a=ACTIVE_AREA1;
+  const base=['#b5d4f4','#378add','#0c447c'],dim=['#dde9f7','#9ec4ee','#6a93bc'];
+  cA1.data.datasets[0].backgroundColor=base.map((c,i)=>(!a||i+1===a)?c:dim[i]);cA1.update();
+  const sd=cS1.data.datasets[0].data;
+  cS1.data.datasets[0].backgroundColor=sd.map((v,i)=>{if(a&&i+1!==a)return'#d9d9d9';return v>=14?'#97c459':v>=10?'#ef9f27':'#f09595';});cS1.update();
+}
+function updateCharts2(){
+  const a=ACTIVE_AREA2;
+  const base=['#f4c4b5','#dd6537','#7c2c0c'],dim=['#f9e0d8','#eeaa8e','#c07058'];
+  cA2.data.datasets[0].backgroundColor=base.map((c,i)=>(!a||i+1===a)?c:dim[i]);cA2.update();
+  const sd=cS2.data.datasets[0].data;
+  cS2.data.datasets[0].backgroundColor=sd.map((v,i)=>{if(a&&i+1!==a)return'#d9d9d9';return v>=14?'#97c459':v>=10?'#ef9f27':'#f09595';});cS2.update();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PESTAÑAS PRINCIPALES
+// ═══════════════════════════════════════════════════════════════════
+function switchModule(n){
+  document.querySelectorAll('.main-tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('on'));
+  document.getElementById('mtab-'+n).classList.add('on');
+  document.getElementById('panel-'+n).classList.add('on');
+  if(n===0) updateResumen();
+  if(n===3 && !cA3) updateMetrics3(ACTIVE_AREA3);
+  if(n===4 && !cA4) updateMetrics4(ACTIVE_AREA4);
+  if(n===5 && !cA5) updateMetrics5(ACTIVE_AREA5);
+  if(n===6 && !cA6) updateMetrics6(ACTIVE_AREA6);
+}
+
+function tog(id){
+  document.getElementById('bd-'+id).classList.toggle('open');
+  document.getElementById('ch-'+id).classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CSV PARSER
+// ═══════════════════════════════════════════════════════════════════
+function parseCSV(txt){
+  return txt.split('\n').map(line=>{
+    const cols=[];let cur='',q=false;
+    for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){q=!q;}else if(c===','&&!q){cols.push(cur.trim());cur='';}else cur+=c;}
+    cols.push(cur.trim());return cols;
+  }).filter(r=>r.some(x=>x));
+}
+
+// Parse nómina CSV (columnas del Sheet):
+// [0]CodEmp [1]CUIL [2]DNI [3]Apellido [4]Nombre [5]NombreyApellido [6]Sexo [7]ESTATUS [8]UnidadNegocio [9]VP [10]AREA [11]RazSocial [12]Tienda [13]AREA [14]Categoria [15]CARGO ...
+function parseNomCSV(rows) {
+  return rows.slice(3).filter(r=>r[5]&&r[12]).map(r=>{
+    let tienda=(r[12]||'').trim().toUpperCase();
+    if(tienda==='NERES')tienda='CALLAO';
+    const area=parseInt(r[13])||0;
+    const nombre=(r[5]||'').trim().toUpperCase();
+    const cargo=(r[15]||'').trim().toUpperCase();
+    const dni=r[2]?String(r[2]).replace(/\.0$/,'').trim():'';
+    const un=(r[8]||'').trim().toUpperCase(); // Unidad de Negocio
+    return [nombre,tienda,cargo,area,dni,un]; // 6 elementos: [0-4] como antes + [5]=UN
+  }).filter(r=>r[5]!=='EXCLUIR'); // excluir personas marcadas como EXCLUIR en la nómina
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// LIVE MODE
+// ═══════════════════════════════════════════════════════════════════
+function showEmbedded(reason){
+  renderAll1(RESP_DATA, NOM_DATA);
+  renderAll2(RESP_DATA2, NOM_DATA);
+  renderAll3([], NOM_DATA);
+  renderAll4([], NOM_DATA);
+  renderAll5([], NOM_DATA);
+  renderAll6([], NOM_DATA);
+  document.getElementById('btn-live').textContent='↻ Refrescar';
+  document.getElementById('btn-live').disabled=false;
+  document.getElementById('upd').textContent=reason;
+  document.getElementById('mode-badge').textContent='Datos embebidos';
+  document.getElementById('mode-badge').style.cssText='background:#faeeda;color:#854f0b';
+  document.getElementById('info-banner').style.display='block';
+}
+
+async function tryLive(){
+  const btn=document.getElementById('btn-live');
+  btn.textContent='⏳ Actualizando...';btn.disabled=true;
+
+  const fetchT=(url,ms)=>{
+    const fp=fetch(url);
+    const tp=new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),ms));
+    return Promise.race([fp,tp]);
+  };
+
+  try {
+    // Fetch nómina, resp1 y resp2 en paralelo
+    const [r1,r2,r3,rN,rA,rM,rC]=await Promise.all([
+      fetchT(`${API}?gid=${GID_RESP1}`,12000),
+      fetchT(`${API}?gid=${GID_RESP2}`,12000),
+      fetchT(`${API}?gid=${GID_RESP3}`,12000),
+      fetchT(`${API}?gid=${GID_NOM}`,12000),
+      fetchT(`${API}?gid=${GID_ASIST}`,12000),
+      fetchT(`${API}?gid=${GID_MOST}`,12000),
+      fetchT(`${API}?gid=${GID_COND}`,12000)
+    ]);
+
+    if(!r1.ok||!r2.ok||!r3.ok||!rN.ok||!rA.ok||!rM.ok||!rC.ok) throw new Error('HTTP error');
+    const[r1r,r2r,r3r,rNr,rAr,rMr,rCr]=await Promise.all([r1.text(),r2.text(),r3.text(),rN.text(),rA.text(),rM.text(),rC.text()]);
+    const[txt1,txt2,txt3,txtN,txtA,txtM,txtC]=[r1r,r2r,r3r,rNr,rAr,rMr,rCr];
+    if(!txt1||txt1.trim().length<50) throw new Error('Respuesta vacía');
+
+    // Parse nómina
+    const nomRaw=parseCSV(txtN);
+    const nomLive=parseNomCSV(nomRaw);
+    NOM_LIVE=nomLive;
+
+    // Rebuild NOM_BY_DNI con nómina en vivo
+    Object.keys(NOM_BY_DNI).forEach(k=>delete NOM_BY_DNI[k]);
+    nomLive.forEach(r=>{
+      const dni=(r[4]||'').toString().trim();
+      if(dni) NOM_BY_DNI[dni]={nombre:r[0],cargo:r[2],tienda:r[1],area:+r[3]};
+    });
+    // Rebuild STORE_AREA
+    Object.keys(STORE_AREA).forEach(k=>delete STORE_AREA[k]);
+    nomLive.forEach(r=>{if(r[1]&&r[3])STORE_AREA[r[1].toUpperCase().trim()]=+r[3];});
+    STORE_AREA['FLOTANTES ÁREA 1']=1;
+
+    // Parse resp1
+    const resp1=parseCSV(txt1).slice(1).filter(r=>r[0]&&r[2]).map(r=>{
+      const rr=[...r];
+      if(rr[1]&&/^\d+$/.test(rr[1].trim()))rr[1]=rr[1].trim()+' / 20';
+      if(rr.length===17)rr.splice(15,0,'');
+      const s16=(rr[16]||'').toUpperCase().trim();
+      if(!STORES.includes(s16)){const f=storeCol1(rr);if(f){rr[16]=f;rr[17]=String(STORE_AREA[f]||'');}}
+      return rr;
+    });
+
+    // Parse resp2 — columnas: [0]fecha [1]score [2]nombre [3]DNI [4]tienda [5]cargo [6-15]Q1-10 [16]AREA
+    const resp2=parseCSV(txt2).slice(1).filter(r=>r[0]&&r[2]).map(r=>{
+      const rr=[...r];
+      if(rr[1]&&/^\d+$/.test(rr[1].trim()))rr[1]=rr[1].trim()+' / 20';
+      return rr;
+    });
+
+    renderAll1(resp1.length>=1?resp1:RESP_DATA, nomLive);
+    renderAll2(resp2, nomLive);
+
+    // Parse asistencia farmacéutica
+    const asistRows = parseAsistCSV(parseCSV(txtA));
+    // Parse resp3 — Inventarios: [0]fecha [1]score [2]DNI [3]nombre [4]tienda [5]cargo [6-15]Q1-10 [16]AREA
+    const resp3=parseCSV(txt3).slice(1).filter(r=>r[0]&&r[3]).map(r=>{
+      const rr=[...r];
+      if(rr[1]&&/^\d+$/.test(rr[1].trim()))rr[1]=rr[1].trim()+' / 20';
+      return rr;
+    });
+    renderAll4(resp3, nomLive);
+
+    // Parse mostrador (formulario con nota)
+    const mostResp=parseCSV(txtM).slice(1).filter(r=>r[0]&&r[3]).map(r=>{
+      const rr=[...r];
+      if(rr[1]&&/^\d+$/.test(rr[1].trim()))rr[1]=rr[1].trim()+' / 20';
+      return rr;
+    });
+    renderAll5(mostResp, nomLive);
+
+    // Parse 5 Conductas de Servicio
+    const condRows=parseMostCSV(parseCSV(txtC));
+    renderAll6(condRows, nomLive);
+
+    renderAll3(asistRows, nomLive);
+    updateResumen();
+
+    document.getElementById('upd').textContent='En vivo — '+new Date().toLocaleString('es-AR');
+    document.getElementById('mode-badge').textContent='En vivo';
+    document.getElementById('mode-badge').style.cssText='background:#e6f1fb;color:#185fa5';
+    document.getElementById('info-banner').style.display='none';
+    btn.textContent='✓ Actualizado';
+    setTimeout(()=>{btn.textContent='↻ Refrescar';btn.disabled=false;},2000);
+
+  } catch(e){
+    console.error('Error cargando datos en vivo:', e);
+    showEmbedded('Sin conexión — mostrando datos embebidos');
+  }
+}
+
+
+
+
+// Generic store table builder for asistencia-only modules (no score)
+function buildStoreTableAsist(tbodyId, storeList, G, prefix, toggleFn) {
+  const tb=document.getElementById(tbodyId);
+  if(!tb) return;
+  tb.innerHTML='';
+  storeList.forEach(s=>{
+    const n=G.nomByStore[s]||0, res=G.rByStore[s]||0;
+    if(n===0&&res===0) return;
+    const pct=n>0?Math.round(res/n*100):0;
+    const area=STORE_AREA[s]||0;
+    const bc=pct>=70?'bg-g':pct>=40?'bg-a':'bg-r';
+    const tr=document.createElement('tr');
+    tr.className='store-row';tr.dataset.area=area;tr.dataset.store=s;
+    tr.onclick=()=>toggleFn(s,tr);
+    tr.innerHTML=`
+      <td><span class="expand-icon">▶</span></td>
+      <td style="font-weight:500">${s}</td>
+      <td><span class="pill pb">Área ${area||'?'}</span></td>
+      <td>${n}</td><td>${res}</td>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <div class="bar"><div class="bf ${bc}" style="width:${Math.min(pct,100)}%"></div></div>
+        <span style="font-size:12px;min-width:28px">${pct}%</span>
+      </div></td>`;
+    tb.appendChild(tr);
+    const pr=document.createElement('tr');
+    const safeId=s.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'')+'_'+prefix;
+    pr.className='people-row';pr.id='prow-'+safeId;pr.style.display='none';pr.dataset.area=area;
+    pr.innerHTML=`<td colspan="6"><div class="people-inner" id="pinner-${safeId}"></div></td>`;
+    tb.appendChild(pr);
+  });
+}
+// ═══════════════════════════════════════════════════════════════════
+// MÓDULO 4 — INVENTARIOS (Supervisores, con nota)
+// ═══════════════════════════════════════════════════════════════════
+let ACTIVE_AREA4=0, STORE_SEARCH4='';
+let cA4=null, cS4=null;
+let G4={nomByStore:{},rByStore:{},sByStore:{},nomByArea:{1:0,2:0,3:0},rByArea:{1:[],2:[],3:[]},peopleByStore:{}};
+
+// Cols: [0]fecha [1]score [2]DNI [3]nombre [4]tienda [5]cargo [6-15]Q1-10 [16]AREA
+function dniCol4(r)   { return (r[2]||'').toString().trim(); }
+function storeCol4(r) {
+  let s=(r[4]||'').toUpperCase().trim();
+  if(s==='NERES'||s==='NERES (VILLA DEL PARQUE 1)')return 'CALLAO';
+  if(STORES.includes(s))return s;
+  // fuzzy: find store that contains or is contained in s
+  const found=STORES.find(st=>s.includes(st)||st.includes(s)||normName(s)===normName(st));
+  if(found)return found;
+  // try NOM_BY_DNI lookup
+  const dni=dniCol4(r);
+  if(dni&&NOM_BY_DNI[dni])return NOM_BY_DNI[dni].tienda.toUpperCase().trim();
+  return '';
+}
+function areaCol4(r)  { const a=parseInt(r[16])||0; return(a>=1&&a<=3)?a:0; }
+
+function renderAll4(rawResp, nom) {
+  const supNom = nom.filter(r=>(r[5]||'').toUpperCase().includes('SUPERVISOR'));
+  const nomToUse = supNom.length>0?supNom:[];
+  const resp = dedup(rawResp, dniCol4, storeCol4);
+
+  const nomByStore={},nomByArea={1:0,2:0,3:0},storesWithSup=new Set();
+  nomToUse.forEach(r=>{
+    const s=(r[1]||'').toUpperCase().trim();if(!STORES.includes(s))return;
+    storesWithSup.add(s);
+    nomByStore[s]=(nomByStore[s]||0)+1;
+    const a=+r[3]||0;if(a>=1&&a<=3)nomByArea[a]++;
+  });
+  // If no nom data yet, still show stores from responses
+  resp.forEach(r=>{const s=storeCol4(r);if(STORES.includes(s))storesWithSup.add(s);});
+
+  const rByStore={},sByStore={},rByArea={1:[],2:[],3:[]};
+  resp.forEach(r=>{
+    const dni=dniCol4(r);
+    const nomInfo=dni?NOM_BY_DNI[dni]:null;
+    const s=nomInfo?nomInfo.tienda.toUpperCase().trim():storeCol4(r);
+    if(!STORES.includes(s))return;
+    const a=nomInfo?nomInfo.area:(areaCol4(r)||STORE_AREA[s]||0),score=sc(r[1]);
+    rByStore[s]=(rByStore[s]||0)+1;
+    if(!sByStore[s])sByStore[s]=[];
+    if(score!==null)sByStore[s].push(score);
+    if(a>=1&&a<=3)rByArea[a].push(score);
+  });
+
+  G4={nomByStore,rByStore,sByStore,nomByArea,rByArea,peopleByStore:{}};
+  updateMetrics4(0);
+
+  const aL=['Área 1','Área 2','Área 3'];
+  const aPt=[1,2,3].map(a=>nomByArea[a]>0?Math.round(rByArea[a].length/nomByArea[a]*100):0);
+  const aAv=[1,2,3].map(a=>{const s=rByArea[a].filter(x=>x!==null);return s.length?parseFloat((s.reduce((x,y)=>x+y,0)/s.length).toFixed(1)):0;});
+
+  if(cA4)cA4.destroy();if(cS4)cS4.destroy();
+  cA4=new Chart(document.getElementById('cArea4'),{type:'bar',plugins:[datalabelPlugin],
+    data:{labels:aL,datasets:[{data:aPt,backgroundColor:['#d4b5f4','#7837dd','#3c0c7c'],borderRadius:5,label:'% Part.',_labelFmt:v=>v+'%'}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:{y:{max:100,ticks:{callback:v=>v+'%',font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
+  });
+  cS4=new Chart(document.getElementById('cScore4'),{type:'bar',plugins:[datalabelPlugin],
+    data:{labels:aL,datasets:[{data:aAv,backgroundColor:aAv.map(v=>v>=14?'#97c459':v>=10?'#ef9f27':'#f09595'),borderRadius:5,label:'Nota prom.',_labelFmt:v=>v+' pts'}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:{y:{max:20,ticks:{font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
+  });
+
+  const seenDNIs4=new Set(),seenNorms4={},peopleByStore4={};
+  STORES.forEach(s=>{peopleByStore4[s]=[];});
+  resp.forEach(r=>{
+    const rDni=dniCol4(r);
+    const nomInfo=rDni?NOM_BY_DNI[rDni]:null;
+    const s=nomInfo?nomInfo.tienda.toUpperCase().trim():storeCol4(r);
+    if(!STORES.includes(s))return;
+    const nombre=(r[3]||'').trim(),score2=sc(r[1]);
+    if(!seenNorms4[s])seenNorms4[s]=[];
+    seenNorms4[s].push(normName(nomInfo?nomInfo.nombre:nombre));
+    if(rDni&&rDni.length>4)seenDNIs4.add(rDni);
+    const rawFecha=(r[0]||'');
+    const fm=rawFecha.match(/(\w{3} \w{3} \d{2} \d{4})|(\d{1,2}\/\d{1,2}\/\d{4})/);
+    const fecha=fm?fm[0]:rawFecha.split(' ')[0];
+    peopleByStore4[s].push({nombre:nomInfo?nomInfo.nombre:nombre,cargo:nomInfo?nomInfo.cargo:(r[5]||'').trim(),score:score2,fecha,st:'r',dni:rDni});
+  });
+  nomToUse.forEach(r=>{
+    const s=(r[1]||'').toUpperCase().trim();if(!STORES.includes(s))return;
+    const nombre=(r[0]||'').trim();if(!nombre)return;
+    const dniNom=(r[4]||'').toString().trim();
+    if(dniNom&&seenDNIs4.has(dniNom))return;
+    if((seenNorms4[s]||[]).some(rn=>sameNorm(normName(nombre),rn)))return;
+    peopleByStore4[s].push({nombre,cargo:r[2]||'',score:null,fecha:'—',st:'p',dni:dniNom});
+  });
+  G4.peopleByStore=peopleByStore4;
+
+  const storeList4=[...storesWithSup].sort((a,b)=>a.localeCompare(b));
+  buildStoreTable('store-tb4', storeList4, G4, 'store4', (s,tr,G,p)=>storeToggle1(s,tr,G,p));
+}
+
+function updateMetrics4(a){
+  const $=id=>document.getElementById(id);
+  let totN,totR,allSc;
+  if(!a){totN=Object.values(G4.nomByStore).reduce((x,y)=>x+y,0);totR=Object.values(G4.rByStore).reduce((x,y)=>x+y,0);allSc=Object.values(G4.sByStore).flat();}
+  else{totN=G4.nomByArea[a]||0;totR=(G4.rByArea[a]||[]).length;allSc=(G4.rByArea[a]||[]).filter(x=>x!==null);}
+  const avgSc=allSc.length?(allSc.reduce((x,y)=>x+y,0)/allSc.length):null;
+  const passed=allSc.filter(s=>s>=10).length;
+  const pctP=totN>0?Math.round(totR/totN*100):0;
+  const pctPas=allSc.length?Math.round(passed/allSc.length*100):0;
+  $('m4-resp').textContent=totR;$('m4-resp-s').textContent=`de ${totN} supervisores`;
+  $('m4-pct').textContent=pctP+'%';$('m4-pct').className='mv '+(pctP>=70?'green':pctP>=40?'amber':'red');
+  $('m4-pct-s').textContent=`${totN-totR} pendientes`;
+  $('m4-avg').textContent=avgSc!==null?avgSc.toFixed(1):'—';$('m4-avg').className='mv '+(avgSc!==null&&avgSc>=10?'green':'amber');
+  $('m4-pass').textContent=pctPas+'%';$('m4-pass-s').textContent=`${passed} de ${allSc.length} respondieron`;
+}
+function setArea4(a,btn){ACTIVE_AREA4=a;document.querySelectorAll('#panel-4 .afbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');const el=document.getElementById('store-search4');if(el)el.value='';STORE_SEARCH4='';updateMetrics4(a);applyFilters4();}
+function filterByStore4(val){STORE_SEARCH4=val.trim().toLowerCase();applyFilters4();}
+function applyFilters4(){
+  document.getElementById('store-tb4').querySelectorAll('tr').forEach(tr=>{
+    if(tr.classList.contains('store-row')){const ok=(!ACTIVE_AREA4||tr.dataset.area==ACTIVE_AREA4)&&(!STORE_SEARCH4||tr.dataset.store.toLowerCase().includes(STORE_SEARCH4));tr.style.display=ok?'':'none';}
+    else if(tr.classList.contains('people-row')){const ok=(!ACTIVE_AREA4||tr.dataset.area==ACTIVE_AREA4)&&(!STORE_SEARCH4||(tr.previousElementSibling?.dataset?.store||'').toLowerCase().includes(STORE_SEARCH4));if(!ok){tr.style.display='none';tr.previousElementSibling?.classList.remove('expanded');}}
+  });
+}
+function searchCollab4(q){searchCollab(q,G4,'collab-results4','collab-result4');}
+
+// ═══════════════════════════════════════════════════════════════════
+// MÓDULO 5 — MOSTRADOR DE FARMACIA (APV de farmacia, solo asistencia)
+// ═══════════════════════════════════════════════════════════════════
+let ACTIVE_AREA5=0, STORE_SEARCH5='';
+let cA5=null, cS5=null;
+let G5={nomByStore:{},rByStore:{},nomByArea:{1:0,2:0,3:0},rByArea:{1:0,2:0,3:0},peopleByStore:{}};
+
+// Cols: [0]CUIL [1]DNI [2]Apellido [3]Nombre [4]NombreApellido [5]ÁREA [6]Tienda [7]CARGO [8]CAPACITACION [9]OBSERVACION
+function parseMostCSV(rows){
+  return rows.slice(1).filter(r=>r[4]&&r[6]).map(r=>{
+    let tienda=(r[6]||'').trim().toUpperCase();
+    if(tienda==='NERES'||tienda.includes('NERES'))tienda='CALLAO';
+    // fuzzy match to STORES
+    if(!STORES.includes(tienda)){
+      const found=STORES.find(st=>tienda.includes(st)||st.includes(tienda)||normName(tienda)===normName(st));
+      if(found)tienda=found;
+    }
+    return {
+      nombre:(r[4]||'').trim().toUpperCase(),
+      dni:(r[1]||'').toString().replace(/\.0$/,'').trim(),
+      tienda,
+      area:parseInt(r[5])||0,
+      cargo:(r[7]||'').trim().toUpperCase(),
+      asistio:(r[8]||'').toString().trim().toUpperCase()==='SI'
+    };
+  });
+}
+
+// Cols formulario Mostrador (con nota): [0]fecha [1]score [2]DNI [3]nombre [4]tienda/farmacia [5]cargo [6-10]Q1-5 [11]AREA
+function dniCol5(r)   { return (r[2]||'').toString().trim(); }
+function storeCol5(r) {
+  let s=(r[4]||'').toUpperCase().trim();
+  if(s==='NERES'||s.includes('NERES')||s==='OH BUENOS AIRES')return s==='OH BUENOS AIRES'?s:'CALLAO';
+  if(STORES.includes(s))return s;
+  const found=STORES.find(st=>s.includes(st)||st.includes(s)||normName(s)===normName(st));
+  if(found)return found;
+  const dni=dniCol5(r);
+  if(dni&&NOM_BY_DNI[dni])return NOM_BY_DNI[dni].tienda.toUpperCase().trim();
+  return s;
+}
+function areaCol5(r)  { const a=parseInt(r[11])||0; return(a>=1&&a<=3)?a:0; }
+
+function renderAll5(rawResp, nom) {
+  const apvNom = nom.filter(r=>(r[5]||'').toUpperCase().includes('APV FARMACIA'));
+  const nomToUse = apvNom.length>0?apvNom:[];
+  const resp = dedup(rawResp, dniCol5, storeCol5);
+
+  const nomByStore={},nomByArea={1:0,2:0,3:0},storesWithApv=new Set();
+  nomToUse.forEach(r=>{
+    const s=(r[1]||'').toUpperCase().trim();if(!STORES.includes(s))return;
+    storesWithApv.add(s);
+    nomByStore[s]=(nomByStore[s]||0)+1;
+    const a=+r[3]||0;if(a>=1&&a<=3)nomByArea[a]++;
+  });
+  resp.forEach(r=>{const s=storeCol5(r);if(STORES.includes(s))storesWithApv.add(s);});
+
+  const rByStore={},sByStore={},rByArea={1:[],2:[],3:[]};
+  resp.forEach(r=>{
+    const dni=dniCol5(r);
+    const nomInfo=dni?NOM_BY_DNI[dni]:null;
+    const s=nomInfo?nomInfo.tienda.toUpperCase().trim():storeCol5(r);
+    if(!STORES.includes(s))return;
+    const a=nomInfo?nomInfo.area:(areaCol5(r)||STORE_AREA[s]||0),score=sc(r[1]);
+    rByStore[s]=(rByStore[s]||0)+1;
+    if(!sByStore[s])sByStore[s]=[];
+    if(score!==null)sByStore[s].push(score);
+    if(a>=1&&a<=3)rByArea[a].push(score);
+  });
+
+  G5={nomByStore,rByStore,sByStore,nomByArea,rByArea,peopleByStore:{}};
+  updateMetrics5(0);
+
+  const aL=['Área 1','Área 2','Área 3'];
+  const aPt=[1,2,3].map(a=>nomByArea[a]>0?Math.round(rByArea[a].length/nomByArea[a]*100):0);
+  const aAv=[1,2,3].map(a=>{const s=rByArea[a].filter(x=>x!==null);return s.length?parseFloat((s.reduce((x,y)=>x+y,0)/s.length).toFixed(1)):0;});
+
+  if(cA5)cA5.destroy();if(cS5)cS5.destroy();
+  cA5=new Chart(document.getElementById('cArea5'),{type:'bar',plugins:[datalabelPlugin],
+    data:{labels:aL,datasets:[{data:aPt,backgroundColor:['#f4e4b5','#ddad37','#7c5c0c'],borderRadius:5,label:'% Part.',_labelFmt:v=>v+'%'}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},
+      scales:{y:{max:100,ticks:{callback:v=>v+'%',font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
+  });
+  cS5=new Chart(document.getElementById('cScore5'),{type:'bar',plugins:[datalabelPlugin],
+    data:{labels:aL,datasets:[{data:aAv,backgroundColor:aAv.map(v=>v>=14?'#97c459':v>=10?'#ef9f27':'#f09595'),borderRadius:5,label:'Nota prom.',_labelFmt:v=>v+' pts'}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},
+      scales:{y:{max:20,ticks:{font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
+  });
+
+  const seenDNIs5=new Set(),seenNorms5={},peopleByStore5={};
+  STORES.forEach(s=>{peopleByStore5[s]=[];});
+  resp.forEach(r=>{
+    const rDni=dniCol5(r);
+    const nomInfo=rDni?NOM_BY_DNI[rDni]:null;
+    const s=nomInfo?nomInfo.tienda.toUpperCase().trim():storeCol5(r);
+    if(!STORES.includes(s))return;
+    const nombre=(r[3]||'').trim(),score2=sc(r[1]);
+    if(!seenNorms5[s])seenNorms5[s]=[];
+    seenNorms5[s].push(normName(nomInfo?nomInfo.nombre:nombre));
+    if(rDni&&rDni.length>4)seenDNIs5.add(rDni);
+    const rawFecha=(r[0]||'');
+    const fm=rawFecha.match(/(\w{3} \w{3} \d{2} \d{4})|(\d{1,2}\/\d{1,2}\/\d{4})/);
+    const fecha=fm?fm[0]:rawFecha.split(' ')[0];
+    peopleByStore5[s].push({nombre:nomInfo?nomInfo.nombre:nombre,cargo:nomInfo?nomInfo.cargo:(r[5]||'').trim(),score:score2,fecha,st:'r',dni:rDni});
+  });
+  nomToUse.forEach(r=>{
+    const s=(r[1]||'').toUpperCase().trim();if(!STORES.includes(s))return;
+    const nombre=(r[0]||'').trim();if(!nombre)return;
+    const dniNom=(r[4]||'').toString().trim();
+    if(dniNom&&seenDNIs5.has(dniNom))return;
+    if((seenNorms5[s]||[]).some(rn=>sameNorm(normName(nombre),rn)))return;
+    peopleByStore5[s].push({nombre,cargo:r[2]||'',score:null,fecha:'—',st:'p',dni:dniNom});
+  });
+  G5.peopleByStore=peopleByStore5;
+
+  const storeList5=[...storesWithApv].sort((a,b)=>a.localeCompare(b));
+  buildStoreTable('store-tb5', storeList5, G5, 'store5', (s,tr,G,p)=>storeToggle1(s,tr,G,p));
+}
+
+function updateMetrics5(a){
+  const $=id=>document.getElementById(id);
+  let totN,totR,allSc;
+  if(!a){totN=Object.values(G5.nomByStore).reduce((x,y)=>x+y,0);totR=Object.values(G5.rByStore).reduce((x,y)=>x+y,0);allSc=Object.values(G5.sByStore||{}).flat();}
+  else{totN=G5.nomByArea[a]||0;totR=(G5.rByArea[a]||[]).length;allSc=(G5.rByArea[a]||[]).filter(x=>x!==null);}
+  const avgSc=allSc&&allSc.length?(allSc.reduce((x,y)=>x+y,0)/allSc.length):null;
+  const passed=allSc?allSc.filter(s=>s>=10).length:0;
+  const pctP=totN>0?Math.round(totR/totN*100):0;
+  const pctPas=allSc&&allSc.length?Math.round(passed/allSc.length*100):0;
+  $('m5-resp').textContent=totR;$('m5-resp-s').textContent=`de ${totN} APV de farmacia`;
+  $('m5-pct').textContent=pctP+'%';$('m5-pct').className='mv '+(pctP>=70?'green':pctP>=40?'amber':'red');
+  $('m5-pct-s').textContent=`${totN-totR} pendientes`;
+  $('m5-avg').textContent=avgSc!==null?avgSc.toFixed(1):'—';
+  $('m5-avg').className='mv '+(avgSc!==null&&avgSc>=10?'green':'amber');
+  $('m5-pass').textContent=pctPas+'%';
+  $('m5-pass-s').textContent=`${passed} de ${allSc?allSc.length:0} respondieron`;
+}
+
+function setArea5(a,btn){ACTIVE_AREA5=a;document.querySelectorAll('#panel-5 .afbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');const el=document.getElementById('store-search5');if(el)el.value='';STORE_SEARCH5='';updateMetrics5(a);applyFilters5();}
+function filterByStore5(val){STORE_SEARCH5=val.trim().toLowerCase();applyFilters5();}
+function applyFilters5(){
+  document.getElementById('store-tb5').querySelectorAll('tr').forEach(tr=>{
+    if(tr.classList.contains('store-row')){const ok=(!ACTIVE_AREA5||tr.dataset.area==ACTIVE_AREA5)&&(!STORE_SEARCH5||tr.dataset.store.toLowerCase().includes(STORE_SEARCH5));tr.style.display=ok?'':'none';}
+    else if(tr.classList.contains('people-row')){const ok=(!ACTIVE_AREA5||tr.dataset.area==ACTIVE_AREA5)&&(!STORE_SEARCH5||(tr.previousElementSibling?.dataset?.store||'').toLowerCase().includes(STORE_SEARCH5));if(!ok){tr.style.display='none';tr.previousElementSibling?.classList.remove('expanded');}}
+  });
+}
+function searchCollab5(q){searchCollab(q,G5,'collab-results5','collab-result5');}
+
+// ═══════════════════════════════════════════════════════════════════
+// MÓDULO 6 — 5 CONDUCTAS DE SERVICIO (APV, solo asistencia)
+// ═══════════════════════════════════════════════════════════════════
+let ACTIVE_AREA6=0, STORE_SEARCH6='';
+let cA6=null;
+let G6={nomByStore:{},rByStore:{},nomByArea:{1:0,2:0,3:0},rByArea:{1:0,2:0,3:0},peopleByStore:{}};
+
+function renderAll6(asistRows, nom){
+  const apvNom=nom.filter(r=>{
+    const un=(r[5]||'').toUpperCase().trim();
+    return un==='APV';
+  });
+  const nomToUse=apvNom.length>0?apvNom:[];
+
+  const nomByStore={},nomByArea={1:0,2:0,3:0};
+  const storesSet=new Set();
+  nomToUse.forEach(r=>{
+    const s=(r[1]||'').toUpperCase().trim();if(!STORES.includes(s))return;
+    storesSet.add(s);
+    nomByStore[s]=(nomByStore[s]||0)+1;
+    const a=+r[3]||0;if(a>=1&&a<=3)nomByArea[a]++;
+  });
+  asistRows.forEach(r=>{const s=r.tienda;if(STORES.includes(s))storesSet.add(s);});
+
+  const rByStore={},rByArea={1:0,2:0,3:0},peopleByStore={};
+  STORES.forEach(s=>{peopleByStore[s]=[];});
+
+  asistRows.forEach(r=>{
+    const s=r.tienda;if(!STORES.includes(s))return;
+    if(!r.asistio)return;
+    rByStore[s]=(rByStore[s]||0)+1;
+    const a=r.area||STORE_AREA[s]||0;
+    if(a>=1&&a<=3)rByArea[a]++;
+    peopleByStore[s].push({nombre:r.nombre,cargo:r.cargo,dni:r.dni,st:'r',fecha:'—'});
+  });
+
+  const asistDNIs=new Set(asistRows.filter(r=>r.asistio).map(r=>r.dni).filter(Boolean));
+  const asistNorms={};
+  asistRows.filter(r=>r.asistio).forEach(r=>{
+    if(!asistNorms[r.tienda])asistNorms[r.tienda]=[];
+    asistNorms[r.tienda].push(normName(r.nombre));
+  });
+  nomToUse.forEach(r=>{
+    const s=(r[1]||'').toUpperCase().trim();if(!STORES.includes(s))return;
+    const dniNom=(r[4]||'').toString().trim();
+    if(dniNom&&asistDNIs.has(dniNom))return;
+    if((asistNorms[s]||[]).some(n=>sameNorm(normName(r[0]),n)))return;
+    peopleByStore[s].push({nombre:r[0],cargo:r[2],dni:dniNom,st:'p',fecha:'—'});
+  });
+
+  G6={nomByStore,rByStore,nomByArea,rByArea,peopleByStore};
+  updateMetrics6(0);
+
+  const aL=['Área 1','Área 2','Área 3'];
+  const aPt=[1,2,3].map(a=>nomByArea[a]>0?Math.round(rByArea[a]/nomByArea[a]*100):0);
+  if(cA6)cA6.destroy();
+  cA6=new Chart(document.getElementById('cArea6'),{type:'bar',plugins:[datalabelPlugin],
+    data:{labels:aL,datasets:[{data:aPt,backgroundColor:['#f4b5d4','#dd3778','#7c0c3c'],borderRadius:5,label:'% Part.',_labelFmt:v=>v+'%'}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},
+      scales:{y:{max:100,ticks:{callback:v=>v+'%',font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
+  });
+
+  const storeList6=[...storesSet].filter(s=>(nomByStore[s]||0)+(rByStore[s]||0)>0).sort((a,b)=>a.localeCompare(b));
+  buildStoreTableAsist('store-tb6', storeList6, G6, 'store6', toggleStore6);
+}
+
+function updateMetrics6(a){
+  const $=id=>document.getElementById(id);
+  let totN,totR;
+  if(!a){totN=Object.values(G6.nomByStore).reduce((x,y)=>x+y,0);totR=Object.values(G6.rByStore).reduce((x,y)=>x+y,0);}
+  else{totN=G6.nomByArea[a]||0;totR=G6.rByArea[a]||0;}
+  const pct=totN>0?Math.round(totR/totN*100):0;
+  $('m6-resp').textContent=totR;$('m6-resp-s').textContent=`de ${totN} APV`;
+  $('m6-pct').textContent=pct+'%';$('m6-pct').className='mv '+(pct>=70?'green':pct>=40?'amber':'red');
+  $('m6-pct-s').textContent=`${totN-totR} pendientes`;
+}
+
+function toggleStore6(store, storeRow){
+  const safeId=store.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'')+'_store6';
+  const prow=document.getElementById('prow-'+safeId);
+  const inner=document.getElementById('pinner-'+safeId);
+  if(!prow)return;
+  if(prow.style.display!=='none'){prow.style.display='none';storeRow.classList.remove('expanded');return;}
+  const people=G6.peopleByStore[store]||[];
+  const resp_count=people.filter(p=>p.st==='r').length;
+  const rows=people.map(p=>{
+    const pill=p.st==='p'?'<span class="pill pa">Pendiente</span>':'<span class="pill pg">Asistió</span>';
+    return `<tr data-result="${p.st==='p'?'pending':'pass'}" data-name="${(p.nombre||'').toLowerCase()}">
+      <td style="font-weight:500">${p.nombre}</td>
+      <td style="color:#888;font-size:12px">${p.cargo}</td>
+      <td>${pill}</td>
+    </tr>`;
+  }).join('');
+  inner.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <span style="font-size:12px;font-weight:500;color:#555">${store} — ${people.length} APV (${resp_count} asistieron)</span>
+      <select onchange="filterInner3('${safeId}',this.value)" style="font-size:12px;padding:4px 8px;border:0.5px solid rgba(0,0,0,.15);border-radius:6px;background:#fff;outline:none">
+        <option value="">Todos</option><option value="pass">Asistieron</option><option value="pending">Pendientes</option>
+      </select>
+    </div>
+    <table><thead><tr><th>Nombre</th><th>Cargo</th><th>Estado</th></tr></thead>
+    <tbody id="pbody-${safeId}">${rows}</tbody></table>`;
+  prow.style.display='';storeRow.classList.add('expanded');
+}
+
+function setArea6(a,btn){ACTIVE_AREA6=a;document.querySelectorAll('#panel-6 .afbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');const el=document.getElementById('store-search6');if(el)el.value='';STORE_SEARCH6='';updateMetrics6(a);applyFilters6();}
+function filterByStore6(val){STORE_SEARCH6=val.trim().toLowerCase();applyFilters6();}
+function applyFilters6(){
+  document.getElementById('store-tb6').querySelectorAll('tr').forEach(tr=>{
+    if(tr.classList.contains('store-row')){const ok=(!ACTIVE_AREA6||tr.dataset.area==ACTIVE_AREA6)&&(!STORE_SEARCH6||tr.dataset.store.toLowerCase().includes(STORE_SEARCH6));tr.style.display=ok?'':'none';}
+    else if(tr.classList.contains('people-row')){const ok=(!ACTIVE_AREA6||tr.dataset.area==ACTIVE_AREA6)&&(!STORE_SEARCH6||(tr.previousElementSibling?.dataset?.store||'').toLowerCase().includes(STORE_SEARCH6));if(!ok){tr.style.display='none';tr.previousElementSibling?.classList.remove('expanded');}}
+  });
+}
+function searchCollab6(q){searchCollab(q,G6,'collab-results6','collab-result6');}
+// ═══════════════════════════════════════════════════════════════════
+// BUSCADOR GLOBAL DE COLABORADORES
+// ═══════════════════════════════════════════════════════════════════
+function searchCollab(query, G, resultsId, countId) {
+  const q = query.trim();
+  const container = document.getElementById(resultsId);
+  const counter   = document.getElementById(countId);
+  if (!q || q.length < 2) {
+    container.style.display = 'none';
+    container.innerHTML = '';
+    counter.textContent = '';
+    return;
+  }
+  const qNorm = normName(q);
+  const qDni  = q.replace(/\D/g,''); // solo dígitos para búsqueda por DNI
+  const isDniSearch = /^\d+$/.test(q.trim()); // true si el query es solo números
+
+  const matches = [];
+  const seen = new Set();
+  Object.entries(G.peopleByStore).forEach(([store, people]) => {
+    people.forEach(p => {
+      const key = (p.nombre||'') + '||' + store;
+      if (seen.has(key)) return;
+      let match = false;
+      if (isDniSearch) {
+        // Solo buscar por DNI si el query es numérico
+        match = p.dni && p.dni.startsWith(qDni) && qDni.length >= 3;
+      } else {
+        // Buscar por nombre: todas las palabras del query deben aparecer en el nombre
+        const words = qNorm.split(' ').filter(w => w.length > 0);
+        const nombre = normName(p.nombre);
+        match = words.every(w => nombre.includes(w));
+      }
+      if (match) { seen.add(key); matches.push({...p, store}); }
+    });
+  });
+
+  counter.textContent = matches.length ? `${matches.length} resultado${matches.length>1?'s':''}` : 'Sin resultados';
+
+  if (!matches.length) {
+    container.innerHTML = '<div style="font-size:13px;color:#aaa;padding:8px 4px">No se encontraron colaboradores con ese nombre o DNI.</div>';
+    container.style.display = 'block';
+    return;
+  }
+
+  const rows = matches.map(p => {
+    let pill, scStr;
+    if(p.st==='p'){pill='<span class="pill pa">Pendiente</span>';scStr='—';}
+    else if(p.score===null){pill='—';scStr='—';}
+    else if(p.score>=10){pill='<span class="pill pg">Aprobado</span>';scStr=p.score+' / 20';}
+    else{pill='<span class="pill pr">Desaprobado</span>';scStr=p.score+' / 20';}
+    return `<tr>
+      <td style="font-weight:500">${p.nombre}</td>
+      <td style="color:#888;font-size:12px">${p.cargo||'—'}</td>
+      <td style="color:#aaa;font-size:12px">${p.store}</td>
+      <td>${scStr}</td><td>${pill}</td>
+      <td style="color:#bbb;font-size:12px">${p.fecha||'—'}</td>
+    </tr>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div style="background:#fff;border:0.5px solid rgba(0,0,0,.1);border-radius:8px;overflow:hidden">
+      <table style="font-size:12px">
+        <thead><tr>
+          <th>Nombre</th><th>Cargo</th><th>Tienda</th><th>Nota</th><th>Estado</th><th>Fecha</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  container.style.display = 'block';
+}
+
+function searchCollab1(q) { searchCollab(q, G1, 'collab-results1', 'collab-result1'); }
+function searchCollab2(q) { searchCollab(q, G2, 'collab-results2', 'collab-result2'); }
+
+
+// ═══════════════════════════════════════════════════════════════════
+// RESUMEN GENERAL
+// ═══════════════════════════════════════════════════════════════════
+let ACTIVE_AREA_RESUMEN = 0;
+
+function setAreaResumen(a, btn) {
+  ACTIVE_AREA_RESUMEN = a;
+  document.querySelectorAll('#panel-0 .afbtn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  updateResumen(a);
+}
+
+function statsFor(G, area) {
+  if (!area) {
+    return {
+      nom: Object.values(G.nomByStore || {}).reduce((a, b) => a + b, 0),
+      form: Object.values(G.rByStore || {}).reduce((a, b) => a + b, 0)
+    };
+  }
+  const nom = (G.nomByArea && G.nomByArea[area]) || 0;
+  const rArea = (G.rByArea && G.rByArea[area]) || [];
+  // rByArea holds either an array of responses (form modules) or a number (attendance modules)
+  const form = Array.isArray(rArea) ? rArea.length : rArea;
+  return { nom, form };
+}
+
+function updateResumen(area) {
+  area = area || ACTIVE_AREA_RESUMEN || 0;
+  // Collect stats from each module
+  // Only count mod2 if supervisors were identified (live nomina loaded)
+  const mod2hasSupv = NOM_LIVE !== null; // only valid when live nomina loaded
+  const mod3hasData = NOM_LIVE !== null;
+
+  const s1 = statsFor(G1, area);
+  const s2 = statsFor(G2, area);
+  const s3 = statsFor(G3, area);
+  const s4 = statsFor(G4, area);
+  const s5 = statsFor(G5, area);
+  const s6 = statsFor(G6, area);
+
+  const modules = [
+    {
+      nombre: 'Módulo 1 — Orden y limpieza', poblacion: 'Toda la tienda',
+      nom: s1.nom,
+      form: s1.form,
+      valid: true
+    },
+    {
+      nombre: 'Módulo 2 — Pilares de la operación', poblacion: 'Supervisores',
+      nom: mod2hasSupv ? s2.nom : 0,
+      form: s2.form,
+      valid: mod2hasSupv
+    },
+    {
+      nombre: 'Módulo 3 — Inventarios', poblacion: 'Supervisores',
+      nom: NOM_LIVE!==null ? s4.nom : 0,
+      form: s4.form,
+      valid: NOM_LIVE!==null
+    },
+    {
+      nombre: 'Asesoría Farmacéutica', poblacion: 'Farmacéuticos',
+      nom: mod3hasData ? s3.nom : 0,
+      form: s3.form,
+      valid: mod3hasData
+    },
+    {
+      nombre: 'Mostrador de farmacia', poblacion: 'APV de farmacia',
+      nom: NOM_LIVE!==null ? s5.nom : 0,
+      form: s5.form,
+      valid: NOM_LIVE!==null
+    }
+  ];
+
+  const META = 85;
+  const tbody = document.getElementById('res-table-body');
+  const tfoot = document.getElementById('res-table-foot');
+
+  let totalNom = 0, totalForm = 0;
+
+  const rows = modules.map(m => {
+    if(m.valid) totalNom += m.nom;
+    totalForm += m.form;
+    const pct = m.nom > 0 ? Math.round(m.form / m.nom * 100) : 0;
+    const diff = pct - META;
+    const barW = Math.min(pct, 100);
+    const barColor = pct >= META ? '#3b6d11' : pct >= 50 ? '#ef9f27' : '#e24b4a';
+    const avanceM = pct >= META ? 100 : (m.nom > 0 ? Math.round(pct / META * 100) : 0);
+    const avanceColor = avanceM >= 100 ? '#3b6d11' : avanceM >= 60 ? '#854f0b' : '#a32d2d';
+    const avanceLabel = pct >= META ? '✓ 100%' : avanceM + '%';
+    const pctColor = pct >= META ? '#3b6d11' : pct >= 50 ? '#854f0b' : '#a32d2d';
+
+    return `<tr>
+      <td style="padding:12px 10px;border-bottom:0.5px solid rgba(0,0,0,.06)"><div style="font-weight:500">${m.nombre}</div><div style="font-size:11px;color:#aaa;margin-top:2px">${m.poblacion||''}</div></td>
+      <td style="padding:12px 10px;text-align:center;border-bottom:0.5px solid rgba(0,0,0,.06);color:#666">${m.valid ? (m.nom || '—') : '<span style=\'color:#ccc\'>Sin conexión</span>'}</td>
+      <td style="padding:12px 10px;text-align:center;border-bottom:0.5px solid rgba(0,0,0,.06);color:#666">${m.valid ? (m.form || 0) : '<span style=\'color:#ccc\'>—</span>'}</td>
+      <td style="padding:12px 10px;text-align:center;border-bottom:0.5px solid rgba(0,0,0,.06);font-weight:500;color:${pctColor}">${m.valid && m.nom > 0 ? pct+'%' : '—'}</td>
+      <td style="padding:12px 10px;border-bottom:0.5px solid rgba(0,0,0,.06)">
+        ${!m.valid ? '<span style="color:#ccc;font-size:12px">Requiere conexión en vivo</span>' : `<div style="display:flex;align-items:center;gap:10px">
+          <div style="flex:1;background:#f0eeea;border-radius:4px;height:7px;overflow:hidden;position:relative;min-width:80px">
+            <div style="position:absolute;left:0;top:0;height:100%;width:${barW}%;background:${barColor};border-radius:4px;transition:width .4s"></div>
+            <div style="position:absolute;left:${META}%;top:-2px;height:11px;width:2px;background:#854f0b;border-radius:1px"></div>
+          </div>
+          <span style="font-size:12px;font-weight:600;color:${avanceColor};min-width:36px;text-align:right">${avanceLabel}</span>
+        </div>`}
+      </td>
+    </tr>`;
+  });
+
+  tbody.innerHTML = rows.join('');
+
+  // Footer totals
+  const globalPct = totalNom > 0 ? Math.round(totalForm / totalNom * 100) : 0;
+  const globalVsMeta = globalPct >= META
+    ? `<span class="pill pg">✓ Meta global alcanzada</span>`
+    : `<span class="pill pr">${META - globalPct}% por debajo de la meta</span>`;
+
+  const avancePct = globalPct >= META ? 100 : Math.round(globalPct / META * 100);
+  const avanceColor = avancePct >= 100 ? '#3b6d11' : avancePct >= 60 ? '#854f0b' : '#a32d2d';
+  const avanceLabel = globalPct >= META ? '✓ 100%' : avancePct + '%';
+
+  tfoot.innerHTML = `<tr style="background:#fff8e6;border-top:2px solid #ef9f27">
+    <td style="padding:14px 10px;font-weight:700;font-size:14px">Total global</td>
+    <td style="padding:14px 10px;text-align:center;font-weight:700;font-size:14px">${totalNom}</td>
+    <td style="padding:14px 10px;text-align:center;font-weight:700;font-size:14px">${totalForm}</td>
+    <td style="padding:14px 10px;text-align:center;font-size:18px;font-weight:700;color:${globalPct>=META?'#3b6d11':globalPct>=50?'#854f0b':'#a32d2d'}">${globalPct}%</td>
+    <td style="padding:14px 10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="flex:1;background:#f0eeea;border-radius:4px;height:7px;overflow:hidden;position:relative;min-width:80px">
+          <div style="position:absolute;left:0;top:0;height:100%;width:${Math.min(avancePct,100)}%;background:${avanceColor};border-radius:4px"></div>
+          <div style="position:absolute;left:${META}%;top:-2px;height:11px;width:2px;background:#854f0b;border-radius:1px"></div>
+        </div>
+        <span style="font-size:13px;font-weight:700;color:${avanceColor};min-width:36px;text-align:right">${avanceLabel}</span>
+      </div>
+    </td>
+  </tr>`;
+
+  // Global progress bar
+  const barColor = globalPct >= META ? '#3b6d11' : globalPct >= 50 ? '#ef9f27' : '#e24b4a';
+  document.getElementById('res-global-pct').textContent = globalPct + '%';
+  document.getElementById('res-global-pct').style.color = barColor;
+  document.getElementById('res-global-bar').style.width = Math.min(globalPct,100) + '%';
+  document.getElementById('res-global-bar').style.background = barColor;
+  document.getElementById('res-global-sub').textContent = `${totalForm} formados de ${totalNom} en nómina total`;
+  const avPct2 = globalPct >= META ? 100 : Math.round(globalPct / META * 100);
+  const metaEl = document.getElementById('res-avance-meta');
+  if(metaEl) {
+    metaEl.textContent = globalPct >= META ? '✓ 100% — meta alcanzada' : avPct2 + '% de avance respecto a la meta';
+    metaEl.style.color = avPct2 >= 100 ? '#3b6d11' : avPct2 >= 60 ? '#854f0b' : '#a32d2d';
+    metaEl.style.fontWeight = '600';
+    metaEl.style.fontSize = '13px';
+  }
+}
+// ═══════════════════════════════════════════════════════════════════
+// MÓDULO 3 — ASESORÍA FARMACÉUTICA
+// ═══════════════════════════════════════════════════════════════════
+const GID_ASIST  = '281104057';
+const GID_RESP3  = '489869547';
+const GID_MOST   = '362436169';
+const GID_COND   = '528961235';
+let ACTIVE_AREA3 = 0, STORE_SEARCH3 = '';
+let cA3 = null;
+let G3 = {nomByStore:{}, rByStore:{}, nomByArea:{1:0,2:0,3:0}, rByArea:{1:0,2:0,3:0}, peopleByStore:{}};
+
+// Parse hoja Asistencia: fila 1 = header, datos desde fila 2
+// cols: [0]CUIL [1]DNI [2]Apellido [3]Nombre [4]NombreApellido [5]AREA [6]Tienda [7]Cargo [8]APACITACION
+function parseAsistCSV(rows) {
+  return rows.slice(1).filter(r => r[4] && r[6]).map(r => {
+    let tienda=(r[6]||'').trim().toUpperCase();
+    if(tienda==='NERES'||tienda.includes('NERES'))tienda='CALLAO';
+    if(!STORES.includes(tienda)){
+      const found=STORES.find(st=>tienda.includes(st)||st.includes(tienda)||normName(tienda)===normName(st));
+      if(found)tienda=found;
+    }
+    return {
+      nombre: (r[4]||'').trim().toUpperCase(),
+      dni:    (r[1]||'').toString().replace(/\.0$/,'').trim(),
+      tienda,
+      area:   parseInt(r[5])||0,
+      cargo:  (r[7]||'').trim().toUpperCase(),
+      asistio:(r[8]||'').toString().trim().toUpperCase() === 'SI'
+    };
+  });
+}
+
+function renderAll3(asistRows, nom) {
+  // Farmacéuticos de la nómina (UN = FARMACEUTICO)
+  const farmNom = nom.filter(r => (r[5]||'').toUpperCase().includes('FARMACEUTICO'));
+  const nomToUse = farmNom.length > 0 ? farmNom : [];
+
+  const nomByStore={}, nomByArea={1:0,2:0,3:0};
+  const storesSet = new Set();
+  nomToUse.forEach(r => {
+    const s = (r[1]||'').toUpperCase().trim();
+    if(!STORES.includes(s)) return;
+    storesSet.add(s);
+    nomByStore[s] = (nomByStore[s]||0) + 1;
+    const a = +r[3]||0; if(a>=1&&a<=3) nomByArea[a]++;
+  });
+
+  // También agregar tiendas que aparecen en la hoja de asistencia
+  asistRows.forEach(r => {
+    const s = r.tienda; if(!STORES.includes(s)) return;
+    storesSet.add(s);
+  });
+
+  const rByStore={}, rByArea={1:0,2:0,3:0}, peopleByStore={};
+  STORES.forEach(s => { peopleByStore[s]=[]; });
+
+  asistRows.forEach(r => {
+    const s = r.tienda; if(!STORES.includes(s)) return;
+    if(!r.asistio) return; // solo contar los que asistieron (SI)
+    rByStore[s] = (rByStore[s]||0) + 1;
+    const a = r.area || STORE_AREA[s] || 0;
+    if(a>=1&&a<=3) rByArea[a]++;
+    peopleByStore[s].push({nombre:r.nombre, cargo:r.cargo, dni:r.dni, st:'r', fecha:'—'});
+  });
+
+  // Pendientes: farmacéuticos de nómina que no asistieron
+  const asistDNIs = new Set(asistRows.filter(r=>r.asistio).map(r=>r.dni).filter(Boolean));
+  const asistNorms = {};
+  asistRows.filter(r=>r.asistio).forEach(r => {
+    if(!asistNorms[r.tienda]) asistNorms[r.tienda]=[];
+    asistNorms[r.tienda].push(normName(r.nombre));
+  });
+  nomToUse.forEach(r => {
+    const s=(r[1]||'').toUpperCase().trim(); if(!STORES.includes(s)) return;
+    const dniNom=(r[4]||'').toString().trim();
+    if(dniNom && asistDNIs.has(dniNom)) return;
+    if((asistNorms[s]||[]).some(n=>sameNorm(normName(r[0]),n))) return;
+    peopleByStore[s].push({nombre:r[0], cargo:r[2], dni:dniNom, st:'p', fecha:'—'});
+  });
+
+  G3={nomByStore, rByStore, nomByArea, rByArea, peopleByStore};
+  updateMetrics3(0);
+
+  // Chart
+  const aL=['Área 1','Área 2','Área 3'];
+  const aPt=[1,2,3].map(a=>nomByArea[a]>0?Math.round(rByArea[a]/nomByArea[a]*100):0);
+  if(cA3) cA3.destroy();
+  cA3 = new Chart(document.getElementById('cArea3'),{type:'bar',plugins:[datalabelPlugin],
+    data:{labels:aL,datasets:[{data:aPt,backgroundColor:['#b5f4d4','#37ad6b','#0c5c35'],borderRadius:5,label:'% Part.',_labelFmt:v=>v+'%'}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false}},
+      scales:{y:{max:100,ticks:{callback:v=>v+'%',font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
+  });
+
+  // Build store table — only stores that have farmacéuticos
+  const storeList3 = [...storesSet].filter(s=>(nomByStore[s]||0)+(rByStore[s]||0)>0).sort((a,b)=>a.localeCompare(b));
+  buildStoreTable3('store-tb3', storeList3, G3);
+}
+
+function updateMetrics3(a) {
+  const $=id=>document.getElementById(id);
+  let totN, totR;
+  if(!a){
+    totN=Object.values(G3.nomByStore).reduce((x,y)=>x+y,0);
+    totR=Object.values(G3.rByStore).reduce((x,y)=>x+y,0);
+  } else {
+    totN=G3.nomByArea[a]||0;
+    totR=G3.rByArea[a]||0;
+  }
+  const pct=totN>0?Math.round(totR/totN*100):0;
+  $('m3-resp').textContent=totR;
+  $('m3-resp-s').textContent=`de ${totN} farmacéuticos`;
+  $('m3-pct').textContent=pct+'%';
+  $('m3-pct').className='mv '+(pct>=70?'green':pct>=40?'amber':'red');
+  $('m3-pct-s').textContent=`${totN-totR} pendientes`;
+}
+
+function buildStoreTable3(tbodyId, storeList, G) {
+  const tb=document.getElementById(tbodyId);
+  tb.innerHTML='';
+  storeList.forEach(s=>{
+    const n=G.nomByStore[s]||0, res=G.rByStore[s]||0;
+    if(n===0&&res===0) return;
+    const pct=n>0?Math.round(res/n*100):0;
+    const area=STORE_AREA[s]||0;
+    const bc=pct>=70?'bg-g':pct>=40?'bg-a':'bg-r';
+    const tr=document.createElement('tr');
+    tr.className='store-row';tr.dataset.area=area;tr.dataset.store=s;
+    tr.onclick=()=>toggleStore3(s,tr);
+    tr.innerHTML=`
+      <td><span class="expand-icon">▶</span></td>
+      <td style="font-weight:500">${s}</td>
+      <td><span class="pill pb">Área ${area||'?'}</span></td>
+      <td>${n}</td><td>${res}</td>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <div class="bar"><div class="bf ${bc}" style="width:${Math.min(pct,100)}%"></div></div>
+        <span style="font-size:12px;min-width:28px">${pct}%</span>
+      </div></td>`;
+    tb.appendChild(tr);
+    const pr=document.createElement('tr');
+    const safeId=s.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'')+'_store3';
+    pr.className='people-row';pr.id='prow-'+safeId;pr.style.display='none';pr.dataset.area=area;
+    pr.innerHTML=`<td colspan="6"><div class="people-inner" id="pinner-${safeId}"></div></td>`;
+    tb.appendChild(pr);
+  });
+}
+
+function toggleStore3(store, storeRow) {
+  const safeId=store.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'')+'_store3';
+  const prow=document.getElementById('prow-'+safeId);
+  const inner=document.getElementById('pinner-'+safeId);
+  if(!prow) return;
+  if(prow.style.display!=='none'){prow.style.display='none';storeRow.classList.remove('expanded');return;}
+  const people=G3.peopleByStore[store]||[];
+  const resp_count=people.filter(p=>p.st==='r').length;
+  const rows=people.map(p=>{
+    const pill=p.st==='p'?'<span class="pill pa">Pendiente</span>':'<span class="pill pg">Asistió</span>';
+    return `<tr data-result="${p.st==='p'?'pending':'pass'}" data-name="${(p.nombre||'').toLowerCase()}">
+      <td style="font-weight:500">${p.nombre}</td>
+      <td style="color:#888;font-size:12px">${p.cargo}</td>
+      <td>${pill}</td>
+    </tr>`;
+  }).join('');
+  inner.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <span style="font-size:12px;font-weight:500;color:#555">${store} — ${people.length} farmacéuticos (${resp_count} asistieron)</span>
+      <select onchange="filterInner3('${safeId}',this.value)" style="font-size:12px;padding:4px 8px;border:0.5px solid rgba(0,0,0,.15);border-radius:6px;background:#fff;outline:none">
+        <option value="">Todos</option>
+        <option value="pass">Asistieron</option>
+        <option value="pending">Pendientes</option>
+      </select>
+    </div>
+    <table id="ptable-${safeId}">
+      <thead><tr><th>Nombre</th><th>Cargo</th><th>Estado</th></tr></thead>
+      <tbody id="pbody-${safeId}">${rows}</tbody>
+    </table>`;
+  prow.style.display='';storeRow.classList.add('expanded');
+}
+
+function filterInner3(id, result) {
+  const tbody=document.getElementById('pbody-'+id); if(!tbody) return;
+  tbody.querySelectorAll('tr').forEach(tr=>{
+    tr.style.display=(!result||tr.dataset.result===result)?'':'none';
+  });
+}
+
+function setArea3(a,btn){
+  ACTIVE_AREA3=a;
+  document.querySelectorAll('#panel-3 .afbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const el=document.getElementById('store-search3');if(el)el.value='';STORE_SEARCH3='';
+  updateMetrics3(a);applyFilters3();
+  if(cA3) updateCharts3();
+}
+function filterByStore3(val){STORE_SEARCH3=val.trim().toLowerCase();applyFilters3();}
+function applyFilters3(){
+  document.getElementById('store-tb3').querySelectorAll('tr').forEach(tr=>{
+    if(tr.classList.contains('store-row')){
+      const ok=(!ACTIVE_AREA3||tr.dataset.area==ACTIVE_AREA3)&&(!STORE_SEARCH3||tr.dataset.store.toLowerCase().includes(STORE_SEARCH3));
+      tr.style.display=ok?'':'none';
+    } else if(tr.classList.contains('people-row')){
+      const ok=(!ACTIVE_AREA3||tr.dataset.area==ACTIVE_AREA3)&&(!STORE_SEARCH3||(tr.previousElementSibling?.dataset?.store||'').toLowerCase().includes(STORE_SEARCH3));
+      if(!ok){tr.style.display='none';tr.previousElementSibling?.classList.remove('expanded');}
+    }
+  });
+}
+function updateCharts3(){
+  const a=ACTIVE_AREA3;
+  const base=['#b5f4d4','#37ad6b','#0c5c35'],dim=['#d8f5e8','#8fd4b0','#6aad8c'];
+  cA3.data.datasets[0].backgroundColor=base.map((c,i)=>(!a||i+1===a)?c:dim[i]);
+  cA3.update();
+}
+function searchCollab3(q){searchCollab(q,G3,'collab-results3','collab-result3');}
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  renderAll1(RESP_DATA, NOM_DATA);
+  renderAll2(RESP_DATA2, NOM_DATA);
+  renderAll3([], NOM_DATA);
+  renderAll3([], NOM_DATA);
+  renderAll4([], NOM_DATA);
+  renderAll5([], NOM_DATA);
+  renderAll6([], NOM_DATA);
+  updateResumen();
+  document.getElementById('mode-badge').textContent='Actualizando...';
+  tryLive();
+});
+</script>
+</body>
+</html>
